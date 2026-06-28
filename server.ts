@@ -4,23 +4,11 @@ dotenv.config();
 import express from "express";
 import path from "path";
 import fs from "fs";
-import { GoogleGenAI } from "@google/genai";
 import { toNodeHandler } from "better-auth/node";
 import { auth } from "./src/lib/auth";
 
 const app = express();
 const PORT = 3000;
-
-// Initialize Gemini Client safely
-// Ensure 'User-Agent' header is set to 'aistudio-build' for telemetry
-const ai = new GoogleGenAI({
-  apiKey: process.env.GEMINI_API_KEY,
-  httpOptions: {
-    headers: {
-      'User-Agent': 'aistudio-build',
-    }
-  }
-});
 
 // Better Auth handler mounted before express.json middleware
 // Use an array to match both "/api/auth" and "/api/auth/*" to avoid SPA routing fallback redirects
