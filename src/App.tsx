@@ -2241,12 +2241,6 @@ export default function App() {
         onDeleteItem={deleteDictionaryItem}
       />
 
-      {/* Footer Branding */}
-      <footer className="border-t border-zinc-900 py-6 bg-zinc-900/10 mt-12 text-center text-zinc-500">
-        <p className="text-xs font-mono select-none">
-          CRAFTED WITH ASSEMBLYAI UNIVERSAL 3.5 PRO & LLAMA 3.1 8B • LOCAL DURABILITY SYNC
-        </p>
-      </footer>
     </div>
   );
 }
