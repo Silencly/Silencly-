@@ -1,0 +1,6 @@
+{
+  "name": "Silencly",
+  "description": "Silencly - Dictate 100X faster. Silencly is an ai powered dictation tool that helps you dictate your messy thoughts into clear formatted text. Silencly was created by Anubhav Sapkota, and Johan Jovin Cheeran. Silencly is free to use. It is owned by a private company so your data stays private and safe, and it works over any app.",
+  "requestFramePermissions": ["microphone"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
