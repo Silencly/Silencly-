@@ -41,6 +41,7 @@ import {
   Triangle,
   Chrome,
   Github,
+  Twitter,
   Circle
 } from "lucide-react";
 import Waveform from "./components/Waveform";
@@ -58,6 +59,15 @@ const marqueeLogos = [
   { name: "Google Cloud", url: "https://svgl.app/library/google-cloud.svg", gradient: "linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%)" },
   { name: "Bing", url: "https://svgl.app/library/bing.svg", gradient: "linear-gradient(135deg, #14b8a6 0%, #0d9488 100%)" }
 ];
+
+
+const AboutPage = ({ onBack }: { onBack: () => void }) => (
+  <div className="min-h-screen bg-white text-black p-12 mt-20">
+    <button onClick={onBack} className="mb-8 text-blue-600 hover:underline">← Back to home</button>
+    <h1 className="text-4xl font-bold mb-4">About Silencly</h1>
+    <p className="max-w-2xl text-lg text-gray-700">Silencly is building the foundation of the new digital epoch. We empower builders, enterprises, and communities with decentralized tools.</p>
+  </div>
+);
 
 export default function App() {
   const {
@@ -78,6 +88,7 @@ export default function App() {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [authMode, setAuthMode] = useState<"signin" | "signup">("signin");
+  const [page, setPage] = useState<"home" | "about">("home");
   const [showConfigPanel, setShowConfigPanel] = useState(false);
   const [tempKey, setTempKey] = useState("");
   const [passwordVisible, setPasswordVisible] = useState(false);
@@ -1939,9 +1950,13 @@ export default function App() {
             </div>
             
             <div className="flex items-center gap-6 text-gray-650">
-              <span><strong>5M+</strong> Transcriptions</span>
-              <span><strong>100K+</strong> Builders</span>
-              <span><strong>Free & Private</strong></span>
+              <button onClick={() => setPage("about")} className="hover:text-black">About</button>
+              <a href="https://x.com/thinkwispr" target="_blank" rel="noreferrer" className="hover:text-black">
+                <Twitter className="w-4 h-4" />
+              </a>
+              <a href="https://github.com/thinkwispr" target="_blank" rel="noreferrer" className="hover:text-black">
+                <Github className="w-4 h-4" />
+              </a>
             </div>
             
             <div className="text-[10px] uppercase tracking-widest text-gray-400">
@@ -1949,6 +1964,13 @@ export default function App() {
             </div>
           </div>
         </footer>
+
+        {/* About Section */}
+        <section id="about" className={`min-h-screen bg-white text-black p-12 mt-20 ${page === "about" ? "block" : "hidden"}`}>
+          <button onClick={() => setPage("home")} className="mb-8 text-blue-600 hover:underline">← Back to home</button>
+          <h1 className="text-4xl font-bold mb-4">About Silencly</h1>
+          <p className="max-w-2xl text-lg text-gray-700">Silencly is building the foundation of the new digital epoch. We empower builders, enterprises, and communities with decentralized tools.</p>
+        </section>
 
 
       </div>

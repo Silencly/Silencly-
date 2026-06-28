@@ -10,7 +10,7 @@
 }
 
 body {
-  @apply font-sans bg-black text-white antialiased;
+  @apply font-sans bg-[#000000] text-[#ffffff] antialiased;
 }
 
 /* Custom fade transitions for output panels */
