@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, MouseEvent, FormEvent } from "react";
 import { useAppAuth } from "./lib/clerk-service";
+import { AuthenticateWithRedirectCallback } from "@clerk/clerk-react";
 import {
   Mic,
   Copy,
@@ -664,6 +665,21 @@ export default function App() {
         return "Ready to record. Tap mic to start.";
     }
   };
+
+  if (window.location.pathname === "/sso-callback") {
+    if (isClerkActive) {
+      return (
+        <div className="min-h-screen bg-[#060608] flex flex-col items-center justify-center text-zinc-100 antialiased font-sans">
+          <RefreshCw className="w-8 h-8 text-indigo-400 animate-spin mb-3" />
+          <p className="text-xs font-mono text-zinc-400 tracking-wider">COMPLETING SECURE SSO CALLBACK...</p>
+          <AuthenticateWithRedirectCallback />
+        </div>
+      );
+    } else {
+      window.location.href = "/";
+      return null;
+    }
+  }
 
   if (isCheckingAuth && !user) {
     return (
