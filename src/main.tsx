@@ -1,13 +1,13 @@
 import {StrictMode} from 'react';
 import {createRoot} from 'react-dom/client';
 import App from './App.tsx';
-import { FirebaseAuthProvider } from './lib/firebase-service.tsx';
+import { SupabaseAuthProvider } from './lib/supabase-service.tsx';
 import './index.css';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <FirebaseAuthProvider>
+    <SupabaseAuthProvider>
       <App />
-    </FirebaseAuthProvider>
+    </SupabaseAuthProvider>
   </StrictMode>,
 );
