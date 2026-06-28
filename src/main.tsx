@@ -1,13 +1,13 @@
 import {StrictMode} from 'react';
 import {createRoot} from 'react-dom/client';
 import App from './App.tsx';
-import { ClerkOrMockProvider } from './lib/clerk-service.tsx';
+import { FirebaseAuthProvider } from './lib/firebase-service.tsx';
 import './index.css';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <ClerkOrMockProvider>
+    <FirebaseAuthProvider>
       <App />
-    </ClerkOrMockProvider>
+    </FirebaseAuthProvider>
   </StrictMode>,
 );
