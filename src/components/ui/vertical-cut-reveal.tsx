@@ -1,6 +1,6 @@
 'use client'
 
-import {
+import React, {
   forwardRef,
   useCallback,
   useEffect,
@@ -9,13 +9,13 @@ import {
   useRef,
   useState,
 } from "react"
-import { DynamicAnimationOptions, motion } from "framer-motion"
+import { motion } from "framer-motion"
 import { cn } from "@/lib/utils"
 
 interface TextProps {
   children: React.ReactNode
   reverse?: boolean
-  transition?: DynamicAnimationOptions
+  transition?: any
   splitBy?: "words" | "characters" | "lines" | string
   staggerDuration?: number
   staggerFrom?: "first" | "last" | "center" | "random" | number
@@ -47,7 +47,7 @@ const VerticalCutReveal = forwardRef<VerticalCutRevealRef, TextProps>(
         type: "spring",
         stiffness: 190,
         damping: 22,
-      },
+      } as any,
       splitBy = "words",
       staggerDuration = 0.2,
       staggerFrom = "first",
@@ -115,7 +115,10 @@ const VerticalCutReveal = forwardRef<VerticalCutRevealRef, TextProps>(
           const randomIndex = Math.floor(Math.random() * total)
           return Math.abs(randomIndex - index) * staggerDuration
         }
-        return Math.abs(staggerFrom - index) * staggerDuration
+        if (typeof staggerFrom === "number") {
+          return Math.abs(staggerFrom - index) * staggerDuration
+        }
+        return 0
       },
       [elements.length, staggerFrom, staggerDuration]
     )

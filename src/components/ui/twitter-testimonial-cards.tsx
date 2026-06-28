@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState } from "react";
 import { cn } from "@/lib/utils";
 
 interface TestimonialCardProps {
+  key?: any;
   className?: string;
   avatar?: string;
   username?: string;

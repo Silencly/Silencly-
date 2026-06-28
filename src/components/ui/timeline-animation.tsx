@@ -1,7 +1,7 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { forwardRef } from "react"
+import React, { forwardRef } from "react"
 
 interface TimelineContentProps {
   as?: any

@@ -284,8 +284,8 @@ Output: "Remind me to buy groceries — specifically milk and eggs"`;
     const polishedText = groqData.choices?.[0]?.message?.content || "";
     res.json({ polishedText });
   } catch (err: any) {
-    console.error("Llama polishing failed:", err);
-    res.status(500).json({ error: err.message || "Failed to polish text using Llama 3.1 8B." });
+    console.error("Groq polishing failed:", err);
+    res.status(500).json({ error: err.message || "Failed to polish text using Groq Llama 3.1 8B Instant." });
   }
 });
 
