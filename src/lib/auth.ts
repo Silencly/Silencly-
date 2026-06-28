@@ -1,8 +1,10 @@
 import { betterAuth } from "better-auth";
 import Database from "better-sqlite3";
+import { dash } from "@better-auth/infra";
 
 export const auth = betterAuth({
   database: new Database("./sqlite.db"),
+  secret: process.env.BETTER_AUTH_SECRET || "1GYO4VXbKG9LFAZcVkaLv93djINpORbB",
   emailAndPassword: {
     enabled: true,
   },
@@ -19,5 +21,8 @@ export const auth = betterAuth({
       clientId: process.env.TWITTER_CLIENT_ID || "mock_twitter_id",
       clientSecret: process.env.TWITTER_CLIENT_SECRET || "mock_twitter_secret",
     }
-  }
+  },
+  plugins: [
+    dash()
+  ]
 });

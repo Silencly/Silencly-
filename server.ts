@@ -1,3 +1,6 @@
+import dotenv from "dotenv";
+dotenv.config();
+
 import express from "express";
 import path from "path";
 import fs from "fs";
@@ -21,7 +24,8 @@ const ai = new GoogleGenAI({
 });
 
 // Better Auth handler mounted before express.json middleware
-app.all("/api/auth/*", toNodeHandler(auth));
+// Use an array to match both "/api/auth" and "/api/auth/*" to avoid SPA routing fallback redirects
+app.all(["/api/auth", "/api/auth/*"], toNodeHandler(auth));
 
 // JSON body parsing with large limit for base64 audio payload
 app.use(express.json({ limit: "50mb" }));
