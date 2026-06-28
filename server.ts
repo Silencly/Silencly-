@@ -5,7 +5,6 @@ import express from "express";
 import path from "path";
 import fs from "fs";
 import { GoogleGenAI } from "@google/genai";
-import { createServer as createViteServer } from "vite";
 import { toNodeHandler } from "better-auth/node";
 import { auth } from "./src/lib/auth";
 
@@ -829,6 +828,7 @@ app.get("/auth/popup", (req, res) => {
 async function startServer() {
   if (process.env.NODE_ENV !== "production") {
     // Development mode uses Vite Dev Server as middleware
+    const { createServer: createViteServer } = await import("vite");
     const vite = await createViteServer({
       server: { middlewareMode: true },
       appType: "spa",
@@ -850,4 +850,8 @@ async function startServer() {
   });
 }
 
-startServer();
+if (process.env.VERCEL !== "1") {
+  startServer();
+}
+
+export default app;

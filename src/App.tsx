@@ -42,11 +42,19 @@ import {
   Chrome,
   Github,
   Twitter,
-  Circle
+  Circle,
+  Send,
+  Facebook,
+  Instagram,
+  Linkedin,
+  Sun,
+  Moon
 } from "lucide-react";
 import Waveform from "./components/Waveform";
 import HistoryDrawer from "./components/HistoryDrawer";
 import DictionaryDrawer, { DictionaryItem } from "./components/DictionaryDrawer";
+import PricingSection from "./components/ui/pricing-section-4";
+import { Testimonials } from "./components/ui/twitter-testimonial-cards";
 import { DictationSession, ToneOption, TONE_OPTIONS } from "./types";
 
 const marqueeLogos = [
@@ -60,12 +68,66 @@ const marqueeLogos = [
   { name: "Bing", url: "https://svgl.app/library/bing.svg", gradient: "linear-gradient(135deg, #14b8a6 0%, #0d9488 100%)" }
 ];
 
+const faqData = {
+  "General": [
+    {
+      q: "What is Silencly?",
+      a: "Traditional voice-to-text transcribes your words literally, keeping all filler words, grammar mistakes, and disjointed pacing. Silencly acts as an real-time professional editor—listening to your raw thoughts and instantly rewriting them into perfectly organized bullet points, clean paragraphs, or checklists."
+    },
+    {
+      q: "Who is this for?",
+      a: "For creators, researchers, professionals, and anyone who thinks faster than they type. If you regularly use scratchpads or voice memos to braindump unorganized thoughts, Silencly will save you hours of editing."
+    },
+    {
+      q: "Do I need prior experience with AI?",
+      a: "Not at all. Silencly is designed to be completely intuitive. Just press record, speak naturally, and the AI handles all the formatting and cleanup automatically."
+    },
+    {
+      q: "How long does it take?",
+      a: "It transcribes and polishes your voice in near real-time, delivering the final formatted text instantly after you finish speaking."
+    },
+    {
+      q: "Is there a community?",
+      a: "Yes! We have an active Discord community where power users share custom dictionary setups, style presets, and workflow tips."
+    }
+  ],
+  "AI & Capabilities": [
+    {
+      q: "How does the custom dictionary feature work?",
+      a: "In your workspace settings, you can add custom vocabulary, names, technology acronyms, or specific product references. Silencly prioritizes these mappings during the AI polishing stage, ensuring terms are spelled perfectly every time."
+    },
+    {
+      q: "Can I customize the tone and style?",
+      a: "Yes, you can choose from various preset tones (like Professional, Casual, Bullet Points) or upgrade to Pro to create fully customizable style instructions."
+    },
+    {
+      q: "What languages do you support?",
+      a: "Silencly currently supports English for optimal tone parsing, but our raw transcription engine supports over 50 languages. We are actively expanding AI formatting for more languages."
+    }
+  ],
+  "Integrations & Security": [
+    {
+      q: "Is my audio and transcription data secure?",
+      a: "Yes, completely. Silencly is owned and operated privately, meaning we do not rent or sell your data, nor do we feed your recordings into external public models to train them. Your privacy is structurally locked."
+    },
+    {
+      q: "Can I export my transcripts?",
+      a: "Yes, you can easily copy your text, export it to markdown, or sync it with your connected note-taking apps."
+    },
+    {
+      q: "Where is my data stored?",
+      a: "All your data is securely encrypted at rest and in transit. Paid workspace plans offer multi-device cloud secure history backup."
+    }
+  ]
+};
+
+
 
 const AboutPage = ({ onBack }: { onBack: () => void }) => (
-  <div className="min-h-screen bg-white text-black p-12 mt-20">
+  <div className="min-h-screen bg-zinc-950 text-zinc-50 p-12 mt-20">
     <button onClick={onBack} className="mb-8 text-blue-600 hover:underline">← Back to home</button>
     <h1 className="text-4xl font-bold mb-4">About Silencly</h1>
-    <p className="max-w-2xl text-lg text-gray-700">Silencly is building the foundation of the new digital epoch. We empower builders, enterprises, and communities with decentralized tools.</p>
+    <p className="max-w-2xl text-lg text-zinc-300">Silencly is building the foundation of the new digital epoch. We empower builders, enterprises, and communities with decentralized tools.</p>
   </div>
 );
 
@@ -99,8 +161,8 @@ export default function App() {
   const [isPlayingDemo, setIsPlayingDemo] = useState(false);
   const [demoTextStage, setDemoTextStage] = useState<"idle" | "listening" | "transcribing" | "polishing" | "done">("idle");
   const [demoProgress, setDemoProgress] = useState(0);
-  const [billingPeriod, setBillingPeriod] = useState<"monthly" | "annually">("annually");
   const [expandedFaq, setExpandedFaq] = useState<number | null>(null);
+  const [faqCategory, setFaqCategory] = useState<"General" | "AI & Capabilities" | "Integrations & Security">("General");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [demoCopied, setDemoCopied] = useState(false);
   const [stellarTab, setStellarTab] = useState<"analyse" | "train" | "testing" | "deploy">("analyse");
@@ -593,8 +655,11 @@ export default function App() {
           setRawText(transcribedText);
         }
       } else {
-        const errorData = await transcribeRes.json().catch(() => ({}));
-        console.warn("Gemini server-side transcription failed. Falling back to browser SpeechRecognition text.", errorData);
+        const errorText = await transcribeRes.text();
+        let errorMsg = "Unknown error";
+        try { errorMsg = JSON.parse(errorText).error || errorText; } catch(e) { errorMsg = errorText; }
+        console.error("Transcription API Error:", errorMsg);
+        console.warn("Gemini server-side transcription failed. Falling back to browser SpeechRecognition text.");
       }
 
       if (!transcribedText || transcribedText.trim() === "") {
@@ -617,8 +682,10 @@ export default function App() {
         polishedResult = polishData.polishedText;
         setPolishedText(polishedResult);
       } else {
-        const errorData = await polishRes.json().catch(() => ({}));
-        throw new Error(errorData.error || "Failed to polish text using Gemini.");
+        const errorText = await polishRes.text();
+        let errorMsg = "Unknown error";
+        try { errorMsg = JSON.parse(errorText).error || errorText; } catch(e) { errorMsg = errorText; }
+        throw new Error(`Failed to polish text: ${errorMsg}`);
       }
 
       // 3. Create session & save to history
@@ -841,7 +908,7 @@ export default function App() {
   if (!user) {
     if (showAuthModal) {
       return (
-        <main className="flex min-h-screen w-full bg-black selection:bg-white/30 p-2 transition-all duration-500 lg:h-screen lg:overflow-hidden lg:p-4 text-white">
+        <main className="flex min-h-screen w-full bg-black selection:bg-zinc-950/30 p-2 transition-all duration-500 lg:h-screen lg:overflow-hidden lg:p-4 text-white">
           {/* Left Column (Hero) */}
           <div className="hidden lg:flex w-[52%] relative flex-col items-center justify-end pb-32 px-12 rounded-3xl overflow-hidden shadow-2xl h-full">
             <video
@@ -919,7 +986,7 @@ export default function App() {
                 setShowAuthModal(false);
                 setAuthError(null);
               }}
-              className="absolute top-6 right-6 lg:top-8 lg:right-8 text-white/40 hover:text-white transition-colors cursor-pointer p-2 rounded-full hover:bg-white/5"
+              className="absolute top-6 right-6 lg:top-8 lg:right-8 text-white/40 hover:text-white transition-colors cursor-pointer p-2 rounded-full hover:bg-zinc-950/5"
             >
               <X className="w-5 h-5" />
             </button>
@@ -951,7 +1018,7 @@ export default function App() {
                   <p className="leading-relaxed">
                     To enable production authentication, please add your Supabase credentials to your environment secrets in AI Studio:
                   </p>
-                  <code className="bg-white/5 p-2 rounded-lg font-mono text-[10px] block break-all text-amber-200">
+                  <code className="bg-zinc-950/5 p-2 rounded-lg font-mono text-[10px] block break-all text-amber-200">
                     VITE_SUPABASE_URL<br/>
                     VITE_SUPABASE_ANON_KEY
                   </code>
@@ -1049,7 +1116,7 @@ export default function App() {
 
                 <button
                   type="submit"
-                  className="w-full h-14 bg-white text-black font-semibold rounded-xl hover:bg-white/90 active:scale-[0.98] mt-4 transition-all cursor-pointer flex items-center justify-center"
+                  className="w-full h-14 bg-zinc-950 text-zinc-50 font-semibold rounded-xl hover:bg-zinc-950/90 active:scale-[0.98] mt-4 transition-all cursor-pointer flex items-center justify-center"
                 >
                   {authMode === "signup" ? "Create Account" : "Sign In"}
                 </button>
@@ -1094,12 +1161,12 @@ export default function App() {
     }
 
     return (
-      <div className="min-h-screen bg-white text-black flex flex-col antialiased font-sans selection:bg-gray-100 relative overflow-hidden">
+      <div className="min-h-screen bg-zinc-950 text-zinc-50 flex flex-col antialiased font-sans selection:bg-zinc-900 relative overflow-hidden">
         {/* Soft, beautiful grid overlay in light gray */}
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#1f1f2e05_1px,transparent_1px),linear-gradient(to_bottom,#1f1f2e05_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] pointer-events-none" />
 
         {/* Navigation Bar */}
-        <nav className="fixed top-0 left-0 w-full z-50 bg-white/80 backdrop-blur-md border-b border-gray-100 px-6 py-4 animate-fade-in-up" style={{ animationDelay: '0.1s', opacity: 0 }}>
+        <nav className="fixed top-0 left-0 w-full z-50 bg-zinc-950/80 backdrop-blur-md border-b border-zinc-900 px-6 py-4 animate-fade-in-up" style={{ animationDelay: '0.1s', opacity: 0 }}>
           <div className="max-w-7xl mx-auto flex items-center justify-between">
             {/* Left Brand */}
             <div 
@@ -1107,14 +1174,14 @@ export default function App() {
               onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
             >
               <img src="https://i.ibb.co/Q742H44R/gemini-watermark-removed.png" alt="Silencly Logo" className="w-6.5 h-6.5 object-contain" referrerPolicy="no-referrer" />
-              <span className="text-lg font-bold font-display tracking-tight text-black select-none">Silencly</span>
+              <span className="text-lg font-bold font-display tracking-tight text-zinc-50 select-none">Silencly</span>
             </div>
 
             {/* Center Navigation Links */}
-            <div className="hidden md:flex items-center gap-8 text-sm font-semibold text-gray-600">
-              <a href="#features" className="hover:text-black transition-colors">Features</a>
-              <a href="#pricing" className="hover:text-black transition-colors">Pricing</a>
-              <a href="#faq" className="hover:text-black transition-colors">FAQ</a>
+            <div className="hidden md:flex items-center gap-8 text-sm font-semibold text-zinc-400">
+              <a href="#features" className="hover:text-zinc-50 transition-colors">Features</a>
+              <a href="#pricing" className="hover:text-zinc-50 transition-colors">Pricing</a>
+              <a href="#faq" className="hover:text-zinc-50 transition-colors">FAQ</a>
             </div>
 
             {/* Right Actions */}
@@ -1124,7 +1191,7 @@ export default function App() {
                   setAuthMode("signin");
                   setShowAuthModal(true);
                 }}
-                className="text-sm font-semibold text-gray-600 hover:text-black transition-colors cursor-pointer"
+                className="text-sm font-semibold text-zinc-400 hover:text-zinc-50 transition-colors cursor-pointer"
               >
                 Sign In
               </button>
@@ -1144,15 +1211,15 @@ export default function App() {
         {/* Hero Section */}
         <section className="relative px-6 pt-32 pb-24 md:pt-40 md:pb-32 max-w-7xl mx-auto text-center">
           {/* Reviews Badge */}
-          <div className="inline-flex items-center gap-2 mb-8 bg-gray-50 border border-gray-200 px-3.5 py-1.5 rounded-full shadow-xs animate-fade-in-up" style={{ animationDelay: '0.2s', opacity: 0 }}>
-            <div className="w-6 h-6 border border-gray-300 bg-white rounded flex items-center justify-center">
-              <Star className="w-3.5 h-3.5 text-black fill-black" />
+          <div className="inline-flex items-center gap-2 mb-8 bg-black border border-zinc-800 px-3.5 py-1.5 rounded-full shadow-xs animate-fade-in-up" style={{ animationDelay: '0.2s', opacity: 0 }}>
+            <div className="w-6 h-6 border border-gray-300 bg-zinc-950 rounded flex items-center justify-center">
+              <Star className="w-3.5 h-3.5 text-zinc-50 fill-black" />
             </div>
-            <span className="text-sm font-medium text-black">4.9 rating from 18.3K+ users</span>
+            <span className="text-sm font-medium text-zinc-50">4.9 rating from 18.3K+ users</span>
           </div>
 
           {/* Main Heading */}
-          <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-[80px] font-sans font-normal leading-[1.1] tracking-tight mb-5 text-black animate-fade-in-up" style={{ animationDelay: '0.3s', opacity: 0 }}>
+          <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-[80px] font-sans font-normal leading-[1.1] tracking-tight mb-5 text-zinc-50 animate-fade-in-up" style={{ animationDelay: '0.3s', opacity: 0 }}>
             Work Smarter. Move Faster.<br />
             <span className="bg-gradient-to-r from-black via-gray-500 to-gray-400 bg-clip-text text-transparent font-medium">
               AI Powers You Up.
@@ -1160,7 +1227,7 @@ export default function App() {
           </h1>
 
           {/* Subheading */}
-          <p className="text-base sm:text-lg md:text-xl text-gray-600 mb-8 max-w-2xl mx-auto font-light leading-relaxed animate-fade-in-up" style={{ animationDelay: '0.4s', opacity: 0 }}>
+          <p className="text-base sm:text-lg md:text-xl text-zinc-400 mb-8 max-w-2xl mx-auto font-light leading-relaxed animate-fade-in-up" style={{ animationDelay: '0.4s', opacity: 0 }}>
             Intelligent automation syncs with the tools you love to streamline tasks, boost output, and save time.
           </p>
 
@@ -1177,267 +1244,21 @@ export default function App() {
             </button>
           </div>
 
-          {/* Tab Bar */}
-          <div className="animate-fade-in-up" style={{ animationDelay: '0.6s', opacity: 0 }}>
-            <div className="max-w-xl mx-auto mb-8 bg-gray-100 rounded-xl p-1 border border-gray-200">
-              {/* Mobile (md:hidden) */}
-              <div className="grid grid-cols-2 gap-1 md:hidden">
-                <button
-                  onClick={() => setStellarTab("analyse")}
-                  className={`flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-xs font-semibold transition-all ${
-                    stellarTab === "analyse" ? "bg-white text-black shadow-sm" : "text-gray-650 hover:text-black"
-                  }`}
-                >
-                  <BarChart3 className="w-4 h-4 shrink-0" />
-                  <span>Analyse</span>
-                </button>
-                <button
-                  onClick={() => setStellarTab("train")}
-                  className={`flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-xs font-semibold transition-all ${
-                    stellarTab === "train" ? "bg-white text-black shadow-sm" : "text-gray-650 hover:text-black"
-                  }`}
-                >
-                  <BookOpen className="w-4 h-4 shrink-0" />
-                  <span>Train</span>
-                </button>
-                <button
-                  onClick={() => setStellarTab("testing")}
-                  className={`flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-xs font-semibold transition-all ${
-                    stellarTab === "testing" ? "bg-white text-black shadow-sm" : "text-gray-650 hover:text-black"
-                  }`}
-                >
-                  <Users className="w-4 h-4 shrink-0" />
-                  <span>Testing</span>
-                </button>
-                <button
-                  onClick={() => setStellarTab("deploy")}
-                  className={`flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-xs font-semibold transition-all ${
-                    stellarTab === "deploy" ? "bg-white text-black shadow-sm" : "text-gray-650 hover:text-black"
-                  }`}
-                >
-                  <Rocket className="w-4 h-4 shrink-0" />
-                  <span>Deploy</span>
-                </button>
-              </div>
-
-              {/* Desktop (hidden md:flex) */}
-              <div className="hidden md:flex items-center justify-between">
-                <button
-                  onClick={() => setStellarTab("analyse")}
-                  className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg text-sm font-semibold transition-all cursor-pointer ${
-                    stellarTab === "analyse" ? "bg-white text-black shadow-sm" : "text-gray-600 hover:text-black"
-                  }`}
-                >
-                  <BarChart3 className="w-4 h-4" />
-                  <span className="ml-2">Analyse</span>
-                </button>
-                <div className="w-px h-5 bg-gray-300" />
-                <button
-                  onClick={() => setStellarTab("train")}
-                  className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg text-sm font-semibold transition-all cursor-pointer ${
-                    stellarTab === "train" ? "bg-white text-black shadow-sm" : "text-gray-600 hover:text-black"
-                  }`}
-                >
-                  <BookOpen className="w-4 h-4" />
-                  <span className="ml-2">Train</span>
-                </button>
-                <div className="w-px h-5 bg-gray-300" />
-                <button
-                  onClick={() => setStellarTab("testing")}
-                  className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg text-sm font-semibold transition-all cursor-pointer ${
-                    stellarTab === "testing" ? "bg-white text-black shadow-sm" : "text-gray-600 hover:text-black"
-                  }`}
-                >
-                  <Users className="w-4 h-4" />
-                  <span className="ml-2">Testing</span>
-                </button>
-                <div className="w-px h-5 bg-gray-300" />
-                <button
-                  onClick={() => setStellarTab("deploy")}
-                  className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg text-sm font-semibold transition-all cursor-pointer ${
-                    stellarTab === "deploy" ? "bg-white text-black shadow-sm" : "text-gray-600 hover:text-black"
-                  }`}
-                >
-                  <Rocket className="w-4 h-4" />
-                  <span className="ml-2">Deploy</span>
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {/* Video + Overlay Section */}
-          <div className="relative rounded-3xl overflow-hidden h-[400px] md:h-[500px] shadow-2xl border border-gray-200 max-w-5xl mx-auto animate-fade-in-up mb-16" style={{ animationDelay: '0.7s', opacity: 0 }}>
-            {/* Background Video */}
-            <video
-              src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260319_165750_358b1e72-c921-48b7-aaac-f200994f32fb.mp4"
-              autoPlay
-              loop
-              muted
-              playsInline
-              className="w-full h-full object-cover"
-            />
-
-            {/* Overlays */}
-            {stellarTab === "analyse" && (
-              <div className="absolute inset-0 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4 animate-fade-in-overlay">
-                <div className="bg-white/95 backdrop-blur-md border border-gray-150 rounded-2xl shadow-xl max-w-sm w-full p-6 text-left text-black animate-slide-up-overlay">
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <span className="text-[10px] font-bold font-mono text-zinc-800 uppercase tracking-widest bg-zinc-100 px-2 py-0.5 rounded">Wizard Mode</span>
-                      <span className="text-xs font-semibold text-gray-500">Step 1 of 4</span>
-                    </div>
-                    <h3 className="text-base font-bold text-gray-900 leading-tight">Set Up Your AI Workspace</h3>
-                    <p className="text-xs text-gray-600">Connect your voice recording feeds and configure tone parsing models.</p>
-                    
-                    {/* Dark Gray Progress Bar */}
-                    <div className="space-y-1.5">
-                      <div className="flex justify-between text-[11px] font-semibold text-gray-700">
-                        <span>Workspace initialization</span>
-                        <span>25%</span>
-                      </div>
-                      <div className="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
-                        <div className="bg-zinc-800 h-full rounded-full transition-all duration-500" style={{ width: '25%' }} />
-                      </div>
-                    </div>
-
-                    <div className="border-t border-gray-100 pt-3 flex justify-between items-center text-[10px] text-gray-400 font-mono">
-                      <span>Active: Analysing feeds</span>
-                      <div className="w-1.5 h-1.5 bg-zinc-800 rounded-full animate-ping" />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {stellarTab === "train" && (
-              <div className="absolute inset-0 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4 animate-fade-in-overlay">
-                <div className="bg-white/95 backdrop-blur-md border border-gray-150 rounded-2xl shadow-xl max-w-sm w-full p-6 text-left text-black animate-slide-up-overlay">
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <span className="text-[10px] font-bold font-mono text-orange-600 uppercase tracking-widest bg-orange-50 px-2 py-0.5 rounded">Training</span>
-                      <span className="text-xs font-semibold text-gray-500">Progress: 67%</span>
-                    </div>
-                    <h3 className="text-base font-bold text-gray-900 leading-tight">AI Model Training</h3>
-                    <p className="text-xs text-gray-600">Fine-tuning speech-to-text semantic dictionaries with custom parameters.</p>
-                    
-                    {/* Orange Progress Bar */}
-                    <div className="space-y-1.5">
-                      <div className="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
-                        <div className="bg-orange-500 h-full rounded-full transition-all duration-500" style={{ width: '67%' }} />
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-2.5 pt-2">
-                      <div className="bg-gray-50 p-2 rounded-lg border border-gray-100">
-                        <div className="text-[9px] font-mono text-gray-400">EPOCH</div>
-                        <div className="text-xs font-bold text-gray-800">12 / 18</div>
-                      </div>
-                      <div className="bg-gray-50 p-2 rounded-lg border border-gray-100">
-                        <div className="text-[9px] font-mono text-gray-400">LOSS RATE</div>
-                        <div className="text-xs font-bold text-gray-800">0.034</div>
-                      </div>
-                      <div className="bg-gray-50 p-2 rounded-lg border border-gray-100">
-                        <div className="text-[9px] font-mono text-gray-400">ACCURACY</div>
-                        <div className="text-xs font-bold text-green-600">99.4%</div>
-                      </div>
-                      <div className="bg-gray-50 p-2 rounded-lg border border-gray-100">
-                        <div className="text-[9px] font-mono text-gray-400">TEMP</div>
-                        <div className="text-xs font-bold text-gray-800">0.7</div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {stellarTab === "testing" && (
-              <div className="absolute inset-0 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4 animate-fade-in-overlay">
-                <div className="bg-white/95 backdrop-blur-md border border-gray-150 rounded-2xl shadow-xl max-w-sm w-full p-6 text-left text-black animate-slide-up-overlay">
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <span className="text-[10px] font-bold font-mono text-green-650 uppercase tracking-widest bg-green-50 px-2 py-0.5 rounded">Evaluation</span>
-                      <span className="text-xs font-semibold text-green-600 flex items-center gap-1">
-                        <Check className="w-3.5 h-3.5 fill-current animate-pulse text-green-600" />
-                        <span>Passed</span>
-                      </span>
-                    </div>
-                    <h3 className="text-base font-bold text-gray-900 leading-tight">Test Suite Results</h3>
-                    <p className="text-xs text-gray-600">Simulating voice formatting test configurations across diverse speech accents.</p>
-                    
-                    <div className="bg-green-50/50 border border-green-100 p-4 rounded-xl text-center space-y-1">
-                      <div className="text-2xl font-black text-green-700">127 / 127</div>
-                      <div className="text-[10px] font-mono font-bold text-green-600 uppercase tracking-wider">All Tests Succeeded</div>
-                    </div>
-
-                    <div className="flex justify-between items-center text-[10px] text-gray-400 font-mono">
-                      <span>Coverage: 98.2%</span>
-                      <span>Duration: 1.4s</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {stellarTab === "deploy" && (
-              <div className="absolute inset-0 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4 animate-fade-in-overlay">
-                <div className="bg-white/95 backdrop-blur-md border border-gray-150 rounded-2xl shadow-xl max-w-sm w-full p-6 text-left text-black animate-slide-up-overlay">
-                  <div className="space-y-3.5">
-                    <div className="flex items-center justify-between">
-                      <span className="text-[10px] font-bold font-mono text-zinc-800 uppercase tracking-widest bg-zinc-100 px-2 py-0.5 rounded">Production</span>
-                      <span className="text-xs font-semibold text-gray-500">v1.2.4-stable</span>
-                    </div>
-                    <h3 className="text-base font-bold text-gray-900 leading-tight">Deploy to Production</h3>
-                    
-                    <ul className="space-y-1.5">
-                      <li className="flex items-center gap-2 text-xs text-gray-700">
-                        <div className="w-3.5 h-3.5 rounded-full bg-green-100 flex items-center justify-center shrink-0">
-                          <Check className="w-2.5 h-2.5 text-green-600" />
-                        </div>
-                        <span className="truncate">Audio compression optimized</span>
-                      </li>
-                      <li className="flex items-center gap-2 text-xs text-gray-700">
-                        <div className="w-3.5 h-3.5 rounded-full bg-green-100 flex items-center justify-center shrink-0">
-                          <Check className="w-2.5 h-2.5 text-green-600" />
-                        </div>
-                        <span className="truncate">Secure transcription layer vetted</span>
-                      </li>
-                      <li className="flex items-center gap-2 text-xs text-gray-700">
-                        <div className="w-3.5 h-3.5 rounded-full bg-green-100 flex items-center justify-center shrink-0">
-                          <Check className="w-2.5 h-2.5 text-green-600" />
-                        </div>
-                        <span className="truncate">Database synced with Cloud SQL</span>
-                      </li>
-                    </ul>
-
-                    <button
-                      onClick={() => {
-                        setAuthMode("signup");
-                        setShowAuthModal(true);
-                      }}
-                      className="w-full bg-black hover:bg-gray-800 text-white font-semibold text-xs py-2 rounded-lg transition-all cursor-pointer shadow flex items-center justify-center gap-1.5 animate-pulse"
-                    >
-                      <Rocket className="w-3.5 h-3.5 text-white" />
-                      <span>Deploy Now</span>
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
+          {/* Video and Tabs Removed */}
 
           {/* Company Logos */}
-          <div className="mt-24 border-t border-gray-100 pt-12 w-full animate-fade-in-up" style={{ animationDelay: '0.8s', opacity: 0 }}>
+          <div className="mt-24 border-t border-zinc-900 pt-12 w-full animate-fade-in-up" style={{ animationDelay: '0.8s', opacity: 0 }}>
             <p className="text-[10px] font-mono text-gray-400 uppercase tracking-widest text-center mb-8">Trusted by industry leaders worldwide</p>
             <div className="flex flex-wrap items-center justify-center gap-x-12 gap-y-6 text-gray-400 select-none">
               {/* INTERSCOPE */}
-              <span className="text-xs font-black tracking-[0.2em] text-gray-400 hover:text-black transition-colors font-sans">INTERSCOPE</span>
+              <span className="text-xs font-black tracking-[0.2em] text-gray-400 hover:text-zinc-50 transition-colors font-sans">INTERSCOPE</span>
               {/* SPOTIFY */}
-              <span className="text-xs font-extrabold tracking-[0.05em] text-gray-400 hover:text-black transition-colors flex items-center gap-1.5">
+              <span className="text-xs font-extrabold tracking-[0.05em] text-gray-400 hover:text-zinc-50 transition-colors flex items-center gap-1.5">
                 <span className="w-3.5 h-3.5 bg-gray-200 rounded-full flex items-center justify-center text-[7px] text-white">●</span>
                 <span>SPOTIFY</span>
               </span>
               {/* Nexera */}
-              <span className="text-xs font-bold tracking-[0.1em] text-gray-400 hover:text-black transition-colors flex items-center gap-1">
+              <span className="text-xs font-bold tracking-[0.1em] text-gray-400 hover:text-zinc-50 transition-colors flex items-center gap-1">
                 <div className="grid grid-cols-2 gap-0.5 w-2 h-2">
                   <div className="w-0.5 h-0.5 bg-gray-400 rounded-full" />
                   <div className="w-0.5 h-0.5 bg-gray-400 rounded-full" />
@@ -1447,14 +1268,14 @@ export default function App() {
                 <span>Nexera</span>
               </span>
               {/* M3 */}
-              <span className="text-sm font-serif italic font-extrabold tracking-wide text-gray-400 hover:text-black transition-colors">M3</span>
+              <span className="text-sm font-serif italic font-extrabold tracking-wide text-gray-400 hover:text-zinc-50 transition-colors">M3</span>
               {/* LAURA COLE */}
-              <span className="text-xs font-light tracking-[0.15em] text-gray-400 hover:text-black transition-colors flex items-center gap-1.5">
+              <span className="text-xs font-light tracking-[0.15em] text-gray-400 hover:text-zinc-50 transition-colors flex items-center gap-1.5">
                 <span className="w-4 h-4 border border-gray-300 rounded-full flex items-center justify-center text-[7px] font-bold">LC</span>
                 <span>LAURA COLE</span>
               </span>
               {/* vertex */}
-              <span className="text-xs font-semibold tracking-[0.1em] text-gray-400 hover:text-black transition-colors flex items-center gap-1">
+              <span className="text-xs font-semibold tracking-[0.1em] text-gray-400 hover:text-zinc-50 transition-colors flex items-center gap-1">
                 <span>vertex</span>
                 <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-pulse" />
               </span>
@@ -1463,7 +1284,7 @@ export default function App() {
         </section>
 
         {/* Core Features Marketing Section */}
-        <section id="features" className="py-20 md:py-28 border-t border-gray-100 max-w-7xl mx-auto px-6 w-full flex justify-center bg-[#ffffff]">
+        <section id="features" className="py-20 md:py-28 border-t border-zinc-900 max-w-7xl mx-auto px-6 w-full flex justify-center bg-[#ffffff]">
           <div className="c1-container py-20 px-5 flex flex-col items-center">
             
             {/* Header Block */}
@@ -1481,14 +1302,14 @@ export default function App() {
               {/* Card 1 — Smart Prompt Suggestions */}
               <div className="c1-card c1-card-1">
                 {/* Prompt box */}
-                <div className="absolute top-[30px] left-[24px] right-[24px] bg-white rounded-[12px] p-[16px] text-[0.8rem] text-[#475569] leading-[1.6] shadow-[0_8px_20px_rgba(0,0,0,0.04)] text-left select-none">
+                <div className="absolute top-[30px] left-[24px] right-[24px] bg-zinc-950 rounded-[12px] p-[16px] text-[0.8rem] text-[#475569] leading-[1.6] shadow-[0_8px_20px_rgba(0,0,0,0.04)] text-left select-none">
                   A bright, high-resolution 3D illustration of a <span className="c1-blur-text">cheerful cartoon</span> of a <span className="c1-blur-text">girl character</span> <span className="c1-blur-text">centred against a</span> smooth blue background
                 </div>
                 
                 {/* "Add more details" pill button */}
                 <button
                   type="button"
-                  className="absolute top-[180px] left-[40px] bg-white border border-black py-[5px] px-[14px] rounded-[20px] text-[0.75rem] font-semibold text-[#1e293b] shadow-[0_4px_15px_rgba(0,0,0,0.08)] flex items-center gap-[6px] select-none pointer-events-none"
+                  className="absolute top-[180px] left-[40px] bg-zinc-950 border border-black py-[5px] px-[14px] rounded-[20px] text-[0.75rem] font-semibold text-[#1e293b] shadow-[0_4px_15px_rgba(0,0,0,0.08)] flex items-center gap-[6px] select-none pointer-events-none"
                 >
                   <span>Add more details</span>
                   <span style={{ color: '#a855f7', fontSize: '1rem' }}>✦</span>
@@ -1535,7 +1356,7 @@ export default function App() {
                 />
 
                 {/* Search pill */}
-                <div className="c1-search absolute top-[220px] left-1/2 -translate-x-1/2 bg-white border border-black py-[6px] px-[18px] rounded-[20px] text-[0.75rem] font-medium text-[#1e293b] shadow-[0_8px_20px_rgba(0,0,0,0.06)] whitespace-nowrap flex items-center gap-[8px] select-none pointer-events-none">
+                <div className="c1-search absolute top-[220px] left-1/2 -translate-x-1/2 bg-zinc-950 border border-black py-[6px] px-[18px] rounded-[20px] text-[0.75rem] font-medium text-[#1e293b] shadow-[0_8px_20px_rgba(0,0,0,0.06)] whitespace-nowrap flex items-center gap-[8px] select-none pointer-events-none">
                   {/* lucide-style search SVG */}
                   <svg
                     className="w-[14px] h-[14px]"
@@ -1560,11 +1381,11 @@ export default function App() {
         </section>
 
         {/* Modern Landing Page Section */}
-        <section id="epoch" className="py-20 md:py-28 bg-[#f9fafb] w-full px-5 md:px-10 flex flex-col items-center justify-center font-sans border-t border-slate-100">
+        <section id="epoch" className="py-20 md:py-28 bg-black w-full px-5 md:px-10 flex flex-col items-center justify-center font-sans border-t border-zinc-900">
           <div className="w-full max-w-[1400px] mx-auto text-center flex flex-col items-center">
             
             {/* Main Hero Container */}
-            <div className="relative w-full rounded-[48px] bg-white border border-slate-200/50 shadow-[0_40px_100px_-20px_rgba(0,0,0,0.03)] overflow-hidden h-[600px] flex flex-col">
+            <div className="relative w-full rounded-[48px] bg-zinc-950 border border-zinc-800/50 shadow-[0_40px_100px_-20px_rgba(0,0,0,0.03)] overflow-hidden h-[600px] flex flex-col">
               
               {/* Background Video */}
               <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden select-none">
@@ -1587,7 +1408,7 @@ export default function App() {
                 className="relative z-20 flex-1 px-8 md:px-16 pt-12 md:pt-16 flex flex-col items-start text-left"
               >
                 {/* Headline */}
-                <h1 className="font-display text-[42px] md:text-[56px] font-medium tracking-tight text-[#0a1b33] leading-none mb-4">
+                <h1 className="font-display text-[42px] md:text-[56px] font-medium tracking-tight text-zinc-50 leading-none mb-4">
                   Foundation of the<br />new voice epoch
                 </h1>
 
@@ -1612,23 +1433,23 @@ export default function App() {
                   initial={{ opacity: 0, y: 15 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.8, delay: 0.4, ease: "easeOut" }}
-                  className="flex items-center bg-white/90 backdrop-blur-2xl px-1.5 py-1.5 rounded-full shadow-[0_12px_40px_rgba(0,0,0,0.08)] border border-slate-200/40"
+                  className="flex items-center bg-zinc-950/90 backdrop-blur-2xl px-1.5 py-1.5 rounded-full shadow-[0_12px_40px_rgba(0,0,0,0.08)] border border-zinc-800/40"
                 >
                   {/* Small circular logo placeholder */}
-                  <div className="w-9 h-9 bg-white border border-slate-100 shadow-sm flex items-center justify-center rounded-full text-slate-500 font-semibold select-none mr-2">
+                  <div className="w-9 h-9 bg-zinc-950 border border-zinc-900 shadow-sm flex items-center justify-center rounded-full text-slate-500 font-semibold select-none mr-2">
                     ✦
                   </div>
 
                   {/* Two standard text buttons */}
-                  <button className="text-[12px] font-semibold text-slate-500 hover:text-[#0a1b33] px-3.5 py-1.5 rounded-full transition-colors cursor-pointer">
+                  <button className="text-[12px] font-semibold text-slate-500 hover:text-zinc-50 px-3.5 py-1.5 rounded-full transition-colors cursor-pointer">
                     Products
                   </button>
-                  <button className="text-[12px] font-semibold text-slate-500 hover:text-[#0a1b33] px-3.5 py-1.5 rounded-full transition-colors cursor-pointer mr-2">
+                  <button className="text-[12px] font-semibold text-slate-500 hover:text-zinc-50 px-3.5 py-1.5 rounded-full transition-colors cursor-pointer mr-2">
                     Docs
                   </button>
 
                   {/* Get in touch button */}
-                  <button className="bg-white px-5 py-2 rounded-full text-[12px] font-semibold text-[#0a1b33] border border-slate-200/60 shadow-sm hover:border-slate-300 transition-all flex items-center gap-1 shrink-0 cursor-pointer">
+                  <button className="bg-zinc-950 px-5 py-2 rounded-full text-[12px] font-semibold text-zinc-50 border border-zinc-800/60 shadow-sm hover:border-zinc-700 transition-all flex items-center gap-1 shrink-0 cursor-pointer">
                     <span>Get in touch</span>
                     <ChevronRight className="w-3.5 h-3.5" />
                   </button>
@@ -1644,7 +1465,7 @@ export default function App() {
                 {[...marqueeLogos, ...marqueeLogos].map((logo, index) => (
                   <div
                     key={index}
-                    className="group relative h-24 w-40 shrink-0 flex items-center justify-center rounded-full bg-white border border-slate-200/60 shadow-sm hover:border-slate-300 transition-all overflow-hidden cursor-pointer"
+                    className="group relative h-24 w-40 shrink-0 flex items-center justify-center rounded-full bg-zinc-950 border border-zinc-800/60 shadow-sm hover:border-zinc-700 transition-all overflow-hidden cursor-pointer"
                   >
                     {/* Hover dynamic gradient backing */}
                     <div
@@ -1667,146 +1488,18 @@ export default function App() {
         </section>
 
         {/* Pricing Section */}
-        <section id="pricing" className="py-20 md:py-28 border-t border-gray-100 max-w-7xl mx-auto px-6 w-full">
-          <div className="text-center max-w-xl mx-auto mb-16">
-            <span className="text-[10px] font-bold font-mono tracking-wider text-black uppercase bg-gray-50 border border-gray-250 px-3 py-1 rounded-full">
-              Simple Pricing
-            </span>
-            <h2 className="text-3xl sm:text-4xl font-extrabold font-display text-black tracking-tight mt-4">
-              Transparent, Flexible Plans
-            </h2>
-            <p className="text-sm text-gray-650 mt-3 font-light leading-relaxed">
-              Start dictating for free today. Upgrade anytime as your transcription needs expand.
-            </p>
-
-            {/* Monthly/Yearly toggle */}
-            <div className="mt-8 inline-flex items-center bg-gray-100 border border-gray-200 p-1 rounded-xl">
-              <button
-                onClick={() => setBillingPeriod("monthly")}
-                className={`px-4 py-2 text-xs font-bold rounded-lg transition-all cursor-pointer ${
-                  billingPeriod === "monthly" ? "bg-white text-black shadow-xs" : "text-gray-500 hover:text-black"
-                }`}
-              >
-                Monthly
-              </button>
-              <button
-                onClick={() => setBillingPeriod("annually")}
-                className={`px-4 py-2 text-xs font-bold rounded-lg transition-all cursor-pointer flex items-center gap-1.5 ${
-                  billingPeriod === "annually" ? "bg-white text-black shadow-xs" : "text-gray-500 hover:text-black"
-                }`}
-              >
-                <span>Annually</span>
-                <span className="bg-gray-200 text-gray-800 text-[9px] font-mono px-1.5 py-0.5 rounded-full">Save 20%</span>
-              </button>
-            </div>
-          </div>
-
-          <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8 items-stretch">
-            {/* Free Starter Plan */}
-            <div className="p-8 sm:p-10 rounded-3xl bg-white border border-gray-200 flex flex-col justify-between relative hover:border-gray-300 transition-all shadow-xs">
-              <div>
-                <div className="text-xs font-bold font-mono tracking-widest uppercase text-gray-400">Free Starter</div>
-                <div className="mt-4 flex items-baseline">
-                  <span className="text-4xl font-extrabold text-black">$0</span>
-                  <span className="text-xs text-gray-500 ml-1">/ forever</span>
-                </div>
-                <p className="text-xs text-gray-600 mt-3 font-light leading-relaxed">
-                  Excellent for lightweight users looking to convert unorganized daily thoughts.
-                </p>
-
-                <div className="mt-8 border-t border-gray-100 pt-8 space-y-4">
-                  <div className="flex items-start gap-3.5 text-xs text-gray-750">
-                    <Check className="w-4 h-4 text-black shrink-0 mt-0.5" />
-                    <span>10 dictation runs per day</span>
-                  </div>
-                  <div className="flex items-start gap-3.5 text-xs text-gray-750">
-                    <Check className="w-4 h-4 text-black shrink-0 mt-0.5" />
-                    <span>Standard formatting & tone choices</span>
-                  </div>
-                  <div className="flex items-start gap-3.5 text-xs text-gray-750">
-                    <Check className="w-4 h-4 text-black shrink-0 mt-0.5" />
-                    <span>Local transcription history drawer</span>
-                  </div>
-                  <div className="flex items-start gap-3.5 text-xs text-gray-400">
-                    <X className="w-4 h-4 shrink-0 mt-0.5" />
-                    <span>No custom style presets</span>
-                  </div>
-                </div>
-              </div>
-
-              <button
-                onClick={() => {
-                  setAuthMode("signup");
-                  setShowAuthModal(true);
-                }}
-                className="w-full bg-gray-50 hover:bg-gray-100 border border-gray-200 text-black text-xs sm:text-sm font-bold py-3.5 px-4 rounded-xl mt-8 transition-all active:scale-[0.98] cursor-pointer"
-              >
-                Get Started Free
-              </button>
-            </div>
-
-            {/* Pro Workspace Plan */}
-            <div className="p-8 sm:p-10 rounded-3xl bg-white border-2 border-black flex flex-col justify-between relative shadow-md">
-              <div className="absolute top-4 right-4 bg-black text-white text-[9px] font-mono font-bold tracking-widest uppercase px-2.5 py-1 rounded-full">
-                Most Popular
-              </div>
-
-              <div>
-                <div className="text-xs font-bold font-mono tracking-widest uppercase text-black">Pro Workspace</div>
-                <div className="mt-4 flex items-baseline">
-                  <span className="text-4xl font-extrabold text-black">
-                    {billingPeriod === "annually" ? "$8" : "$10"}
-                  </span>
-                  <span className="text-xs text-gray-500 ml-1 font-mono">/ month, billed {billingPeriod === "annually" ? "annually" : "monthly"}</span>
-                </div>
-                <p className="text-xs text-gray-600 mt-3 font-light leading-relaxed">
-                  For creators, researchers, and professional builders demanding absolute typing speed.
-                </p>
-
-                <div className="mt-8 border-t border-gray-100 pt-8 space-y-4">
-                  <div className="flex items-start gap-3.5 text-xs text-gray-750">
-                    <Check className="w-4 h-4 text-black shrink-0 mt-0.5" />
-                    <span className="font-semibold text-black">Unlimited transcriptions & polishing</span>
-                  </div>
-                  <div className="flex items-start gap-3.5 text-xs text-gray-750">
-                    <Check className="w-4 h-4 text-black shrink-0 mt-0.5" />
-                    <span>Premium, high-speed priority servers</span>
-                  </div>
-                  <div className="flex items-start gap-3.5 text-xs text-gray-750">
-                    <Check className="w-4 h-4 text-black shrink-0 mt-0.5" />
-                    <span>Fully customizable tone and style presets</span>
-                  </div>
-                  <div className="flex items-start gap-3.5 text-xs text-gray-750">
-                    <Check className="w-4 h-4 text-black shrink-0 mt-0.5" />
-                    <span>Shared Custom Dictionary (Unlimited vocabulary)</span>
-                  </div>
-                  <div className="flex items-start gap-3.5 text-xs text-gray-750">
-                    <Check className="w-4 h-4 text-black shrink-0 mt-0.5" />
-                    <span>Multi-device cloud secure history backup</span>
-                  </div>
-                </div>
-              </div>
-
-              <button
-                onClick={() => {
-                  setAuthMode("signup");
-                  setShowAuthModal(true);
-                }}
-                className="w-full bg-black hover:bg-gray-800 text-white text-xs sm:text-sm font-bold py-3.5 px-4 rounded-xl mt-8 transition-all active:scale-[0.98] cursor-pointer shadow"
-              >
-                Upgrade to Pro
-              </button>
-            </div>
-          </div>
-        </section>
+        <PricingSection onAuthClick={() => {
+          setAuthMode("signup");
+          setShowAuthModal(true);
+        }} />
 
         {/* User Reviews / Testimonials */}
-        <section id="reviews" className="py-20 md:py-28 border-t border-gray-100 max-w-7xl mx-auto px-6 w-full">
+        <section id="reviews" className="py-20 md:py-28 border-t border-zinc-900 max-w-7xl mx-auto px-6 w-full overflow-hidden">
           <div className="text-center max-w-xl mx-auto mb-16">
-            <span className="text-[10px] font-bold font-mono tracking-wider text-black uppercase bg-gray-50 border border-gray-200 px-3 py-1 rounded-full">
+            <span className="text-[10px] font-bold font-mono tracking-wider text-zinc-50 uppercase bg-black border border-zinc-800 px-3 py-1 rounded-full">
               Social Proof
             </span>
-            <h2 className="text-3xl sm:text-4xl font-extrabold font-display text-black tracking-tight mt-4">
+            <h2 className="text-3xl sm:text-4xl font-extrabold font-display text-zinc-50 tracking-tight mt-4">
               Loved by Fast Builders
             </h2>
             <p className="text-sm text-gray-650 mt-3 font-light leading-relaxed">
@@ -1814,162 +1507,191 @@ export default function App() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto font-sans">
-            {/* Review 1 */}
-            <div className="p-6 sm:p-8 rounded-3xl bg-white border border-gray-200 hover:border-gray-300 transition-all flex flex-col justify-between shadow-xs text-black">
-              <div>
-                <div className="flex items-center gap-1 text-black mb-4">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="w-3.5 h-3.5 fill-current" />
-                  ))}
-                </div>
-                <p className="text-xs sm:text-sm text-gray-700 italic leading-relaxed font-light">
-                  "Silencly completely replaced my scratchpad. I can blurt out highly unorganized thoughts about code design, and it formats them into clear JIRA tasks instantly. It's easily 10x faster."
-                </p>
-              </div>
-              <div className="mt-6 pt-6 border-t border-gray-100 flex items-center gap-3">
-                <div className="w-9 h-9 rounded-full bg-gray-50 border border-gray-200 flex items-center justify-center font-bold text-xs text-black">
-                  JC
-                </div>
-                <div>
-                  <div className="text-xs font-semibold text-black">Johan Jovin Cheeran</div>
-                  <div className="text-[10px] text-gray-500">Software Architect</div>
-                </div>
-              </div>
-            </div>
-
-            {/* Review 2 */}
-            <div className="p-6 sm:p-8 rounded-3xl bg-white border border-gray-200 hover:border-gray-300 transition-all flex flex-col justify-between shadow-xs text-black">
-              <div>
-                <div className="flex items-center gap-1 text-black mb-4">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="w-3.5 h-3.5 fill-current" />
-                  ))}
-                </div>
-                <p className="text-xs sm:text-sm text-gray-700 italic leading-relaxed font-light">
-                  "I use Silencly to dictate UX feedback while reviewing mockups. What used to take 20 minutes of tedious keyboard typing now takes a 2-minute voice braindump."
-                </p>
-              </div>
-              <div className="mt-6 pt-6 border-t border-gray-100 flex items-center gap-3">
-                <div className="w-9 h-9 rounded-full bg-gray-50 border border-gray-200 flex items-center justify-center font-bold text-xs text-black">
-                  SM
-                </div>
-                <div>
-                  <div className="text-xs font-semibold text-black">Sarah Miller</div>
-                  <div className="text-[10px] text-gray-500">Product Designer</div>
-                </div>
-              </div>
-            </div>
-
-            {/* Review 3 */}
-            <div className="p-6 sm:p-8 rounded-3xl bg-white border border-gray-200 hover:border-gray-300 transition-all flex flex-col justify-between shadow-xs text-black">
-              <div>
-                <div className="flex items-center gap-1 text-black mb-4">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="w-3.5 h-3.5 fill-current" />
-                  ))}
-                </div>
-                <p className="text-xs sm:text-sm text-gray-700 italic leading-relaxed font-light">
-                  "The custom vocabulary is a game changer. It actually spells our company acronyms and specific API endpoints correctly. I couldn't go back to standard voice tools."
-                </p>
-              </div>
-              <div className="mt-6 pt-6 border-t border-gray-100 flex items-center gap-3">
-                <div className="w-9 h-9 rounded-full bg-gray-50 border border-gray-200 flex items-center justify-center font-bold text-xs text-black">
-                  AS
-                </div>
-                <div>
-                  <div className="text-xs font-semibold text-black">Anubhav Sapkota</div>
-                  <div className="text-[10px] text-gray-500">Lead Researcher</div>
-                </div>
-              </div>
-            </div>
+          <div className="max-w-5xl mx-auto font-sans flex justify-center">
+            <Testimonials />
           </div>
         </section>
 
         {/* FAQ Section */}
-        <section id="faq" className="py-20 md:py-28 border-t border-gray-100 max-w-4xl mx-auto px-6 w-full">
-          <div className="text-center mb-16">
-            <span className="text-[10px] font-bold font-mono tracking-wider text-black uppercase bg-gray-50 border border-gray-200 px-3 py-1 rounded-full">
-              Q&A
-            </span>
-            <h2 className="text-3xl font-extrabold font-display text-black tracking-tight mt-4">
-              Frequently Asked Questions
-            </h2>
-          </div>
-
-          <div className="space-y-4 font-sans">
-            {[
-              {
-                q: "How is Silencly different from standard dictation?",
-                a: "Traditional voice-to-text transcribes your words literally, keeping all filler words, grammar mistakes, and disjointed pacing. Silencly acts as an real-time professional editor—listening to your raw thoughts and instantly rewriting them into perfectly organized bullet points, clean paragraphs, or checklists."
-              },
-              {
-                q: "Is my audio and transcription data secure?",
-                a: "Yes, completely. Silencly is owned and operated privately, meaning we do not rent or sell your data, nor do we feed your recordings into external public models to train them. Your privacy is structurally locked."
-              },
-              {
-                q: "How does the custom dictionary feature work?",
-                a: "In your workspace settings, you can add custom vocabulary, names, technology acronyms, or specific product references. Silencly prioritizes these mappings during the AI polishing stage, ensuring terms are spelled perfectly every time."
-              },
-              {
-                q: "Can I cancel my Pro subscription at any time?",
-                a: "Absolutely. You can cancel your subscription in one click from your account dashboard. You'll retain access to all your Pro features until the end of your current billing cycle."
-              }
-            ].map((item, index) => (
-              <div
-                key={index}
-                className="rounded-2xl border border-gray-200 bg-white overflow-hidden transition-colors hover:border-gray-300"
-              >
-                <button
-                  onClick={() => setExpandedFaq(expandedFaq === index ? null : index)}
-                  className="w-full text-left p-5 flex items-center justify-between text-black font-medium text-xs sm:text-sm cursor-pointer select-none"
-                >
-                  <span>{item.q}</span>
-                  {expandedFaq === index ? (
-                    <Minus className="w-4 h-4 text-gray-500 shrink-0" />
-                  ) : (
-                    <Plus className="w-4 h-4 text-gray-500 shrink-0" />
-                  )}
-                </button>
-                {expandedFaq === index && (
-                  <div className="px-5 pb-5 pt-1 text-xs text-gray-500 leading-relaxed font-light border-t border-gray-100">
-                    {item.a}
-                  </div>
-                )}
+        <section id="faq" className="py-20 md:py-28 max-w-6xl mx-auto px-6 w-full">
+          <div className="flex flex-col md:flex-row gap-16">
+            {/* Left Column */}
+            <div className="w-full md:w-1/3 flex flex-col">
+              <div className="mb-6">
+                <span className="inline-flex items-center gap-1.5 text-xs font-medium bg-zinc-900 border border-zinc-800 text-zinc-300 px-3 py-1 rounded-full mb-6">
+                  <div className="w-1 h-1 rounded-full bg-zinc-500"></div>
+                  FAQ
+                </span>
+                <h2 className="text-3xl md:text-4xl font-semibold text-zinc-50 tracking-tight leading-tight">
+                  Answers to the questions that come up most.
+                </h2>
               </div>
-            ))}
+              
+              <div className="hidden md:flex mt-8 flex-col space-y-1">
+                {(Object.keys(faqData) as Array<keyof typeof faqData>).map((category) => (
+                  <button
+                    key={category}
+                    onClick={() => { setFaqCategory(category); setExpandedFaq(null); }}
+                    className={`text-left px-5 py-3 rounded-full text-sm font-medium transition-all cursor-pointer ${
+                      faqCategory === category 
+                        ? "bg-zinc-800/50 text-zinc-50 border border-zinc-700/50 shadow-sm" 
+                        : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/50 border border-transparent"
+                    }`}
+                  >
+                    {category}
+                  </button>
+                ))}
+              </div>
+
+              {/* Mobile Category Select */}
+              <div className="md:hidden mt-6 mb-8">
+                <select 
+                  value={faqCategory}
+                  onChange={(e) => { setFaqCategory(e.target.value as any); setExpandedFaq(null); }}
+                  className="w-full bg-zinc-900 border border-zinc-800 text-zinc-50 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-zinc-700"
+                >
+                  {Object.keys(faqData).map((category) => (
+                    <option key={category} value={category}>{category}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="mt-8 bg-zinc-900/50 border border-zinc-800/80 rounded-3xl p-6">
+                <h3 className="text-lg font-medium text-zinc-50 mb-2">Got Questions?</h3>
+                <p className="text-sm text-zinc-400 mb-6 leading-relaxed">
+                  Need help with something? Our team is here to make things easy. Don't hesitate to reach out.
+                </p>
+                <a href="#contact" className="text-sm font-medium text-zinc-50 hover:text-zinc-300 flex items-center gap-1 cursor-pointer">
+                  Email us <ArrowRight className="w-4 h-4 ml-1" />
+                </a>
+              </div>
+            </div>
+
+            {/* Right Column */}
+            <div className="w-full md:w-2/3">
+              <div className="mb-10 text-zinc-400 text-sm md:text-base leading-relaxed max-w-lg hidden md:block mt-8">
+                Learn how Silencly works, what it covers, how the workflow flows, and what you can expect day to day.
+              </div>
+
+              <div className="space-y-3">
+                {faqData[faqCategory].map((item, index) => (
+                  <div
+                    key={index}
+                    className="rounded-2xl border border-zinc-800/80 bg-zinc-900/40 overflow-hidden transition-all hover:bg-zinc-900/60"
+                  >
+                    <button
+                      onClick={() => setExpandedFaq(expandedFaq === index ? null : index)}
+                      className="w-full text-left px-6 py-5 flex items-center justify-between text-zinc-50 font-medium text-sm md:text-base cursor-pointer"
+                    >
+                      <span className="pr-4">{item.q}</span>
+                      <div className={`w-6 h-6 rounded-full bg-zinc-800 flex items-center justify-center shrink-0 transition-transform ${expandedFaq === index ? "rotate-180" : ""}`}>
+                        <ChevronDown className="w-3.5 h-3.5 text-zinc-400" />
+                      </div>
+                    </button>
+                    {expandedFaq === index && (
+                      <div className="px-6 pb-6 pt-0 text-sm md:text-base text-zinc-400 leading-relaxed font-light">
+                        {item.a}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         </section>
 
         {/* Public Footer */}
-        <footer className="border-t border-gray-100 bg-gray-50 py-12">
-          <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-6 text-[11px] font-mono text-gray-500">
-            <div className="flex items-center gap-3">
-              <img src="https://i.ibb.co/Q742H44R/gemini-watermark-removed.png" alt="Silencly Logo" className="w-6.5 h-6.5 object-contain" referrerPolicy="no-referrer" />
-              <span className="text-xs font-bold text-black uppercase tracking-wider">Silencly Inc.</span>
+        <footer className="bg-[#0a0a0a] border-t border-zinc-900 pt-16 pb-8">
+          <div className="max-w-7xl mx-auto px-6">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
+              {/* Column 1 */}
+              <div className="col-span-1 md:col-span-1">
+                <div className="flex items-center gap-3 mb-4">
+                  <img src="https://i.ibb.co/Q742H44R/gemini-watermark-removed.png" alt="Silencly Logo" className="w-8 h-8 object-contain" referrerPolicy="no-referrer" />
+                  <span className="text-xl font-bold text-zinc-50 tracking-tight">Silencly</span>
+                </div>
+                <p className="text-zinc-400 text-sm mb-6 leading-relaxed">
+                  Join our newsletter for the latest updates and exclusive offers.
+                </p>
+                <div className="relative">
+                  <input 
+                    type="email" 
+                    placeholder="Enter your email" 
+                    className="w-full bg-zinc-950 border border-zinc-800 rounded-full py-2.5 pl-4 pr-12 text-sm text-zinc-300 focus:outline-none focus:border-zinc-700"
+                  />
+                  <button className="absolute right-1 top-1 bottom-1 bg-white text-black rounded-full w-8 flex items-center justify-center hover:bg-zinc-200 transition-colors cursor-pointer">
+                    <Send className="w-4 h-4 ml-[-2px]" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Column 2 */}
+              <div>
+                <h3 className="text-zinc-50 font-semibold mb-6">Quick Links</h3>
+                <ul className="space-y-4">
+                  <li><button onClick={() => { window.scrollTo(0, 0); setPage("home"); }} className="text-zinc-400 hover:text-zinc-50 transition-colors text-sm cursor-pointer">Home</button></li>
+                  <li><button onClick={() => setPage("about")} className="text-zinc-400 hover:text-zinc-50 transition-colors text-sm cursor-pointer">About Us</button></li>
+                  <li><a href="#features" className="text-zinc-400 hover:text-zinc-50 transition-colors text-sm cursor-pointer">Features</a></li>
+                  <li><a href="#pricing" className="text-zinc-400 hover:text-zinc-50 transition-colors text-sm cursor-pointer">Pricing</a></li>
+                  <li><a href="#contact" className="text-zinc-400 hover:text-zinc-50 transition-colors text-sm cursor-pointer">Contact</a></li>
+                </ul>
+              </div>
+
+              {/* Column 3 */}
+              <div>
+                <h3 className="text-zinc-50 font-semibold mb-6">Contact Us</h3>
+                <ul className="space-y-4 text-sm text-zinc-400">
+                  <li>123 AI Boulevard</li>
+                  <li>Tech City, TC 12345</li>
+                  <li>Phone: (123) 456-7890</li>
+                  <li>Email: hello@silencly.com</li>
+                </ul>
+              </div>
+
+              {/* Column 4 */}
+              <div>
+                <h3 className="text-zinc-50 font-semibold mb-6">Follow Us</h3>
+                <div className="flex items-center gap-3 mb-8">
+                  <a href="#" className="w-10 h-10 rounded-full border border-zinc-800 flex items-center justify-center text-zinc-400 hover:text-zinc-50 hover:bg-zinc-900 transition-all cursor-pointer">
+                    <Facebook className="w-4 h-4" />
+                  </a>
+                  <a href="https://x.com/thinkwispr" className="w-10 h-10 rounded-full border border-zinc-800 flex items-center justify-center text-zinc-400 hover:text-zinc-50 hover:bg-zinc-900 transition-all cursor-pointer">
+                    <Twitter className="w-4 h-4" />
+                  </a>
+                  <a href="#" className="w-10 h-10 rounded-full border border-zinc-800 flex items-center justify-center text-zinc-400 hover:text-zinc-50 hover:bg-zinc-900 transition-all cursor-pointer">
+                    <Instagram className="w-4 h-4" />
+                  </a>
+                  <a href="#" className="w-10 h-10 rounded-full border border-zinc-800 flex items-center justify-center text-zinc-400 hover:text-zinc-50 hover:bg-zinc-900 transition-all cursor-pointer">
+                    <Linkedin className="w-4 h-4" />
+                  </a>
+                </div>
+                
+                <div className="flex items-center gap-2 text-zinc-400">
+                  <Sun className="w-4 h-4" />
+                  <div className="w-12 h-6 bg-white rounded-full p-1 flex items-center cursor-pointer">
+                    <div className="w-4 h-4 rounded-full bg-black shadow-sm transform translate-x-6 transition-transform"></div>
+                  </div>
+                  <Moon className="w-4 h-4 text-zinc-50" />
+                </div>
+              </div>
             </div>
-            
-            <div className="flex items-center gap-6 text-gray-650">
-              <button onClick={() => setPage("about")} className="hover:text-black">About</button>
-              <a href="https://x.com/thinkwispr" target="_blank" rel="noreferrer" className="hover:text-black">
-                <Twitter className="w-4 h-4" />
-              </a>
-              <a href="https://github.com/thinkwispr" target="_blank" rel="noreferrer" className="hover:text-black">
-                <Github className="w-4 h-4" />
-              </a>
-            </div>
-            
-            <div className="text-[10px] uppercase tracking-widest text-gray-400">
-              © 2026 Silencly. Crafted in Private Workspace.
+
+            <div className="border-t border-zinc-900 pt-8 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-zinc-500">
+              <p>© 2026 Silencly. All rights reserved.</p>
+              <div className="flex items-center gap-6">
+                <a href="#" className="hover:text-zinc-300 cursor-pointer">Privacy Policy</a>
+                <a href="#" className="hover:text-zinc-300 cursor-pointer">Terms of Service</a>
+                <a href="#" className="hover:text-zinc-300 cursor-pointer">Cookie Settings</a>
+              </div>
             </div>
           </div>
         </footer>
 
         {/* About Section */}
-        <section id="about" className={`min-h-screen bg-white text-black p-12 mt-20 ${page === "about" ? "block" : "hidden"}`}>
+        <section id="about" className={`min-h-screen bg-zinc-950 text-zinc-50 p-12 mt-20 ${page === "about" ? "block" : "hidden"}`}>
           <button onClick={() => setPage("home")} className="mb-8 text-blue-600 hover:underline">← Back to home</button>
           <h1 className="text-4xl font-bold mb-4">About Silencly</h1>
-          <p className="max-w-2xl text-lg text-gray-700">Silencly is building the foundation of the new digital epoch. We empower builders, enterprises, and communities with decentralized tools.</p>
+          <p className="max-w-2xl text-lg text-zinc-300">Silencly is building the foundation of the new digital epoch. We empower builders, enterprises, and communities with decentralized tools.</p>
         </section>
 
 
@@ -2279,7 +2001,7 @@ function StepItem({ number, text, active = false }: StepItemProps) {
       <div
         className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold transition-all duration-300 border ${
           active
-            ? "bg-white text-black border-white shadow-md"
+            ? "bg-zinc-950 text-zinc-50 border-white shadow-md"
             : "bg-transparent text-white/30 border-white/20"
         }`}
       >
