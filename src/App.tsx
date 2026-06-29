@@ -185,7 +185,36 @@ export default function App() {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [authMode, setAuthMode] = useState<"signin" | "signup">("signin");
-  const [page, setPage] = useState<"home" | "about">("home");
+  const [page, setPage] = useState<"home" | "about">(
+    typeof window !== "undefined" && window.location.pathname === "/about" ? "about" : "home"
+  );
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (page === "about") {
+      if (window.location.pathname !== "/about") {
+        window.history.pushState({ page: "about" }, "", "/about");
+      }
+    } else {
+      if (window.location.pathname !== "/") {
+        window.history.pushState({ page: "home" }, "", "/");
+      }
+    }
+  }, [page]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const handlePopState = () => {
+      if (window.location.pathname === "/about") {
+        setPage("about");
+      } else {
+        setPage("home");
+      }
+    };
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, []);
+
   const [showConfigPanel, setShowConfigPanel] = useState(false);
   const [tempKey, setTempKey] = useState("");
   const [passwordVisible, setPasswordVisible] = useState(false);
@@ -1241,7 +1270,10 @@ export default function App() {
             {/* Left Brand */}
             <div 
               className="flex items-center gap-2 cursor-pointer select-none"
-              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+              onClick={() => {
+                setPage("home");
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
             >
               <img src="https://i.ibb.co/Q742H44R/gemini-watermark-removed.png" alt="Silencly Logo" className="w-5.5 h-5.5 object-contain" referrerPolicy="no-referrer" />
               <span className="text-base font-bold font-display tracking-tight text-white">Silencly</span>
@@ -1249,9 +1281,9 @@ export default function App() {
 
             {/* Center Navigation Links */}
             <div className="hidden md:flex items-center gap-8 text-sm font-semibold text-white/80">
-              <a href="#features" className="hover:text-white transition-colors">Features</a>
-              <a href="#pricing" className="hover:text-white transition-colors">Pricing</a>
-              <a href="#faq" className="hover:text-white transition-colors">FAQ</a>
+              <a href="#features" onClick={() => setPage("home")} className="hover:text-white transition-colors">Features</a>
+              <a href="#pricing" onClick={() => setPage("home")} className="hover:text-white transition-colors">Pricing</a>
+              <a href="#faq" onClick={() => setPage("home")} className="hover:text-white transition-colors">FAQ</a>
             </div>
 
             {/* Right Actions */}
@@ -1279,8 +1311,11 @@ export default function App() {
           </nav>
         </div>
 
-        {/* Hero Section */}
-        <section className="relative px-6 pt-44 pb-24 md:pt-52 md:pb-32 min-h-screen flex flex-col justify-center items-center overflow-hidden bg-black text-white w-full">
+        {/* Homepage Content */}
+        {page === "home" && (
+          <>
+            {/* Hero Section */}
+            <section className="relative px-6 pt-44 pb-24 md:pt-52 md:pb-32 min-h-screen flex flex-col justify-center items-center overflow-hidden bg-black text-white w-full">
           {/* Background Video Layer */}
           <video
             ref={videoRef}
@@ -1650,6 +1685,76 @@ export default function App() {
             </div>
           </div>
         </section>
+          </>
+        )}
+
+        {/* Conditional About Content */}
+        {page === "about" && (
+          <section id="about" className="relative min-h-screen bg-black text-white py-32 px-6 flex flex-col justify-center items-center overflow-hidden w-full">
+            {/* Background decorative glowing gradients */}
+            <div className="absolute top-[-10%] left-[10%] w-[500px] h-[500px] bg-blue-900/10 rounded-full blur-[150px] mix-blend-screen pointer-events-none z-0" />
+            <div className="absolute bottom-[-10%] right-[10%] w-[500px] h-[500px] bg-indigo-900/10 rounded-full blur-[150px] mix-blend-screen pointer-events-none z-0" />
+
+            <div className="relative z-10 max-w-3xl mx-auto flex flex-col items-center text-center space-y-12">
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8 }}
+                className="space-y-4"
+              >
+                <span className="text-[10px] font-bold font-mono tracking-wider text-zinc-400 uppercase bg-zinc-900/80 border border-zinc-800 px-3 py-1 rounded-full">
+                  Our Philosophy
+                </span>
+                <h1 className="text-4xl sm:text-6xl font-display font-semibold tracking-tight bg-gradient-to-b from-white to-zinc-400 bg-clip-text text-transparent">
+                  About Silencly
+                </h1>
+                <p className="text-lg sm:text-xl font-serif text-zinc-300 italic max-w-xl mx-auto">
+                  "Listening to your raw, unfiltered thoughts and crafting them into perfectly organized drafts."
+                </p>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 0.85 }}
+                transition={{ delay: 0.3, duration: 0.8 }}
+                className="text-zinc-300 space-y-6 text-base sm:text-lg leading-relaxed text-left font-light bg-zinc-900/40 border border-zinc-800/60 rounded-3xl p-8 sm:p-10 shadow-2xl backdrop-blur-md"
+              >
+                <p>
+                  At Silencly, we believe that typing is often a bottleneck for creativity. Traditional voice dictation tools simply transcribe your words literally—keeping all the filler words, grammar slips, and disjointed pacing that occur when you're speaking off-the-cuff.
+                </p>
+                <p>
+                  <strong>Silencly is an AI-powered dictation app</strong> built to solve this. We act as your real-time professional editor. Whether you are blurring out disorganized notes about code, brain-dumping user feedback, or drafting articles, our advanced AI understanding cleans up the mess instantly.
+                </p>
+                <p>
+                  We are committed to absolute user privacy. Silencly is privately owned and operated; your voice recordings and generated text are never sold, rented, or used to train public models. Your intellectual property is completely secure with us.
+                </p>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.6, duration: 0.5 }}
+                className="flex items-center gap-4"
+              >
+                <button
+                  onClick={() => setPage("home")}
+                  className="bg-white hover:bg-zinc-100 text-black px-6 py-3 rounded-full text-sm font-semibold transition-all active:scale-[0.98] cursor-pointer shadow-lg font-sans"
+                >
+                  Back to Home
+                </button>
+                <button
+                  onClick={() => {
+                    setAuthMode("signup");
+                    setShowAuthModal(true);
+                  }}
+                  className="bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-white px-6 py-3 rounded-full text-sm font-semibold transition-all active:scale-[0.98] cursor-pointer shadow-lg font-sans"
+                >
+                  Get Started Free
+                </button>
+              </motion.div>
+            </div>
+          </section>
+        )}
 
         {/* Public Footer */}
         <footer className="bg-[#0a0a0a] border-t border-zinc-900 pt-16 pb-8">
@@ -1662,7 +1767,7 @@ export default function App() {
                   <span className="text-xl font-bold text-zinc-50 tracking-tight">Silencly</span>
                 </div>
                 <p className="text-zinc-400 text-sm mb-6 leading-relaxed">
-                  Join our newsletter for the latest updates and exclusive offers.
+                  Silencly is an AI-powered dictation app.
                 </p>
                 <div className="relative">
                   <input 
@@ -1682,9 +1787,9 @@ export default function App() {
                 <ul className="space-y-4">
                   <li><button onClick={() => { window.scrollTo(0, 0); setPage("home"); }} className="text-zinc-400 hover:text-zinc-50 transition-colors text-sm cursor-pointer">Home</button></li>
                   <li><button onClick={() => setPage("about")} className="text-zinc-400 hover:text-zinc-50 transition-colors text-sm cursor-pointer">About Us</button></li>
-                  <li><a href="#features" className="text-zinc-400 hover:text-zinc-50 transition-colors text-sm cursor-pointer">Features</a></li>
-                  <li><a href="#pricing" className="text-zinc-400 hover:text-zinc-50 transition-colors text-sm cursor-pointer">Pricing</a></li>
-                  <li><a href="#contact" className="text-zinc-400 hover:text-zinc-50 transition-colors text-sm cursor-pointer">Contact</a></li>
+                  <li><a href="#features" onClick={() => setPage("home")} className="text-zinc-400 hover:text-zinc-50 transition-colors text-sm cursor-pointer">Features</a></li>
+                  <li><a href="#pricing" onClick={() => setPage("home")} className="text-zinc-400 hover:text-zinc-50 transition-colors text-sm cursor-pointer">Pricing</a></li>
+                  <li><a href="#faq" onClick={() => setPage("home")} className="text-zinc-400 hover:text-zinc-50 transition-colors text-sm cursor-pointer">FAQ</a></li>
                 </ul>
               </div>
 
@@ -1692,9 +1797,8 @@ export default function App() {
               <div>
                 <h3 className="text-zinc-50 font-semibold mb-6">Contact Us</h3>
                 <ul className="space-y-4 text-sm text-zinc-400">
-                  <li>123 AI Boulevard</li>
-                  <li>Tech City, TC 12345</li>
-                  <li>Phone: (123) 456-7890</li>
+                  <li>UAE, Fujairah</li>
+                  <li>Support: s.impersio@gmail.com</li>
                   <li>Email: hello@silencly.com</li>
                 </ul>
               </div>
@@ -1703,8 +1807,10 @@ export default function App() {
               <div>
                 <h3 className="text-zinc-50 font-semibold mb-6">Follow Us</h3>
                 <div className="flex items-center gap-3 mb-8">
-                  <a href="#" className="w-10 h-10 rounded-full border border-zinc-800 flex items-center justify-center text-zinc-400 hover:text-zinc-50 hover:bg-zinc-900 transition-all cursor-pointer">
-                    <Facebook className="w-4 h-4" />
+                  <a href="https://discord.com/users/Agent47_assasinator" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full border border-zinc-800 flex items-center justify-center text-zinc-400 hover:text-[#5865F2] hover:bg-zinc-900 transition-all cursor-pointer" title="Discord">
+                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.894.077.077 0 0 1-.008-.128c.126-.093.252-.19.372-.287a.075.075 0 0 1 .077-.011c3.92 1.793 8.18 1.793 12.061 0a.073.073 0 0 1 .078.009c.12.099.246.195.373.289a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.894.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.156-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.156 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.156-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.156 2.418z"/>
+                    </svg>
                   </a>
                   <a href="https://x.com/thinkwispr" className="w-10 h-10 rounded-full border border-zinc-800 flex items-center justify-center text-zinc-400 hover:text-zinc-50 hover:bg-zinc-900 transition-all cursor-pointer">
                     <Twitter className="w-4 h-4" />
@@ -1738,12 +1844,7 @@ export default function App() {
           </div>
         </footer>
 
-        {/* About Section */}
-        <section id="about" className={`min-h-screen bg-zinc-950 text-zinc-50 p-12 mt-20 ${page === "about" ? "block" : "hidden"}`}>
-          <button onClick={() => setPage("home")} className="mb-8 text-blue-600 hover:underline">← Back to home</button>
-          <h1 className="text-4xl font-bold mb-4">About Silencly</h1>
-          <p className="max-w-2xl text-lg text-zinc-300">Silencly is building the foundation of the new digital epoch. We empower builders, enterprises, and communities with decentralized tools.</p>
-        </section>
+
 
 
       </div>
