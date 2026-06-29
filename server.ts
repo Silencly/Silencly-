@@ -4,15 +4,9 @@ dotenv.config();
 import express from "express";
 import path from "path";
 import fs from "fs";
-import { toNodeHandler } from "better-auth/node";
-import { auth } from "./src/lib/auth";
 
 const app = express();
 const PORT = 3000;
-
-// Better Auth handler mounted before express.json middleware
-// Use an array to match both "/api/auth" and "/api/auth/*" to avoid SPA routing fallback redirects
-app.all(["/api/auth", "/api/auth/*"], toNodeHandler(auth));
 
 // JSON body parsing with large limit for base64 audio payload
 app.use(express.json({ limit: "50mb" }));
@@ -321,7 +315,7 @@ app.post("/api/transcribe", async (req, res) => {
 
     const transcriptRequestBody: any = {
       audio_url: audioUrl,
-      speech_models: ["universal-3-pro", "universal-2"]
+      speech_model: "best"
     };
 
     // If custom vocabulary words are present, apply them to boost accuracy

@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, MouseEvent, FormEvent, ChangeEvent, ReactNode } from "react";
 import { motion } from "motion/react";
+import Hls from "hls.js";
 import { useAppAuth } from "./lib/supabase-service";
 import {
   Mic,
@@ -24,6 +25,7 @@ import {
   Database,
   Star,
   ArrowRight,
+  ArrowUpRight,
   Lock,
   Zap,
   Play,
@@ -144,6 +146,39 @@ export default function App() {
     signInWithSocial,
   } = useAppAuth();
 
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const videoSrc = "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260319_055001_8e16d972-3b2b-441c-86ad-2901a54682f9.mp4";
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    if (videoSrc.endsWith(".m3u8")) {
+      if (Hls.isSupported()) {
+        const hls = new Hls();
+        hls.loadSource(videoSrc);
+        hls.attachMedia(video);
+        hls.on(Hls.Events.MANIFEST_PARSED, () => {
+          video.play().catch((e) => console.log("Auto-play prevented:", e));
+        });
+        return () => {
+          hls.destroy();
+        };
+      } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
+        video.src = videoSrc;
+        video.addEventListener("loadedmetadata", () => {
+          video.play().catch((e) => console.log("Auto-play prevented:", e));
+        });
+      }
+    } else {
+      video.src = videoSrc;
+      video.addEventListener("loadedmetadata", () => {
+        video.play().catch((e) => console.log("Auto-play prevented:", e));
+      });
+      video.play().catch((e) => console.log("Auto-play prevented:", e));
+    }
+  }, [videoSrc]);
+
   const [authEmail, setAuthEmail] = useState("");
   const [authPassword, setAuthPassword] = useState("");
   const [authName, setAuthName] = useState("");
@@ -166,6 +201,16 @@ export default function App() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [demoCopied, setDemoCopied] = useState(false);
   const [stellarTab, setStellarTab] = useState<"analyse" | "train" | "testing" | "deploy">("analyse");
+
+  const [isAtTop, setIsAtTop] = useState(true);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsAtTop(window.scrollY < 20);
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   useEffect(() => {
     const tabs: Array<"analyse" | "train" | "testing" | "deploy"> = ["analyse", "train", "testing", "deploy"];
@@ -1165,23 +1210,48 @@ export default function App() {
         {/* Soft, beautiful grid overlay in light gray */}
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#1f1f2e05_1px,transparent_1px),linear-gradient(to_bottom,#1f1f2e05_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] pointer-events-none" />
 
-        {/* Navigation Bar */}
-        <nav className="fixed top-0 left-0 w-full z-50 bg-zinc-950/80 backdrop-blur-md border-b border-zinc-900 px-6 py-4 animate-fade-in-up" style={{ animationDelay: '0.1s', opacity: 0 }}>
-          <div className="max-w-7xl mx-auto flex items-center justify-between">
+        {/* Top Scam Alert Banner */}
+        <div className={`fixed top-0 left-0 w-full bg-red-950/95 border-b border-red-900/50 py-2 px-4 text-center flex items-center justify-center gap-3 z-[60] shadow-lg transition-all duration-300 ${
+          isAtTop ? "translate-y-0 opacity-100" : "-translate-y-full opacity-0 pointer-events-none"
+        }`}>
+          <div className="flex items-center gap-2">
+            <span className="flex h-2 w-2 relative">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+            </span>
+            <span className="text-red-400 font-bold text-[10px] sm:text-xs uppercase tracking-wider font-mono">Alert</span>
+            <span className="text-zinc-200 text-xs sm:text-sm font-medium">Impersio scam alert</span>
+          </div>
+          <a 
+            href="https://impersio-scam-alert-4j5kne7w.sites.blink.new/" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="bg-red-600 hover:bg-red-500 text-white text-[10px] sm:text-xs font-semibold px-3 py-1 rounded-full transition-all active:scale-95 shadow-md inline-flex items-center gap-1 cursor-pointer"
+          >
+            <span>Find out</span>
+            <ArrowUpRight className="w-3 h-3" />
+          </a>
+        </div>
+
+        {/* Floating Capsule Navigation Bar */}
+        <div className={`fixed left-0 right-0 z-50 px-4 transition-all duration-300 ${
+          isAtTop ? "top-14 md:top-16" : "top-4"
+        }`}>
+          <nav className="max-w-4xl mx-auto rounded-full border border-white/20 bg-white/10 backdrop-blur-xl shadow-xl shadow-black/50 px-6 py-2.5 flex items-center justify-between">
             {/* Left Brand */}
             <div 
-              className="flex items-center gap-2 cursor-pointer"
+              className="flex items-center gap-2 cursor-pointer select-none"
               onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
             >
-              <img src="https://i.ibb.co/Q742H44R/gemini-watermark-removed.png" alt="Silencly Logo" className="w-6.5 h-6.5 object-contain" referrerPolicy="no-referrer" />
-              <span className="text-lg font-bold font-display tracking-tight text-zinc-50 select-none">Silencly</span>
+              <img src="https://i.ibb.co/Q742H44R/gemini-watermark-removed.png" alt="Silencly Logo" className="w-5.5 h-5.5 object-contain" referrerPolicy="no-referrer" />
+              <span className="text-base font-bold font-display tracking-tight text-white">Silencly</span>
             </div>
 
             {/* Center Navigation Links */}
-            <div className="hidden md:flex items-center gap-8 text-sm font-semibold text-zinc-400">
-              <a href="#features" className="hover:text-zinc-50 transition-colors">Features</a>
-              <a href="#pricing" className="hover:text-zinc-50 transition-colors">Pricing</a>
-              <a href="#faq" className="hover:text-zinc-50 transition-colors">FAQ</a>
+            <div className="hidden md:flex items-center gap-8 text-sm font-semibold text-white/80">
+              <a href="#features" className="hover:text-white transition-colors">Features</a>
+              <a href="#pricing" className="hover:text-white transition-colors">Pricing</a>
+              <a href="#faq" className="hover:text-white transition-colors">FAQ</a>
             </div>
 
             {/* Right Actions */}
@@ -1191,7 +1261,7 @@ export default function App() {
                   setAuthMode("signin");
                   setShowAuthModal(true);
                 }}
-                className="text-sm font-semibold text-zinc-400 hover:text-zinc-50 transition-colors cursor-pointer"
+                className="text-sm font-semibold text-white/80 hover:text-white transition-colors cursor-pointer"
               >
                 Sign In
               </button>
@@ -1200,86 +1270,67 @@ export default function App() {
                   setAuthMode("signup");
                   setShowAuthModal(true);
                 }}
-                className="bg-black hover:bg-gray-800 text-white text-xs sm:text-sm font-semibold px-4.5 py-2 rounded-full transition-all active:scale-[0.98] cursor-pointer shadow-xs flex items-center gap-1.5 font-sans"
+                className="bg-white hover:bg-zinc-100 text-black text-xs sm:text-sm font-semibold px-4 py-2 rounded-full transition-all active:scale-[0.98] cursor-pointer shadow-md flex items-center gap-1.5 font-sans"
               >
+                <ArrowUpRight className="w-3.5 h-3.5 stroke-[2.5]" />
                 <span>Get started free</span>
               </button>
             </div>
-          </div>
-        </nav>
+          </nav>
+        </div>
 
         {/* Hero Section */}
-        <section className="relative px-6 pt-32 pb-24 md:pt-40 md:pb-32 max-w-7xl mx-auto text-center">
-          {/* Reviews Badge */}
-          <div className="inline-flex items-center gap-2 mb-8 bg-black border border-zinc-800 px-3.5 py-1.5 rounded-full shadow-xs animate-fade-in-up" style={{ animationDelay: '0.2s', opacity: 0 }}>
-            <div className="w-6 h-6 border border-gray-300 bg-zinc-950 rounded flex items-center justify-center">
-              <Star className="w-3.5 h-3.5 text-zinc-50 fill-black" />
-            </div>
-            <span className="text-sm font-medium text-zinc-50">4.9 rating from 18.3K+ users</span>
-          </div>
+        <section className="relative px-6 pt-44 pb-24 md:pt-52 md:pb-32 min-h-screen flex flex-col justify-center items-center overflow-hidden bg-black text-white w-full">
+          {/* Background Video Layer */}
+          <video
+            ref={videoRef}
+            src={videoSrc}
+            autoPlay
+            muted
+            loop
+            playsInline
+            className="absolute inset-0 w-full h-full object-cover opacity-90 z-0 pointer-events-none"
+          />
 
-          {/* Main Heading */}
-          <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-[80px] font-sans font-normal leading-[1.1] tracking-tight mb-5 text-zinc-50 animate-fade-in-up" style={{ animationDelay: '0.3s', opacity: 0 }}>
-            Work Smarter. Move Faster.<br />
-            <span className="bg-gradient-to-r from-black via-gray-500 to-gray-400 bg-clip-text text-transparent font-medium">
-              AI Powers You Up.
-            </span>
-          </h1>
+          {/* Video Overlay */}
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-[1px] z-1 pointer-events-none" />
 
-          {/* Subheading */}
-          <p className="text-base sm:text-lg md:text-xl text-zinc-400 mb-8 max-w-2xl mx-auto font-light leading-relaxed animate-fade-in-up" style={{ animationDelay: '0.4s', opacity: 0 }}>
-            Intelligent automation syncs with the tools you love to streamline tasks, boost output, and save time.
-          </p>
+          {/* Decorative Gradients */}
+          <div className="absolute top-[-20%] left-[20%] w-[600px] h-[600px] bg-blue-900/20 rounded-full blur-[120px] mix-blend-screen pointer-events-none z-1" />
+          <div className="absolute bottom-[-10%] right-[20%] w-[500px] h-[500px] bg-indigo-900/20 rounded-full blur-[120px] mix-blend-screen pointer-events-none z-1" />
 
-          {/* CTA Button */}
-          <div className="animate-fade-in-up mb-12" style={{ animationDelay: '0.5s', opacity: 0 }}>
-            <button
-              onClick={() => {
-                setAuthMode("signup");
-                setShowAuthModal(true);
-              }}
-              className="bg-black text-white px-8 py-3 rounded-full text-base font-medium hover:bg-gray-800 transition-colors cursor-pointer shadow-lg active:scale-[0.98]"
+          {/* Content Container */}
+          <div className="relative z-10 max-w-5xl mx-auto flex flex-col items-center text-center space-y-12">
+            
+            {/* Pre-headline */}
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+              className="text-3xl sm:text-5xl lg:text-[48px] font-display font-light leading-[1.1] text-white"
             >
-              Begin Free Trial
-            </button>
-          </div>
+              Speak silently
+            </motion.p>
 
-          {/* Video and Tabs Removed */}
+            {/* Main Headline */}
+            <motion.h1
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.2, duration: 0.6 }}
+              className="text-6xl sm:text-8xl lg:text-[136px] font-display font-semibold leading-[0.9] tracking-tighter bg-gradient-to-b from-white via-white to-[#b4c0ff] bg-clip-text text-transparent"
+            >
+              Speak faster
+            </motion.h1>
 
-          {/* Company Logos */}
-          <div className="mt-24 border-t border-zinc-900 pt-12 w-full animate-fade-in-up" style={{ animationDelay: '0.8s', opacity: 0 }}>
-            <p className="text-[10px] font-mono text-gray-400 uppercase tracking-widest text-center mb-8">Trusted by industry leaders worldwide</p>
-            <div className="flex flex-wrap items-center justify-center gap-x-12 gap-y-6 text-gray-400 select-none">
-              {/* INTERSCOPE */}
-              <span className="text-xs font-black tracking-[0.2em] text-gray-400 hover:text-zinc-50 transition-colors font-sans">INTERSCOPE</span>
-              {/* SPOTIFY */}
-              <span className="text-xs font-extrabold tracking-[0.05em] text-gray-400 hover:text-zinc-50 transition-colors flex items-center gap-1.5">
-                <span className="w-3.5 h-3.5 bg-gray-200 rounded-full flex items-center justify-center text-[7px] text-white">●</span>
-                <span>SPOTIFY</span>
-              </span>
-              {/* Nexera */}
-              <span className="text-xs font-bold tracking-[0.1em] text-gray-400 hover:text-zinc-50 transition-colors flex items-center gap-1">
-                <div className="grid grid-cols-2 gap-0.5 w-2 h-2">
-                  <div className="w-0.5 h-0.5 bg-gray-400 rounded-full" />
-                  <div className="w-0.5 h-0.5 bg-gray-400 rounded-full" />
-                  <div className="w-0.5 h-0.5 bg-gray-400 rounded-full" />
-                  <div className="w-0.5 h-0.5 bg-gray-400 rounded-full" />
-                </div>
-                <span>Nexera</span>
-              </span>
-              {/* M3 */}
-              <span className="text-sm font-serif italic font-extrabold tracking-wide text-gray-400 hover:text-zinc-50 transition-colors">M3</span>
-              {/* LAURA COLE */}
-              <span className="text-xs font-light tracking-[0.15em] text-gray-400 hover:text-zinc-50 transition-colors flex items-center gap-1.5">
-                <span className="w-4 h-4 border border-gray-300 rounded-full flex items-center justify-center text-[7px] font-bold">LC</span>
-                <span>LAURA COLE</span>
-              </span>
-              {/* vertex */}
-              <span className="text-xs font-semibold tracking-[0.1em] text-gray-400 hover:text-zinc-50 transition-colors flex items-center gap-1">
-                <span>vertex</span>
-                <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-pulse" />
-              </span>
-            </div>
+            {/* Subheadline */}
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 0.7 }}
+              transition={{ delay: 0.4, duration: 0.6 }}
+              className="text-lg sm:text-[20px] font-sans leading-[1.65] text-white max-w-xl mx-auto"
+            >
+              silencly dictates you messy thoughts in to clear ofrmateeed text .
+            </motion.p>
           </div>
         </section>
 
