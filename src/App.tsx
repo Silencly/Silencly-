@@ -228,6 +228,7 @@ export default function App() {
   const [demoProgress, setDemoProgress] = useState(0);
   const [expandedFaq, setExpandedFaq] = useState<number | null>(null);
   const [faqCategory, setFaqCategory] = useState<"General" | "AI & Capabilities" | "Integrations & Security">("General");
+  const [expandedAboutFaq, setExpandedAboutFaq] = useState<number | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [demoCopied, setDemoCopied] = useState(false);
   const [stellarTab, setStellarTab] = useState<"analyse" | "train" | "testing" | "deploy">("analyse");
@@ -1240,33 +1241,8 @@ export default function App() {
         {/* Soft, beautiful grid overlay in light gray */}
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#1f1f2e05_1px,transparent_1px),linear-gradient(to_bottom,#1f1f2e05_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] pointer-events-none" />
 
-        {/* Top Scam Alert Banner */}
-        <div className={`fixed top-0 left-0 w-full bg-red-950/95 border-b border-red-900/50 py-2 px-4 text-center flex items-center justify-center gap-3 z-[60] shadow-lg transition-all duration-300 ${
-          isAtTop ? "translate-y-0 opacity-100" : "-translate-y-full opacity-0 pointer-events-none"
-        }`}>
-          <div className="flex items-center gap-2">
-            <span className="flex h-2 w-2 relative">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
-            </span>
-            <span className="text-red-400 font-bold text-[10px] sm:text-xs uppercase tracking-wider font-mono">Alert</span>
-            <span className="text-zinc-200 text-xs sm:text-sm font-medium">Impersio scam alert</span>
-          </div>
-          <a 
-            href="https://impersio-scam-alert-4j5kne7w.sites.blink.new/" 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="bg-red-600 hover:bg-red-500 text-white text-[10px] sm:text-xs font-semibold px-3 py-1 rounded-full transition-all active:scale-95 shadow-md inline-flex items-center gap-1 cursor-pointer"
-          >
-            <span>Find out</span>
-            <ArrowUpRight className="w-3 h-3" />
-          </a>
-        </div>
-
         {/* Floating Capsule Navigation Bar */}
-        <div className={`fixed left-0 right-0 z-50 px-4 transition-all duration-300 ${
-          isAtTop ? "top-14 md:top-16" : "top-4"
-        }`}>
+        <div className="fixed left-0 right-0 z-50 px-4 top-4">
           <nav className="max-w-4xl mx-auto rounded-full border border-white/20 bg-white/10 backdrop-blur-xl shadow-xl shadow-black/50 px-6 py-2.5 flex items-center justify-between">
             {/* Left Brand */}
             <div 
@@ -1592,68 +1568,385 @@ export default function App() {
 
         {/* Conditional About Content */}
         {page === "about" && (
-          <section id="about" className="relative min-h-screen bg-black text-white py-32 px-6 flex flex-col justify-center items-center overflow-hidden w-full">
+          <section id="about" className="relative min-h-screen bg-black text-white py-32 px-6 flex flex-col justify-start items-center overflow-hidden w-full">
             {/* Background decorative glowing gradients */}
-            <div className="absolute top-[-10%] left-[10%] w-[500px] h-[500px] bg-blue-900/10 rounded-full blur-[150px] mix-blend-screen pointer-events-none z-0" />
-            <div className="absolute bottom-[-10%] right-[10%] w-[500px] h-[500px] bg-indigo-900/10 rounded-full blur-[150px] mix-blend-screen pointer-events-none z-0" />
+            <div className="absolute top-[-5%] left-[5%] w-[600px] h-[600px] bg-red-950/20 rounded-full blur-[160px] mix-blend-screen pointer-events-none z-0" />
+            <div className="absolute bottom-[10%] right-[5%] w-[600px] h-[600px] bg-indigo-950/15 rounded-full blur-[160px] mix-blend-screen pointer-events-none z-0" />
 
-            <div className="relative z-10 max-w-3xl mx-auto flex flex-col items-center text-center space-y-12">
-              <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8 }}
-                className="space-y-4"
-              >
-                <span className="text-[10px] font-bold font-mono tracking-wider text-zinc-400 uppercase bg-zinc-900/80 border border-zinc-800 px-3 py-1 rounded-full">
-                  Our Philosophy
+            <div className="relative z-10 max-w-4xl mx-auto flex flex-col space-y-16 w-full">
+              
+              {/* Header Title Block */}
+              <div className="text-center space-y-4">
+                <span className="text-[10px] font-bold font-mono tracking-widest text-red-400 uppercase bg-red-950/50 border border-red-900/40 px-3 py-1.5 rounded-full inline-flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse"></span>
+                  Authenticity Alert
                 </span>
                 <h1 className="text-4xl sm:text-6xl font-display font-semibold tracking-tight bg-gradient-to-b from-white to-zinc-400 bg-clip-text text-transparent">
-                  About Silencly
+                  Impersio Authenticity Alert
                 </h1>
-                <p className="text-lg sm:text-xl font-serif text-zinc-300 italic max-w-xl mx-auto">
-                  "Listening to your raw, unfiltered thoughts and crafting them into perfectly organized drafts."
+                <p className="text-base sm:text-lg text-zinc-400 max-w-2xl mx-auto font-sans">
+                  A public warning and factual timeline regarding unauthorized product cloning. Protect your credentials and trust.
                 </p>
-              </motion.div>
+                <p className="text-xs text-zinc-500 font-mono">Updated June 2026</p>
+              </div>
 
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 0.85 }}
-                transition={{ delay: 0.3, duration: 0.8 }}
-                className="text-zinc-300 space-y-6 text-base sm:text-lg leading-relaxed text-left font-light bg-zinc-900/40 border border-zinc-800/60 rounded-3xl p-8 sm:p-10 shadow-2xl backdrop-blur-md"
-              >
-                <p>
-                  At Silencly, we believe that typing is often a bottleneck for creativity. Traditional voice dictation tools simply transcribe your words literally—keeping all the filler words, grammar slips, and disjointed pacing that occur when you're speaking off-the-cuff.
-                </p>
-                <p>
-                  <strong>Silencly is an AI-powered dictation app</strong> built to solve this. We act as your real-time professional editor. Whether you are blurring out disorganized notes about code, brain-dumping user feedback, or drafting articles, our advanced AI understanding cleans up the mess instantly.
-                </p>
-                <p>
-                  We are committed to absolute user privacy. Silencly is privately owned and operated; your voice recordings and generated text are never sold, rented, or used to train public models. Your intellectual property is completely secure with us.
-                </p>
-              </motion.div>
-
-              <motion.div
+              {/* Major Warning Banner */}
+              <motion.div 
                 initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.6, duration: 0.5 }}
-                className="flex items-center gap-4"
+                className="bg-red-950/20 border border-red-900/60 rounded-3xl p-6 sm:p-8 backdrop-blur-md relative overflow-hidden"
               >
-                <button
-                  onClick={() => setPage("home")}
-                  className="bg-white hover:bg-zinc-100 text-black px-6 py-3 rounded-full text-sm font-semibold transition-all active:scale-[0.98] cursor-pointer shadow-lg font-sans"
-                >
-                  Back to Home
-                </button>
-                <button
-                  onClick={() => {
-                    setAuthMode("signup");
-                    setShowAuthModal(true);
-                  }}
-                  className="bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-white px-6 py-3 rounded-full text-sm font-semibold transition-all active:scale-[0.98] cursor-pointer shadow-lg font-sans"
-                >
-                  Get Started Free
-                </button>
+                <div className="absolute top-0 right-0 w-32 h-32 bg-red-900/5 rounded-full blur-2xl pointer-events-none" />
+                <div className="flex flex-col sm:flex-row gap-5 items-start">
+                  <div className="p-3 bg-red-950/80 border border-red-800 rounded-2xl text-red-400">
+                    <AlertTriangle className="w-6 h-6" />
+                  </div>
+                  <div className="space-y-4 flex-1">
+                    <h2 className="text-lg sm:text-xl font-bold text-red-200">
+                      thinkwispr.dev is an unauthorized copy of impersio.me
+                    </h2>
+                    <p className="text-sm sm:text-base text-zinc-300 leading-relaxed font-light">
+                      A fraudulent clone masquerading as an original product. The real Impersio platform — including the Silencly AI dictation tool — was created by the Impersio team and operates at <span className="text-red-300 font-medium">impersio.me</span>. <span className="text-red-300 font-medium">thinkwispr.dev</span> stole the product concept, design, and identity.
+                    </p>
+                    <div className="flex flex-wrap gap-3 pt-2">
+                      <a 
+                        href="https://impersio.me"
+                        target="_blank"
+                        className="bg-white hover:bg-zinc-200 text-black px-5 py-2.5 rounded-full text-xs font-semibold transition-all flex items-center gap-1.5 shadow-md"
+                      >
+                        Visit the Real impersio.me
+                        <ArrowUpRight className="w-3.5 h-3.5" />
+                      </a>
+                      <a 
+                        href="#evidence"
+                        className="bg-zinc-900/80 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 px-5 py-2.5 rounded-full text-xs font-semibold transition-all inline-flex items-center gap-1"
+                      >
+                        See the Evidence
+                      </a>
+                    </div>
+                  </div>
+                </div>
               </motion.div>
+
+              {/* What's Happening */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-4">
+                <div className="bg-zinc-900/40 border border-zinc-800/80 rounded-3xl p-6 sm:p-8 backdrop-blur-sm space-y-4">
+                  <span className="text-[10px] font-bold font-mono tracking-wider text-green-400 uppercase bg-green-950/40 border border-green-900/30 px-2.5 py-1 rounded-full inline-block">
+                    The Original
+                  </span>
+                  <h3 className="text-xl font-semibold text-zinc-100">Silencly</h3>
+                  <p className="text-sm sm:text-base text-zinc-400 leading-relaxed font-light">
+                    Silencly is an AI-powered dictation tool created by the Impersio team — Anubhav Sapkota and Johan Jovin Cheeran. It operates exclusively at <span className="text-zinc-200 font-medium">impersio.me</span> and delivers speech-to-text at 100X speed with a private, privacy-first architecture.
+                  </p>
+                </div>
+
+                <div className="bg-zinc-900/40 border border-zinc-800/80 rounded-3xl p-6 sm:p-8 backdrop-blur-sm space-y-4">
+                  <span className="text-[10px] font-bold font-mono tracking-wider text-red-400 uppercase bg-red-950/40 border border-red-900/30 px-2.5 py-1 rounded-full inline-block">
+                    The Copycat
+                  </span>
+                  <h3 className="text-xl font-semibold text-zinc-100">thinkwispr</h3>
+                  <p className="text-sm sm:text-base text-zinc-400 leading-relaxed font-light">
+                    <span className="text-zinc-200 font-medium">thinkwispr.dev</span> is a near-identical product offering the same AI dictation functionality, mimicking the original's value proposition, visual identity, and user experience. It operates under different creators — Daksh Shetty, Ahmad Qamar, Asjad Raza, and Musa — with no affiliation to Impersio.
+                  </p>
+                </div>
+              </div>
+
+              {/* Why It Matters */}
+              <div className="bg-zinc-900/20 border border-zinc-800/60 rounded-3xl p-6 sm:p-8 backdrop-blur-md space-y-3">
+                <div className="flex items-center gap-2.5 text-zinc-200">
+                  <span className="text-red-400"><Lock className="w-5 h-5" /></span>
+                  <h3 className="text-lg font-semibold">Why It Matters</h3>
+                </div>
+                <p className="text-sm sm:text-base text-zinc-400 leading-relaxed font-light">
+                  Impersonation scams erode trust in genuine products, confuse users, and violate intellectual property. Users signing up on the copycat site may expose their data to an unverified platform with no accountability to the original creators.
+                </p>
+              </div>
+
+              {/* Evidence Section */}
+              <div id="evidence" className="space-y-6 pt-6">
+                <div className="text-center sm:text-left space-y-2">
+                  <h2 className="text-2xl sm:text-3xl font-display font-semibold tracking-tight text-zinc-100">
+                    Evidence: Side-by-Side Comparison
+                  </h2>
+                  <p className="text-sm text-zinc-400 max-w-2xl font-sans">
+                    A direct comparison of impersio.me (the original) and thinkwispr.dev (the copy).
+                  </p>
+                </div>
+
+                {/* Table */}
+                <div className="overflow-x-auto rounded-2xl border border-zinc-800/80 bg-zinc-900/20 backdrop-blur-sm">
+                  <table className="w-full text-left border-collapse text-xs sm:text-sm">
+                    <thead>
+                      <tr className="border-b border-zinc-800 bg-zinc-900/60 text-zinc-300 font-mono uppercase tracking-wider text-[10px]">
+                        <th className="p-4 font-semibold">Aspect</th>
+                        <th className="p-4 font-semibold text-green-400">impersio.me (Original)</th>
+                        <th className="p-4 font-semibold text-red-400">thinkwispr.dev (Copy)</th>
+                        <th className="p-4 font-semibold">Verdict</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-zinc-800 text-zinc-300">
+                      <tr className="hover:bg-zinc-900/20">
+                        <td className="p-4 font-semibold font-mono text-zinc-400">Color scheme</td>
+                        <td className="p-4">Dark minimal (#060608 background, zinc accents)</td>
+                        <td className="p-4">Dark minimal (black background, white text)</td>
+                        <td className="p-4">
+                          <span className="px-2 py-0.5 rounded-full text-[10px] bg-red-950/40 border border-red-900/30 text-red-400 font-medium">near-identical</span>
+                        </td>
+                      </tr>
+                      <tr className="hover:bg-zinc-900/20">
+                        <td className="p-4 font-semibold font-mono text-zinc-400">Layout structure</td>
+                        <td className="p-4">Split hero: text left, auth form right</td>
+                        <td className="p-4">Centered hero with video background + CTA</td>
+                        <td className="p-4">
+                          <span className="px-2 py-0.5 rounded-full text-[10px] bg-yellow-950/40 border border-yellow-900/30 text-yellow-400 font-medium">similar</span>
+                        </td>
+                      </tr>
+                      <tr className="hover:bg-zinc-900/20">
+                        <td className="p-4 font-semibold font-mono text-zinc-400">Typography</td>
+                        <td className="p-4">Sans-serif, clean modern aesthetic</td>
+                        <td className="p-4">Instrument Serif + Inter, editorial feel</td>
+                        <td className="p-4">
+                          <span className="px-2 py-0.5 rounded-full text-[10px] bg-zinc-800 border border-zinc-700 text-zinc-400 font-medium">different</span>
+                        </td>
+                      </tr>
+                      <tr className="hover:bg-zinc-900/20">
+                        <td className="p-4 font-semibold font-mono text-zinc-400">Overall aesthetic</td>
+                        <td className="p-4">Minimal dark SaaS with login gate</td>
+                        <td className="p-4">Marketing-centric dark landing page</td>
+                        <td className="p-4">
+                          <span className="px-2 py-0.5 rounded-full text-[10px] bg-red-950/40 border border-red-900/30 text-red-400 font-medium">inspired</span>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              {/* Timeline Section */}
+              <div className="space-y-6 pt-6">
+                <div className="text-center sm:text-left space-y-2">
+                  <h2 className="text-2xl sm:text-3xl font-display font-semibold tracking-tight text-zinc-100">
+                    Timeline: How It Unfolded
+                  </h2>
+                  <p className="text-sm text-zinc-400 font-sans">
+                    A chronological journey of events and our response.
+                  </p>
+                </div>
+
+                {/* Timeline Grid */}
+                <div className="relative border-l border-zinc-800 ml-4 pl-6 space-y-10 py-2">
+                  
+                  {/* Step 1 */}
+                  <div className="relative">
+                    <span className="absolute -left-10 top-1.5 w-8 h-8 rounded-full bg-zinc-950 border border-zinc-800 flex items-center justify-center text-zinc-400 text-xs font-mono">
+                      01
+                    </span>
+                    <div className="space-y-1.5">
+                      <span className="text-[10px] font-bold font-mono tracking-wide text-zinc-500 uppercase">Step 1</span>
+                      <h4 className="text-base sm:text-lg font-semibold text-zinc-100">Original Launch: Impersio creates Silencly</h4>
+                      <p className="text-xs sm:text-sm text-zinc-400 font-light leading-relaxed max-w-2xl">
+                        The Impersio team — Anubhav Sapkota and Johan Jovin Cheeran — launch Silencly, an AI dictation tool operating at impersio.me. The product gains traction with its privacy-first, high-speed dictation capabilities.
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Step 2 */}
+                  <div className="relative">
+                    <span className="absolute -left-10 top-1.5 w-8 h-8 rounded-full bg-zinc-950 border border-zinc-800 flex items-center justify-center text-zinc-400 text-xs font-mono">
+                      02
+                    </span>
+                    <div className="space-y-1.5">
+                      <span className="text-[10px] font-bold font-mono tracking-wide text-zinc-500 uppercase">Step 2</span>
+                      <h4 className="text-base sm:text-lg font-semibold text-zinc-100">Copy Appears: thinkwispr.dev goes live</h4>
+                      <p className="text-xs sm:text-sm text-zinc-400 font-light leading-relaxed max-w-2xl">
+                        A near-identical product called thinkwispr appears at thinkwispr.dev, offering the same core AI dictation functionality. The site uses different branding but copies the product concept, target audience, and value proposition.
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Step 3 */}
+                  <div className="relative">
+                    <span className="absolute -left-10 top-1.5 w-8 h-8 rounded-full bg-zinc-950 border border-zinc-800 flex items-center justify-center text-zinc-400 text-xs font-mono">
+                      03
+                    </span>
+                    <div className="space-y-1.5">
+                      <span className="text-[10px] font-bold font-mono tracking-wide text-zinc-500 uppercase">Step 3</span>
+                      <h4 className="text-base sm:text-lg font-semibold text-zinc-100">Discovery: Copycat identified</h4>
+                      <p className="text-xs sm:text-sm text-zinc-400 font-light leading-relaxed max-w-2xl">
+                        The similarities between thinkwispr.dev and impersio.me are documented. Both offer identical core services — AI-powered dictation — with overlapping feature sets targeting the same users.
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Step 4 */}
+                  <div className="relative">
+                    <span className="absolute -left-10 top-1.5 w-8 h-8 rounded-full bg-red-950 border border-red-900 flex items-center justify-center text-red-400 text-xs font-mono">
+                      04
+                    </span>
+                    <div className="space-y-1.5">
+                      <span className="text-[10px] font-bold font-mono tracking-wide text-red-400 uppercase">Step 4</span>
+                      <h4 className="text-base sm:text-lg font-semibold text-red-300">Alert Published: Public awareness campaign</h4>
+                      <p className="text-xs sm:text-sm text-zinc-400 font-light leading-relaxed max-w-2xl">
+                        This authenticity alert is published to help users distinguish the original Impersio platform from the unauthorized thinkwispr.dev clone. Users are urged to verify they are using the genuine product at impersio.me.
+                      </p>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+
+              {/* Stay Safe Section */}
+              <div className="space-y-6 pt-6">
+                <div className="text-center sm:text-left space-y-2">
+                  <h2 className="text-2xl sm:text-3xl font-display font-semibold tracking-tight text-zinc-100">
+                    Stay Safe: How to Protect Yourself
+                  </h2>
+                  <p className="text-sm text-zinc-400 font-sans">
+                    Simple steps to verify you're using the genuine Impersio platform.
+                  </p>
+                </div>
+
+                {/* Steps Cards */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                  <div className="bg-zinc-900/35 border border-zinc-800 rounded-2xl p-6 space-y-3">
+                    <div className="flex items-center gap-2 text-green-400">
+                      <Check className="w-5 h-5" />
+                      <h5 className="font-semibold text-zinc-100 text-sm sm:text-base">Check the URL</h5>
+                    </div>
+                    <p className="text-xs sm:text-sm text-zinc-400 font-light leading-relaxed">
+                      The real Impersio platform is <span className="text-zinc-200">ONLY at impersio.me</span>. Any other domain claiming to be Impersio or offering a suspiciously similar product is unauthorized.
+                    </p>
+                  </div>
+
+                  <div className="bg-zinc-900/35 border border-zinc-800 rounded-2xl p-6 space-y-3">
+                    <div className="flex items-center gap-2 text-green-400">
+                      <Check className="w-5 h-5" />
+                      <h5 className="font-semibold text-zinc-100 text-sm sm:text-base">Verify the creators</h5>
+                    </div>
+                    <p className="text-xs sm:text-sm text-zinc-400 font-light leading-relaxed">
+                      Impersio and Silencly were created by <span className="text-zinc-200">Anubhav Sapkota and Johan Jovin Cheeran</span>. If you see different names attached to a similar product, investigate before trusting.
+                    </p>
+                  </div>
+
+                  <div className="bg-zinc-900/35 border border-zinc-800 rounded-2xl p-6 space-y-3">
+                    <div className="flex items-center gap-2 text-green-400">
+                      <Check className="w-5 h-5" />
+                      <h5 className="font-semibold text-zinc-100 text-sm sm:text-base">Trust the original team</h5>
+                    </div>
+                    <p className="text-xs sm:text-sm text-zinc-400 font-light leading-relaxed">
+                      The Impersio team built and launched the original product. Copies often lack the security commitment, customer support, and regular feature updates of the genuine platform.
+                    </p>
+                  </div>
+
+                  <div className="bg-zinc-900/35 border border-zinc-800 rounded-2xl p-6 space-y-3">
+                    <div className="flex items-center gap-2 text-green-400">
+                      <Check className="w-5 h-5" />
+                      <h5 className="font-semibold text-zinc-100 text-sm sm:text-base">Report copycats</h5>
+                    </div>
+                    <p className="text-xs sm:text-sm text-zinc-400 font-light leading-relaxed">
+                      If you encounter websites impersonating impersio.me, report them. Domain registrars and hosting providers can take down fraudulent sites when notified.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Final Caution Card */}
+                <div className="bg-red-950/10 border border-red-900/30 rounded-2xl p-6 text-center text-xs sm:text-sm text-zinc-300 leading-relaxed max-w-3xl mx-auto">
+                  <strong className="text-red-400">Always verify before you trust:</strong> The only authentic Impersio experience is at impersio.me. If you landed on thinkwispr.dev believing it was the original, you were deceived. Share this page to help others avoid the same trap.
+                </div>
+              </div>
+
+              {/* Accordion FAQ Area */}
+              <div className="space-y-6 pt-6">
+                <div className="text-center sm:text-left space-y-2">
+                  <h2 className="text-2xl sm:text-3xl font-display font-semibold tracking-tight text-zinc-100">
+                    FAQ: Frequently Asked Questions
+                  </h2>
+                  <p className="text-sm text-zinc-400 font-sans">
+                    Common questions about thinkwispr.dev and impersio.me.
+                  </p>
+                </div>
+
+                <div className="space-y-3">
+                  {[
+                    {
+                      q: "Is thinkwispr.dev the same as impersio.me?",
+                      a: "No, thinkwispr.dev is an unauthorized, fraudulent clone of impersio.me. It has no affiliation with the genuine Impersio platform or its creators, Anubhav Sapkota and Johan Jovin Cheeran."
+                    },
+                    {
+                      q: "Who created the original Impersio / Silencly?",
+                      a: "The genuine Impersio platform and Silencly AI dictation tool were created entirely by the Impersio team — Anubhav Sapkota and Johan Jovin Cheeran."
+                    },
+                    {
+                      q: "Who is behind thinkwispr.dev?",
+                      a: "thinkwispr.dev operates under separate individuals — Daksh Shetty, Ahmad Qamar, Asjad Raza, and Musa — with absolutely no affiliation to or authorization from Impersio."
+                    },
+                    {
+                      q: "Is thinkwispr.dev a scam?",
+                      a: "Yes. It is an unauthorized copy that cloned the original product concept, design, value proposition, and identity to deceive users into believing it is the original service."
+                    },
+                    {
+                      q: "How can I verify I'm on the real Impersio site?",
+                      a: "Check your browser's address bar. The real platform operates exclusively at impersio.me. Any other domain name is a fake clone."
+                    },
+                    {
+                      q: "What should I do if I accidentally signed up on thinkwispr.dev?",
+                      a: "If you accidentally registered on thinkwispr.dev, we recommend immediately changing your password (especially if you reused it elsewhere), avoiding inputting any sensitive data, and switching exclusively to the genuine impersio.me."
+                    },
+                    {
+                      q: "Can thinkwispr.dev be taken down?",
+                      a: "Yes. Active take-down requests, hosting abuse reports, and domain-level enforcement are currently underway to protect our users and intellectual property."
+                    }
+                  ].map((item, index) => (
+                    <div
+                      key={index}
+                      className="rounded-2xl border border-zinc-800/80 bg-zinc-900/30 overflow-hidden transition-all hover:bg-zinc-900/55"
+                    >
+                      <button
+                        onClick={() => setExpandedAboutFaq(expandedAboutFaq === index ? null : index)}
+                        className="w-full text-left px-6 py-4.5 flex items-center justify-between text-zinc-50 font-medium text-sm md:text-base cursor-pointer"
+                      >
+                        <span className="pr-4">{item.q}</span>
+                        <div className={`w-5.5 h-5.5 rounded-full bg-zinc-800 flex items-center justify-center shrink-0 transition-transform ${expandedAboutFaq === index ? "rotate-180" : ""}`}>
+                          <ChevronDown className="w-3 h-3 text-zinc-400" />
+                        </div>
+                      </button>
+                      {expandedAboutFaq === index && (
+                        <div className="px-6 pb-5 pt-0 text-xs sm:text-sm text-zinc-400 leading-relaxed font-light">
+                          {item.a}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Take Action CTA */}
+              <div className="bg-zinc-900/40 border border-zinc-800 rounded-3xl p-8 sm:p-10 text-center space-y-6">
+                <h3 className="text-xl sm:text-2xl font-semibold text-zinc-50 font-display">
+                  Take Action: Help spread the word
+                </h3>
+                <p className="text-sm text-zinc-400 max-w-xl mx-auto leading-relaxed">
+                  Share this page so others searching for thinkwispr.dev can learn the truth. The more people who know, the harder it becomes for copycats to deceive users.
+                </p>
+                <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                  <button
+                    onClick={() => {
+                      setPage("home");
+                      window.scrollTo({ top: 0, behavior: "smooth" });
+                    }}
+                    className="bg-white hover:bg-zinc-100 text-black px-6 py-3 rounded-full text-sm font-semibold transition-all cursor-pointer shadow-lg w-full sm:w-auto"
+                  >
+                    Go Back to Home
+                  </button>
+                  <a
+                    href="mailto:abuse@impersio.me"
+                    className="bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-white px-6 py-3 rounded-full text-sm font-semibold transition-all cursor-pointer shadow-lg w-full sm:w-auto inline-flex items-center justify-center gap-1.5"
+                  >
+                    Report to: abuse@impersio.me
+                  </a>
+                </div>
+              </div>
+
             </div>
           </section>
         )}
