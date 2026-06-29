@@ -146,6 +146,10 @@ export default function App() {
     signInWithSocial,
   } = useAppAuth();
 
+  const [page, setPage] = useState<"home" | "about">(
+    typeof window !== "undefined" && window.location.pathname === "/about" ? "about" : "home"
+  );
+
   const videoRef = useRef<HTMLVideoElement>(null);
   const videoSrc = "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260319_055001_8e16d972-3b2b-441c-86ad-2901a54682f9.mp4";
 
@@ -177,7 +181,7 @@ export default function App() {
       });
       video.play().catch((e) => console.log("Auto-play prevented:", e));
     }
-  }, [videoSrc]);
+  }, [videoSrc, page]);
 
   const [authEmail, setAuthEmail] = useState("");
   const [authPassword, setAuthPassword] = useState("");
@@ -185,9 +189,6 @@ export default function App() {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [authMode, setAuthMode] = useState<"signin" | "signup">("signin");
-  const [page, setPage] = useState<"home" | "about">(
-    typeof window !== "undefined" && window.location.pathname === "/about" ? "about" : "home"
-  );
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -1281,7 +1282,6 @@ export default function App() {
 
             {/* Center Navigation Links */}
             <div className="hidden md:flex items-center gap-8 text-sm font-semibold text-white/80">
-              <a href="#features" onClick={() => setPage("home")} className="hover:text-white transition-colors">Features</a>
               <a href="#pricing" onClick={() => setPage("home")} className="hover:text-white transition-colors">Pricing</a>
               <a href="#faq" onClick={() => setPage("home")} className="hover:text-white transition-colors">FAQ</a>
             </div>
@@ -1324,15 +1324,14 @@ export default function App() {
             muted
             loop
             playsInline
-            className="absolute inset-0 w-full h-full object-cover opacity-90 z-0 pointer-events-none"
+            className="absolute inset-0 w-full h-full object-cover opacity-80 z-0 pointer-events-none grayscale brightness-[0.35] contrast-[1.15]"
           />
 
           {/* Video Overlay */}
-          <div className="absolute inset-0 bg-black/40 backdrop-blur-[1px] z-1 pointer-events-none" />
+          <div className="absolute inset-0 bg-black/70 backdrop-blur-[1px] z-1 pointer-events-none" />
 
           {/* Decorative Gradients */}
-          <div className="absolute top-[-20%] left-[20%] w-[600px] h-[600px] bg-blue-900/20 rounded-full blur-[120px] mix-blend-screen pointer-events-none z-1" />
-          <div className="absolute bottom-[-10%] right-[20%] w-[500px] h-[500px] bg-indigo-900/20 rounded-full blur-[120px] mix-blend-screen pointer-events-none z-1" />
+          {/* Gradients removed for pristine pitch-black background as requested */}
 
           {/* Content Container */}
           <div className="relative z-10 max-w-5xl mx-auto flex flex-col items-center text-center space-y-12">
@@ -1364,105 +1363,8 @@ export default function App() {
               transition={{ delay: 0.4, duration: 0.6 }}
               className="text-lg sm:text-[20px] font-sans leading-[1.65] text-white max-w-xl mx-auto"
             >
-              silencly dictates you messy thoughts in to clear ofrmateeed text .
+              Silencly dictates your messy thoughts into clear, formatted text.
             </motion.p>
-          </div>
-        </section>
-
-        {/* Core Features Marketing Section */}
-        <section id="features" className="py-20 md:py-28 border-t border-zinc-900 max-w-7xl mx-auto px-6 w-full flex justify-center bg-[#ffffff]">
-          <div className="c1-container py-20 px-5 flex flex-col items-center">
-            
-            {/* Header Block */}
-            <div className="mb-12 text-center max-w-3xl mx-auto">
-              <span className="c1-badge">Core Features</span>
-              <h2 className="c1-title">Built for Speed & Quality</h2>
-              <p className="c1-subtitle">
-                Everything you need to go<br />from idea to image
-              </p>
-            </div>
-
-            {/* Grid */}
-            <div className="c1-grid w-full">
-              
-              {/* Card 1 — Smart Prompt Suggestions */}
-              <div className="c1-card c1-card-1">
-                {/* Prompt box */}
-                <div className="absolute top-[30px] left-[24px] right-[24px] bg-zinc-950 rounded-[12px] p-[16px] text-[0.8rem] text-[#475569] leading-[1.6] shadow-[0_8px_20px_rgba(0,0,0,0.04)] text-left select-none">
-                  A bright, high-resolution 3D illustration of a <span className="c1-blur-text">cheerful cartoon</span> of a <span className="c1-blur-text">girl character</span> <span className="c1-blur-text">centred against a</span> smooth blue background
-                </div>
-                
-                {/* "Add more details" pill button */}
-                <button
-                  type="button"
-                  className="absolute top-[180px] left-[40px] bg-zinc-950 border border-black py-[5px] px-[14px] rounded-[20px] text-[0.75rem] font-semibold text-[#1e293b] shadow-[0_4px_15px_rgba(0,0,0,0.08)] flex items-center gap-[6px] select-none pointer-events-none"
-                >
-                  <span>Add more details</span>
-                  <span style={{ color: '#a855f7', fontSize: '1rem' }}>✦</span>
-                </button>
-
-                {/* Cursor SVG arrow */}
-                <svg
-                  className="absolute top-[205px] left-[110px] w-6 h-6 select-none pointer-events-none drop-shadow-[0_4px_6px_rgba(0,0,0,0.2)] z-10"
-                  viewBox="0 0 24 24"
-                  fill="#0f172a"
-                  stroke="#ffffff"
-                  strokeWidth="1"
-                >
-                  <path d="M4 2L20 11L11 13L9 22L4 2Z" />
-                </svg>
-
-                <h3 className="relative z-10">Smart Prompt Suggestions</h3>
-              </div>
-
-              {/* Card 2 — API Access */}
-              <div className="c1-card c1-card-2">
-                <div className="c1-api-visual absolute top-0 left-0 right-0 bottom-[70px] flex items-center justify-center px-[24px]">
-                  <img
-                    className="c1-network-img w-full h-[180px] object-contain mt-[20px]"
-                    src="https://pub-f170a2592d2c4a1485466404c36807be.r2.dev/viktor/network.svg"
-                    alt="Network visualization"
-                    referrerPolicy="no-referrer"
-                  />
-                </div>
-                <h3 className="relative z-10">API Access</h3>
-              </div>
-
-              {/* Card 3 — Project Library */}
-              <div className="c1-card c1-card-3">
-                {/* Mesh overlay */}
-                <div className="c1-mesh" />
-
-                {/* Folder image */}
-                <img
-                  className="c1-folder absolute top-[50px] left-1/2 -translate-x-1/2 w-[170px] drop-shadow-[0_15px_25px_rgba(0,0,0,0.08)]"
-                  src="https://pub-f170a2592d2c4a1485466404c36807be.r2.dev/viktor/library%20icon.svg"
-                  alt="Library folder icon"
-                  referrerPolicy="no-referrer"
-                />
-
-                {/* Search pill */}
-                <div className="c1-search absolute top-[220px] left-1/2 -translate-x-1/2 bg-zinc-950 border border-black py-[6px] px-[18px] rounded-[20px] text-[0.75rem] font-medium text-[#1e293b] shadow-[0_8px_20px_rgba(0,0,0,0.06)] whitespace-nowrap flex items-center gap-[8px] select-none pointer-events-none">
-                  {/* lucide-style search SVG */}
-                  <svg
-                    className="w-[14px] h-[14px]"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="#64748b"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <circle cx="11" cy="11" r="8" />
-                    <line x1="21" y1="21" x2="16.65" y2="16.65" />
-                  </svg>
-                  <span>Search in library</span>
-                </div>
-
-                <h3 className="relative z-10">Project Library</h3>
-              </div>
-
-            </div>
           </div>
         </section>
 
@@ -1787,7 +1689,6 @@ export default function App() {
                 <ul className="space-y-4">
                   <li><button onClick={() => { window.scrollTo(0, 0); setPage("home"); }} className="text-zinc-400 hover:text-zinc-50 transition-colors text-sm cursor-pointer">Home</button></li>
                   <li><button onClick={() => setPage("about")} className="text-zinc-400 hover:text-zinc-50 transition-colors text-sm cursor-pointer">About Us</button></li>
-                  <li><a href="#features" onClick={() => setPage("home")} className="text-zinc-400 hover:text-zinc-50 transition-colors text-sm cursor-pointer">Features</a></li>
                   <li><a href="#pricing" onClick={() => setPage("home")} className="text-zinc-400 hover:text-zinc-50 transition-colors text-sm cursor-pointer">Pricing</a></li>
                   <li><a href="#faq" onClick={() => setPage("home")} className="text-zinc-400 hover:text-zinc-50 transition-colors text-sm cursor-pointer">FAQ</a></li>
                 </ul>
