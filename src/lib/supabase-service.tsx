@@ -28,6 +28,7 @@ interface AuthContextType {
   signUpWithEmail: (email: string, password: string, name: string) => Promise<void>;
   signOut: () => Promise<void>;
   signInWithSocial: (provider: "google" | "github") => Promise<void>;
+  updateProfileName: (name: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -169,6 +170,31 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
     }
   };
 
+  const updateProfileName = async (newName: string) => {
+    setError(null);
+    if (!supabase) {
+      setUser(prev => prev ? { 
+        ...prev, 
+        name: newName,
+        image: `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(newName)}`
+      } : null);
+      return;
+    }
+
+    const { data, error: sbError } = await supabase.auth.updateUser({
+      data: { full_name: newName }
+    });
+
+    if (sbError) {
+      setError(sbError.message);
+      throw sbError;
+    }
+
+    if (data?.user) {
+      setUser(mapSupabaseUser(data.user));
+    }
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -181,6 +207,7 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
         signUpWithEmail,
         signOut,
         signInWithSocial,
+        updateProfileName,
       }}
     >
       {children}

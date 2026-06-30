@@ -144,6 +144,7 @@ export default function App() {
     signUpWithEmail,
     signOut: handleSignOut,
     signInWithSocial,
+    updateProfileName,
   } = useAppAuth();
 
   const [page, setPage] = useState<"home" | "about">(
@@ -233,7 +234,24 @@ export default function App() {
   const [demoCopied, setDemoCopied] = useState(false);
   const [stellarTab, setStellarTab] = useState<"analyse" | "train" | "testing" | "deploy">("analyse");
 
+  const [showProfileDropdown, setShowProfileDropdown] = useState(false);
+  const [showManageNameModal, setShowManageNameModal] = useState(false);
+  const [newNameInput, setNewNameInput] = useState("");
+
   const [isAtTop, setIsAtTop] = useState(true);
+
+  useEffect(() => {
+    if (showManageNameModal && user) {
+      setNewNameInput(user.name || "");
+    }
+  }, [showManageNameModal, user]);
+
+  useEffect(() => {
+    if (user) {
+      setShowAuthModal(false);
+      setPage("home");
+    }
+  }, [user]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -981,10 +999,9 @@ export default function App() {
     );
   }
 
-  if (!user) {
-    if (showAuthModal) {
-      return (
-        <main className="flex min-h-screen w-full bg-black selection:bg-zinc-950/30 p-2 transition-all duration-500 lg:h-screen lg:overflow-hidden lg:p-4 text-white">
+  if (!user && showAuthModal) {
+    return (
+      <main className="flex min-h-screen w-full bg-black selection:bg-zinc-950/30 p-2 transition-all duration-500 lg:h-screen lg:overflow-hidden lg:p-4 text-white">
           {/* Left Column (Hero) */}
           <div className="hidden lg:flex w-[52%] relative flex-col items-center justify-end pb-32 px-12 rounded-3xl overflow-hidden shadow-2xl h-full">
             <video
@@ -1234,8 +1251,9 @@ export default function App() {
           </div>
         </main>
       );
-    }
+  }
 
+  if (!user || page !== "workspace") {
     return (
       <div className="min-h-screen bg-zinc-950 text-zinc-50 flex flex-col antialiased font-sans selection:bg-zinc-900 relative overflow-hidden">
         {/* Soft, beautiful grid overlay in light gray */}
@@ -1260,29 +1278,101 @@ export default function App() {
             <div className="hidden md:flex items-center gap-8 text-sm font-semibold text-white/80">
               <a href="#pricing" onClick={() => setPage("home")} className="hover:text-white transition-colors">Pricing</a>
               <a href="#faq" onClick={() => setPage("home")} className="hover:text-white transition-colors">FAQ</a>
+              {user && (
+                <button onClick={() => setPage("workspace")} className="hover:text-white transition-colors cursor-pointer text-sm font-semibold">Workspace</button>
+              )}
             </div>
 
             {/* Right Actions */}
             <div className="flex items-center gap-4">
-              <button
-                onClick={() => {
-                  setAuthMode("signin");
-                  setShowAuthModal(true);
-                }}
-                className="text-sm font-semibold text-white/80 hover:text-white transition-colors cursor-pointer"
-              >
-                Sign In
-              </button>
-              <button
-                onClick={() => {
-                  setAuthMode("signup");
-                  setShowAuthModal(true);
-                }}
-                className="bg-white hover:bg-zinc-100 text-black text-xs sm:text-sm font-semibold px-4 py-2 rounded-full transition-all active:scale-[0.98] cursor-pointer shadow-md flex items-center gap-1.5 font-sans"
-              >
-                <ArrowUpRight className="w-3.5 h-3.5 stroke-[2.5]" />
-                <span>Get started free</span>
-              </button>
+              {user ? (
+                <div className="relative">
+                  {/* User Logo / Avatar */}
+                  <button
+                    onClick={() => setShowProfileDropdown(!showProfileDropdown)}
+                    className="flex items-center gap-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full pl-2 pr-3.5 py-1.5 transition-all cursor-pointer focus:outline-none focus:ring-1 focus:ring-white/20 select-none"
+                    aria-label="User menu"
+                  >
+                    <img src={user.image} className="w-6 h-6 rounded-full border border-white/20" referrerPolicy="no-referrer" />
+                    <span className="text-xs font-semibold text-white hidden sm:inline-block max-w-[120px] truncate">{user.name}</span>
+                    <ChevronDown className={`w-3.5 h-3.5 text-white/60 transition-transform ${showProfileDropdown ? "rotate-180" : ""}`} />
+                  </button>
+
+                  {/* Floating Dropdown Menu */}
+                  {showProfileDropdown && (
+                    <div className="absolute right-0 mt-2.5 w-64 rounded-3xl border border-zinc-850 bg-zinc-950/95 p-4 shadow-2xl backdrop-blur-xl z-50 text-left space-y-3.5 animate-in fade-in slide-in-from-top-2 duration-200">
+                      {/* User metadata header */}
+                      <div className="flex items-center gap-3 border-b border-zinc-900 pb-3">
+                        <img src={user.image} className="w-10 h-10 rounded-full border border-zinc-850" referrerPolicy="no-referrer" />
+                        <div className="flex flex-col">
+                          <span className="text-xs font-bold text-zinc-100 truncate max-w-[150px]">{user.name}</span>
+                          <span className="text-[10px] text-zinc-500 truncate max-w-[150px]">{user.email}</span>
+                        </div>
+                      </div>
+
+                      {/* Dropdown Options */}
+                      <div className="flex flex-col gap-1 text-xs">
+                        <button
+                          onClick={() => {
+                            setPage("workspace");
+                            setShowProfileDropdown(false);
+                          }}
+                          className="flex items-center gap-2.5 text-left text-zinc-300 hover:text-white hover:bg-white/5 rounded-xl px-3 py-2 transition-all cursor-pointer w-full font-medium"
+                        >
+                          <Mic className="w-4 h-4 text-zinc-400" />
+                          Go to Workspace
+                        </button>
+                        
+                        <button
+                          onClick={() => {
+                            setShowProfileDropdown(false);
+                            setShowManageNameModal(true);
+                          }}
+                          className="flex items-center gap-2.5 text-left text-zinc-300 hover:text-white hover:bg-white/5 rounded-xl px-3 py-2 transition-all cursor-pointer w-full font-medium"
+                        >
+                          <Settings className="w-4 h-4 text-zinc-400" />
+                          Manage Profile
+                        </button>
+                      </div>
+
+                      {/* Sign Out Button */}
+                      <div className="border-t border-zinc-900 pt-2.5">
+                        <button
+                          onClick={() => {
+                            setShowProfileDropdown(false);
+                            handleSignOut();
+                          }}
+                          className="flex items-center gap-2.5 text-left text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-xl px-3 py-2 transition-all cursor-pointer w-full font-medium"
+                        >
+                          Sign Out
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <>
+                  <button
+                    onClick={() => {
+                      setAuthMode("signin");
+                      setShowAuthModal(true);
+                    }}
+                    className="text-sm font-semibold text-white/80 hover:text-white transition-colors cursor-pointer"
+                  >
+                    Sign In
+                  </button>
+                  <button
+                    onClick={() => {
+                      setAuthMode("signup");
+                      setShowAuthModal(true);
+                    }}
+                    className="bg-white hover:bg-zinc-100 text-black text-xs sm:text-sm font-semibold px-4 py-2 rounded-full transition-all active:scale-[0.98] cursor-pointer shadow-md flex items-center gap-1.5 font-sans"
+                  >
+                    <ArrowUpRight className="w-3.5 h-3.5 stroke-[2.5]" />
+                    <span>Get started free</span>
+                  </button>
+                </>
+              )}
             </div>
           </nav>
         </div>
@@ -1643,6 +1733,12 @@ export default function App() {
                       <li className="flex items-center gap-2">
                         <span className="text-zinc-500">●</span> X (Twitter): <a href="https://x.com/silenclyai" target="_blank" rel="noopener noreferrer" className="text-zinc-200 hover:text-white underline transition-colors">@silenclyai</a>
                       </li>
+                      <li className="flex items-center gap-2">
+                        <span className="text-zinc-500">●</span> LinkedIn: <a href="https://www.linkedin.com/company/thinkwispr" target="_blank" rel="noopener noreferrer" className="text-zinc-200 hover:text-white underline transition-colors">linkedin.com/company/thinkwispr</a>
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <span className="text-zinc-500">●</span> GitHub: <a href="https://github.com/thinkwispr" target="_blank" rel="noopener noreferrer" className="text-zinc-200 hover:text-white underline transition-colors">github.com/thinkwispr</a>
+                      </li>
                     </ul>
                   </div>
 
@@ -1873,11 +1969,24 @@ export default function App() {
                     <Instagram className="w-4 h-4" />
                   </a>
                   <a 
-                    href="#" 
+                    href="https://www.linkedin.com/company/thinkwispr" 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
                     className="w-10 h-10 rounded-full border border-zinc-800 flex items-center justify-center text-zinc-400 hover:text-zinc-50 hover:bg-zinc-900 transition-all cursor-pointer"
                     aria-label="LinkedIn"
+                    title="LinkedIn"
                   >
                     <Linkedin className="w-4 h-4" />
+                  </a>
+                  <a 
+                    href="https://github.com/thinkwispr" 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    className="w-10 h-10 rounded-full border border-zinc-800 flex items-center justify-center text-zinc-400 hover:text-zinc-50 hover:bg-zinc-900 transition-all cursor-pointer"
+                    aria-label="GitHub"
+                    title="GitHub"
+                  >
+                    <Github className="w-4 h-4" />
                   </a>
                 </div>
                 
@@ -1902,8 +2011,87 @@ export default function App() {
           </div>
         </footer>
 
+        {/* Name Management Modal */}
+        {showManageNameModal && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+            {/* Backdrop */}
+            <div 
+              className="absolute inset-0 bg-black/80 backdrop-blur-md cursor-pointer"
+              onClick={() => setShowManageNameModal(false)}
+            />
+            
+            {/* Modal Card */}
+            <div className="relative w-full max-w-md bg-zinc-950 border border-zinc-900 rounded-3xl p-6 sm:p-8 shadow-2xl z-10 text-left animate-in fade-in zoom-in-95 duration-200">
+              <button 
+                onClick={() => setShowManageNameModal(false)}
+                className="absolute top-4 right-4 text-zinc-500 hover:text-white transition-colors cursor-pointer"
+                aria-label="Close modal"
+              >
+                <X className="w-5 h-5" />
+              </button>
+              
+              <div className="space-y-6">
+                <div className="space-y-2">
+                  <h3 className="text-xl font-bold font-display tracking-tight text-white">Manage Profile</h3>
+                  <p className="text-xs text-zinc-500">Update your personal account details.</p>
+                </div>
+                
+                <form 
+                  onSubmit={async (e) => {
+                    e.preventDefault();
+                    if (!newNameInput.trim()) return;
+                    try {
+                      await updateProfileName(newNameInput.trim());
+                      setShowManageNameModal(false);
+                    } catch (err) {
+                      console.error(err);
+                    }
+                  }}
+                  className="space-y-4"
+                >
+                  <div className="space-y-2">
+                    <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Your Name</label>
+                    <input 
+                      type="text" 
+                      value={newNameInput}
+                      onChange={(e) => setNewNameInput(e.target.value)}
+                      placeholder="Enter your name"
+                      className="w-full bg-zinc-900 border border-zinc-800 rounded-2xl py-3 px-4 text-sm text-zinc-200 focus:outline-none focus:border-zinc-700 transition-colors"
+                      autoFocus
+                    />
+                  </div>
 
-
+                  <div className="space-y-2">
+                    <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Email Address</label>
+                    <input 
+                      type="text" 
+                      value={user?.email || ""} 
+                      disabled
+                      className="w-full bg-zinc-900/50 border border-zinc-800/40 rounded-2xl py-3 px-4 text-sm text-zinc-500 cursor-not-allowed select-none"
+                    />
+                    <p className="text-[10px] text-zinc-600">Email cannot be changed as it is locked to your auth credentials.</p>
+                  </div>
+                  
+                  <div className="flex gap-3 pt-2">
+                    <button
+                      type="button"
+                      onClick={() => setShowManageNameModal(false)}
+                      className="flex-1 bg-zinc-900 hover:bg-zinc-850 text-zinc-300 rounded-full py-2.5 text-xs font-semibold transition-all cursor-pointer border border-zinc-800"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      className="flex-1 bg-white hover:bg-zinc-200 text-black rounded-full py-2.5 text-xs font-semibold transition-all cursor-pointer shadow-md"
+                    >
+                      Save Changes
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        )}
 
       </div>
     );
@@ -1914,18 +2102,24 @@ export default function App() {
       {/* Workspace Header Panel */}
       <header className="border-b border-zinc-900 bg-black px-6 py-4">
         <div className="max-w-3xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-2.5 cursor-pointer select-none animate-pulse-slow" onClick={() => setPage("home")}>
             <img src="https://i.ibb.co/Q742H44R/gemini-watermark-removed.png" alt="Silencly Logo" className="w-6.5 h-6.5 object-contain" referrerPolicy="no-referrer" />
-            <span className="text-base font-bold font-display tracking-tight text-white">Silencly Workspace</span>
+            <span className="text-base font-bold font-display tracking-tight text-white hover:text-white/90 transition-colors">Silencly Workspace</span>
           </div>
 
           {/* User profile with Sign Out */}
           <div className="flex items-center gap-3 bg-zinc-900/80 border border-zinc-800 rounded-2xl px-3.5 py-1.5 shadow-sm">
-            <img src={user.image} className="w-5.5 h-5.5 rounded-full border border-zinc-800" referrerPolicy="no-referrer" />
-            <div className="hidden sm:flex flex-col text-left">
-              <span className="text-xs font-bold text-zinc-100 leading-none">{user.name}</span>
+            <img src={user.image} className="w-5.5 h-5.5 rounded-full border border-zinc-800 cursor-pointer" referrerPolicy="no-referrer" onClick={() => setShowManageNameModal(true)} title="Manage Profile" />
+            <div className="hidden sm:flex flex-col text-left cursor-pointer" onClick={() => setShowManageNameModal(true)} title="Manage Profile">
+              <span className="text-xs font-bold text-zinc-100 leading-none hover:text-white transition-colors">{user.name}</span>
               <span className="text-[8px] text-zinc-500 font-mono tracking-wide leading-none uppercase mt-0.5">{user.provider || "email"}</span>
             </div>
+            <button
+              onClick={() => setPage("home")}
+              className="ml-1 text-zinc-500 hover:text-zinc-300 text-[9px] font-bold uppercase transition-colors cursor-pointer border-r border-zinc-800/80 pr-2"
+            >
+              Home
+            </button>
             <button
               onClick={handleSignOut}
               className="ml-1 text-zinc-500 hover:text-red-400 text-[9px] font-bold uppercase transition-colors cursor-pointer"
@@ -2194,6 +2388,88 @@ export default function App() {
         onAddItem={addDictionaryItem}
         onDeleteItem={deleteDictionaryItem}
       />
+
+      {/* Name Management Modal */}
+      {showManageNameModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          {/* Backdrop */}
+          <div 
+            className="absolute inset-0 bg-black/80 backdrop-blur-md cursor-pointer"
+            onClick={() => setShowManageNameModal(false)}
+          />
+          
+          {/* Modal Card */}
+          <div className="relative w-full max-w-md bg-zinc-950 border border-zinc-900 rounded-3xl p-6 sm:p-8 shadow-2xl z-10 text-left animate-in fade-in zoom-in-95 duration-200 text-white">
+            <button 
+              onClick={() => setShowManageNameModal(false)}
+              className="absolute top-4 right-4 text-zinc-500 hover:text-white transition-colors cursor-pointer"
+              aria-label="Close modal"
+            >
+              <X className="w-5 h-5" />
+            </button>
+            
+            <div className="space-y-6">
+              <div className="space-y-2">
+                <h3 className="text-xl font-bold font-display tracking-tight text-white">Manage Profile</h3>
+                <p className="text-xs text-zinc-500">Update your personal account details.</p>
+              </div>
+              
+              <form 
+                onSubmit={async (e) => {
+                  e.preventDefault();
+                  if (!newNameInput.trim()) return;
+                  try {
+                    await updateProfileName(newNameInput.trim());
+                    setShowManageNameModal(false);
+                  } catch (err) {
+                    console.error(err);
+                  }
+                }}
+                className="space-y-4"
+              >
+                <div className="space-y-2">
+                  <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Your Name</label>
+                  <input 
+                    type="text" 
+                    value={newNameInput}
+                    onChange={(e) => setNewNameInput(e.target.value)}
+                    placeholder="Enter your name"
+                    className="w-full bg-zinc-900 border border-zinc-800 rounded-2xl py-3 px-4 text-sm text-zinc-200 focus:outline-none focus:border-zinc-700 transition-colors"
+                    autoFocus
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Email Address</label>
+                  <input 
+                    type="text" 
+                    value={user?.email || ""} 
+                    disabled
+                    className="w-full bg-zinc-900/50 border border-zinc-800/40 rounded-2xl py-3 px-4 text-sm text-zinc-500 cursor-not-allowed select-none"
+                  />
+                  <p className="text-[10px] text-zinc-600">Email cannot be changed as it is locked to your auth credentials.</p>
+                </div>
+                
+                <div className="flex gap-3 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setShowManageNameModal(false)}
+                    className="flex-1 bg-zinc-900 hover:bg-zinc-850 text-zinc-300 rounded-full py-2.5 text-xs font-semibold transition-all cursor-pointer border border-zinc-800"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="flex-1 bg-white hover:bg-zinc-200 text-black rounded-full py-2.5 text-xs font-semibold transition-all cursor-pointer shadow-md"
+                  >
+                    Save Changes
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   );
