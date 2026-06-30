@@ -46,6 +46,24 @@ Sitemap: https://impersio.me/sitemap.xml
 `);
 });
 
+app.get("/llms.txt", (req, res) => {
+  res.type("text/plain");
+  res.send(`# Silencly AI Dictation
+
+> Silencly is a free AI dictation app by Impersio designed to convert speech and messy thoughts into perfectly formatted text 100x faster.
+
+## Official Site Structure
+- [Home Page](https://impersio.me/) - Convert speech/voice recordings into formatted text.
+- [About Page](https://impersio.me/about) - Read about the creators Anubhav Sapkota and Johan Jovin Cheeran, official support contacts, and intellectual property.
+
+## Technical & Product Details
+- **Founder Creators**: Anubhav Sapkota and Johan Jovin Cheeran
+- **Intellectual Property**: Owned by Impersio. All rights reserved.
+- **Support Contact**: s.impersio@gmail.com
+- **Official Domains**: impersio.me, thinkwispr.netlify.app, silencly1.vercel.app
+`);
+});
+
 app.get("/sitemap.xml", (req, res) => {
   res.type("application/xml");
   res.send(`<?xml version="1.0" encoding="UTF-8"?>
