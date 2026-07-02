@@ -1735,7 +1735,7 @@ export default function App() {
                   </span>
                   <h3 className="text-xl font-semibold text-zinc-100">Our Team</h3>
                   <p className="text-sm sm:text-base text-zinc-400 leading-relaxed font-light font-sans">
-                    Silencly was created, designed, and engineered entirely by the Impersio team, led by **Anubhav Sapkota** and **Johan Jovin Cheeran**. We remain dedicated to updating and supporting the product with ongoing performance updates and security audits.
+                    Silencly was created, designed, and engineered entirely by the Impersio team, led by **Anubhav Sapkota**, **Daksh shetty**, and **Johan Jovin Cheeran**. We remain dedicated to updating and supporting the product with ongoing performance updates and security audits.
                   </p>
                 </div>
               </div>
@@ -1790,6 +1790,12 @@ export default function App() {
                         <span className="text-green-400">✔</span> <a href="https://impersio.me" target="_blank" rel="noopener noreferrer" className="text-zinc-300 hover:text-white underline transition-colors">impersio.me</a>
                       </li>
                       <li className="flex items-center gap-2">
+                        <span className="text-green-400">✔</span> <a href="https://thinkwispr.dev" target="_blank" rel="noopener noreferrer" className="text-zinc-300 hover:text-white underline transition-colors">thinkwispr.dev</a>
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <span className="text-green-400">✔</span> <a href="https://thinkwispr.me" target="_blank" rel="noopener noreferrer" className="text-zinc-300 hover:text-white underline transition-colors">thinkwispr.me</a>
+                      </li>
+                      <li className="flex items-center gap-2">
                         <span className="text-green-400">✔</span> <a href="https://silencly1.vercel.app" target="_blank" rel="noopener noreferrer" className="text-zinc-300 hover:text-white underline transition-colors">silencly1.vercel.app</a>
                       </li>
                     </ul>
@@ -1826,7 +1832,7 @@ export default function App() {
                       <h5 className="font-semibold text-zinc-100 text-sm sm:text-base">Verify the Creators</h5>
                     </div>
                     <p className="text-xs sm:text-sm text-zinc-400 font-light leading-relaxed">
-                      Genuine releases of Silencly are built exclusively by founders <span className="text-zinc-200">Anubhav Sapkota and Johan Jovin Cheeran</span>.
+                      Genuine releases of Silencly are built exclusively by founders <span className="text-zinc-200">Anubhav Sapkota, Daksh shetty, and Johan Jovin Cheeran</span>.
                     </p>
                   </div>
 
@@ -1836,7 +1842,7 @@ export default function App() {
                       <h5 className="font-semibold text-zinc-100 text-sm sm:text-base">Verify Verified Domains</h5>
                     </div>
                     <p className="text-xs sm:text-sm text-zinc-400 font-light leading-relaxed">
-                      Impersio verified mirrors include <span className="text-zinc-200">thinkwispr.netlify.app</span> and <span className="text-zinc-200">silencly1.vercel.app</span>.
+                      Impersio verified mirrors include <span className="text-zinc-200">thinkwispr.netlify.app</span>, <span className="text-zinc-200">thinkwispr.dev</span>, <span className="text-zinc-200">thinkwispr.me</span>, and <span className="text-zinc-200">silencly1.vercel.app</span>.
                     </p>
                   </div>
 
@@ -1867,7 +1873,7 @@ export default function App() {
                   {[
                     {
                       q: "Who created the original Silencly?",
-                      a: "The genuine Silencly AI dictation tool was created and developed entirely by the Impersio team — Anubhav Sapkota and Johan Jovin Cheeran."
+                      a: "The genuine Silencly AI dictation tool was created and developed entirely by the Impersio team — Anubhav Sapkota, Daksh shetty, and Johan Jovin Cheeran."
                     },
                     {
                       q: "Is Silencly free to use?",

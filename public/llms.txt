@@ -4,10 +4,10 @@
 
 ## Official Site Structure
 - [Home Page](https://impersio.me/) - Convert speech/voice recordings into formatted text.
-- [About Page](https://impersio.me/about) - Read about the creators Anubhav Sapkota and Johan Jovin Cheeran, official support contacts, and intellectual property.
+- [About Page](https://impersio.me/about) - Read about the creators Anubhav Sapkota, Daksh shetty, and Johan Jovin Cheeran, official support contacts, and intellectual property.
 
 ## Technical & Product Details
-- **Founder Creators**: Anubhav Sapkota and Johan Jovin Cheeran
+- **Founder Creators**: Anubhav Sapkota, Daksh shetty, and Johan Jovin Cheeran
 - **Intellectual Property**: Owned by Impersio. All rights reserved.
 - **Support Contact**: s.impersio@gmail.com
-- **Official Domains**: impersio.me, thinkwispr.netlify.app, silencly1.vercel.app
+- **Official Domains**: impersio.me, thinkwispr.netlify.app, thinkwispr.dev, thinkwispr.me, silencly1.vercel.app

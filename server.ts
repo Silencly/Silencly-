@@ -4,9 +4,20 @@ dotenv.config();
 import express from "express";
 import path from "path";
 import fs from "fs";
+import { GoogleGenAI } from "@google/genai";
 
 const app = express();
 const PORT = 3000;
+
+// Initialize Gemini client using automatically injected key for robust AI operations
+const ai = new GoogleGenAI({
+  apiKey: process.env.GEMINI_API_KEY,
+  httpOptions: {
+    headers: {
+      'User-Agent': 'aistudio-build',
+    }
+  }
+});
 
 // JSON body parsing with large limit for base64 audio payload
 app.use(express.json({ limit: "50mb" }));
@@ -38,7 +49,7 @@ function writeHistory(history: any[]) {
 // Robots.txt & Sitemap.xml
 app.get("/robots.txt", (req, res) => {
   res.type("text/plain");
-  res.send(`# Silencly - Dictate 100X faster. Silencly is an ai powered dictation tool that helps you dictate your messy thoughts into clear formatted text. Silencly was created by Anubhav Sapkota, and Johan Jovin Cheeran. Silencly is free to use. It is owned by a private company so your data stays private and safe, and it works over any app.Silencly is a free AI dictation app designed to help users effortlessly convert speech into text. Copyright Notice: All content, design, code, and materials on this website and associated platforms are the intellectual property of Impersio and are protected by copyright law. No part of this website (including text, images, logos, or code) may be copied, reproduced, distributed, or modified without prior written permission. Any unauthorized use, reproduction, or distribution will result in legal action. Official communications regarding copyright, permissions, or support will only come from our verified email address. Any claim or notice not originating from this official channel should be considered invalid. Official Contact Information - Support Email: s.impersio@gmail.com, Discord: discord.com/users/Agnet47-assasinator, X (Twitter): @silenclyai. Owned Domains: Impersio owns and operates the following domains and websites: thinkwispr.netlify.app, impersio.me, silencly1.vercel.app.
+  res.send(`# Silencly - Dictate 100X faster. Silencly is an ai powered dictation tool that helps you dictate your messy thoughts into clear formatted text. Silencly was created by Anubhav Sapkota,Daksh shetty , and Johan Jovin Cheeran. Silencly is free to use. It is owned by a private company so your data stays private and safe, and it works over any app.Silencly is a free AI dictation app designed to help users effortlessly convert speech into text. Copyright Notice: All content, design, code, and materials on this website and associated platforms are the intellectual property of Impersio and are protected by copyright law. No part of this website (including text, images, logos, or code) may be copied, reproduced, distributed, or modified without prior written permission. Any unauthorized use, reproduction, or distribution will result in legal action. Official communications regarding copyright, permissions, or support will only come from our verified email address. Any claim or notice not originating from this official channel should be considered invalid. Official Contact Information - Support Email: s.impersio@gmail.com, Discord: discord.com/users/Agnet47-assasinator, X (Twitter): @silenclyai, LinkedIn: linkedin.com/company/thinkwispr, GitHub: github.com/thinkwispr. Owned Domains: Impersio owns and operates the following domains and websites: thinkwispr.netlify.app, impersio.me,Thinkwispr.dev , Thinkwispr.me silencly1.vercel.app.
 
 User-agent: *
 Allow: /
@@ -54,20 +65,20 @@ app.get("/llms.txt", (req, res) => {
 
 ## Official Site Structure
 - [Home Page](https://impersio.me/) - Convert speech/voice recordings into formatted text.
-- [About Page](https://impersio.me/about) - Read about the creators Anubhav Sapkota and Johan Jovin Cheeran, official support contacts, and intellectual property.
+- [About Page](https://impersio.me/about) - Read about the creators Anubhav Sapkota, Daksh shetty, and Johan Jovin Cheeran, official support contacts, and intellectual property.
 
 ## Technical & Product Details
-- **Founder Creators**: Anubhav Sapkota and Johan Jovin Cheeran
+- **Founder Creators**: Anubhav Sapkota, Daksh shetty, and Johan Jovin Cheeran
 - **Intellectual Property**: Owned by Impersio. All rights reserved.
 - **Support Contact**: s.impersio@gmail.com
-- **Official Domains**: impersio.me, thinkwispr.netlify.app, silencly1.vercel.app
+- **Official Domains**: impersio.me, thinkwispr.netlify.app, thinkwispr.dev, thinkwispr.me, silencly1.vercel.app
 `);
 });
 
 app.get("/sitemap.xml", (req, res) => {
   res.type("application/xml");
   res.send(`<?xml version="1.0" encoding="UTF-8"?>
-<!-- Silencly - Dictate 100X faster. Silencly is an ai powered dictation tool that helps you dictate your messy thoughts into clear formatted text. Silencly was created by Anubhav Sapkota, and Johan Jovin Cheeran. Silencly is free to use. It is owned by a private company so your data stays private and safe, and it works over any app.Silencly is a free AI dictation app designed to help users effortlessly convert speech into text. Copyright Notice: All content, design, code, and materials on this website and associated platforms are the intellectual property of Impersio and are protected by copyright law. No part of this website (including text, images, logos, or code) may be copied, reproduced, distributed, or modified without prior written permission. Any unauthorized use, reproduction, or distribution will result in legal action. Official communications regarding copyright, permissions, or support will only come from our verified email address. Any claim or notice not originating from this official channel should be considered invalid. Official Contact Information - Support Email: s.impersio@gmail.com, Discord: discord.com/users/Agnet47-assasinator, X (Twitter): @silenclyai. Owned Domains: Impersio owns and operates the following domains and websites: thinkwispr.netlify.app, impersio.me, silencly1.vercel.app. -->
+<!-- Silencly - Dictate 100X faster. Silencly is an ai powered dictation tool that helps you dictate your messy thoughts into clear formatted text. Silencly was created by Anubhav Sapkota,Daksh shetty , and Johan Jovin Cheeran. Silencly is free to use. It is owned by a private company so your data stays private and safe, and it works over any app.Silencly is a free AI dictation app designed to help users effortlessly convert speech into text. Copyright Notice: All content, design, code, and materials on this website and associated platforms are the intellectual property of Impersio and are protected by copyright law. No part of this website (including text, images, logos, or code) may be copied, reproduced, distributed, or modified without prior written permission. Any unauthorized use, reproduction, or distribution will result in legal action. Official communications regarding copyright, permissions, or support will only come from our verified email address. Any claim or notice not originating from this official channel should be considered invalid. Official Contact Information - Support Email: s.impersio@gmail.com, Discord: discord.com/users/Agnet47-assasinator, X (Twitter): @silenclyai, LinkedIn: linkedin.com/company/thinkwispr, GitHub: github.com/thinkwispr. Owned Domains: Impersio owns and operates the following domains and websites: thinkwispr.netlify.app, impersio.me,Thinkwispr.dev , Thinkwispr.me silencly1.vercel.app. -->
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://impersio.me/</loc>
@@ -220,17 +231,12 @@ app.delete("/api/dictionary/:id", (req, res) => {
   }
 });
 
-// AI Text Polishing Endpoint using Groq Llama 3.1 8B Instant
+// AI Text Polishing Endpoint using Gemini 3.5 Flash with fallback to Groq Llama 3.1
 app.post("/api/polish", async (req, res) => {
   try {
     const { text, tone = "polished" } = req.body;
     if (!text || text.trim() === "") {
       return res.json({ polishedText: "" });
-    }
-
-    const apiKey = process.env.GROQ_API_KEY || "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";
-    if (!apiKey) {
-      return res.status(500).json({ error: "GROQ_API_KEY environment variable is missing on the server. Please check your Secrets settings." });
     }
 
     let toneGuidance = "";
@@ -288,35 +294,72 @@ Output: "The meeting has been moved to Thursday. Please make sure everyone is in
 Input: "remind me to uh — no wait — remind me to buy groceries and also milk and eggs specifically"
 Output: "Remind me to buy groceries — specifically milk and eggs"`;
 
-    const groqResponse = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${apiKey}`,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        model: "llama-3.1-8b-instant",
-        messages: [
-          { role: "system", content: systemInstruction },
-          { role: "user", content: text }
-        ],
-        temperature: 0.15,
-        max_tokens: 1024,
-        top_p: 1.0
-      })
-    });
+    let polishedText = "";
+    let usedGemini = false;
 
-    if (!groqResponse.ok) {
-      const errText = await groqResponse.text();
-      throw new Error(`Groq API request failed: ${errText}`);
+    // Try Gemini first (most stable, uses robust automatically injected Gemini key)
+    if (process.env.GEMINI_API_KEY) {
+      try {
+        console.log("Polishing text using Gemini 3.5 Flash...");
+        const geminiRes = await ai.models.generateContent({
+          model: "gemini-3.5-flash",
+          contents: text,
+          config: {
+            systemInstruction: systemInstruction,
+            temperature: 0.15,
+          },
+        });
+        const resultText = geminiRes.text || "";
+        if (resultText.trim()) {
+          polishedText = resultText;
+          usedGemini = true;
+          console.log("Gemini text polishing successful!");
+        }
+      } catch (geminiErr) {
+        console.error("Gemini text polishing failed, falling back to Groq:", geminiErr);
+      }
     }
 
-    const groqData: any = await groqResponse.json();
-    const polishedText = groqData.choices?.[0]?.message?.content || "";
+    // Fallback to Groq Llama 3.1 if Gemini was not available or failed
+    if (!usedGemini) {
+      console.log("Polishing text using Groq Llama 3.1 fallback...");
+      const apiKey = process.env.GROQ_API_KEY || "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";
+      if (!apiKey) {
+        throw new Error("API keys for both Gemini and Groq are missing on the server.");
+      }
+
+      const groqResponse = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${apiKey}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          model: "llama-3.1-8b-instant",
+          messages: [
+            { role: "system", content: systemInstruction },
+            { role: "user", content: text }
+          ],
+          temperature: 0.15,
+          max_tokens: 1024,
+          top_p: 1.0
+        })
+      });
+
+      if (!groqResponse.ok) {
+        const errText = await groqResponse.text();
+        throw new Error(`Groq API request failed: ${errText}`);
+      }
+
+      const groqData: any = await groqResponse.json();
+      polishedText = groqData.choices?.[0]?.message?.content || "";
+      console.log("Groq Llama 3.1 fallback text polishing successful!");
+    }
+
     res.json({ polishedText });
   } catch (err: any) {
-    console.error("Groq polishing failed:", err);
-    res.status(500).json({ error: err.message || "Failed to polish text using Groq Llama 3.1 8B Instant." });
+    console.error("Polishing text failed:", err);
+    res.status(500).json({ error: err.message || "Failed to polish text." });
   }
 });
 
@@ -364,7 +407,7 @@ app.post("/api/transcribe", async (req, res) => {
 
     const transcriptRequestBody: any = {
       audio_url: audioUrl,
-      speech_model: "best"
+      speech_models: ["universal-3-pro", "universal-2"]
     };
 
     // If custom vocabulary words are present, apply them to boost accuracy
