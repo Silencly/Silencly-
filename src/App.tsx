@@ -72,11 +72,11 @@ import StatusPage from "./components/StatusPage";
 const marqueeLogos = [
   { name: "Procure", url: "https://svgl.app/library/preact.svg", gradient: "linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)" },
   { name: "Shopify", url: "https://svgl.app/library/shopify.svg", gradient: "linear-gradient(135deg, #f59e0b 0%, #d97706 100%)" },
-  { name: "Blender", url: "https://svgl.app/library/blender.svg", gradient: "linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)" },
+  { name: "Partner", url: "https://cdn.theorg.com/fb8876de-28db-4c4e-8dd8-0880eeba2c23_thumb.jpg", gradient: "linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)" },
   { name: "Figma", url: "https://svgl.app/library/figma.svg", gradient: "linear-gradient(135deg, #a855f7 0%, #7e22ce 100%)" },
   { name: "Spotify", url: "https://svgl.app/library/spotify.svg", gradient: "linear-gradient(135deg, #ec4899 0%, #be185d 100%)" },
   { name: "Lottielab", url: "https://svgl.app/library/lottielab.svg", gradient: "linear-gradient(135deg, #eab308 0%, #22c55e 100%)" },
-  { name: "Google Cloud", url: "https://svgl.app/library/google-cloud.svg", gradient: "linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%)" },
+  { name: "Mobile App", url: "https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/object/public/bilal-assets/Mobile%20image.png", gradient: "linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%)" },
   { name: "Bing", url: "https://svgl.app/library/bing.svg", gradient: "linear-gradient(135deg, #14b8a6 0%, #0d9488 100%)" }
 ];
 
@@ -1550,8 +1550,11 @@ export default function App() {
             </div>
 
             {/* Seamless Marquee Logo Scroller Component */}
-            <div className="w-full mt-10 overflow-hidden marquee-mask select-none">
-              <div className="animate-marquee flex gap-6 py-4">
+            <div className="w-full mt-10 overflow-hidden marquee-mask select-none flex flex-col items-center">
+              <span className="text-[11px] font-mono tracking-[0.25em] text-zinc-500 uppercase mb-4 animate-pulse">
+                ✦ Powered By ✦
+              </span>
+              <div className="animate-marquee flex gap-6 py-4 w-full">
                 {/* Double list to ensure seamless scroll */}
                 {[...marqueeLogos, ...marqueeLogos].map((logo, index) => (
                   <div
