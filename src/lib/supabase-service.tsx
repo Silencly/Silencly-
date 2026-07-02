@@ -1,14 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
-import { createClient, User } from "@supabase/supabase-js";
-
-// Retrieve environment variables with fallback values for illustration
-const supabaseUrl = (import.meta as any).env?.VITE_SUPABASE_URL || "";
-const supabaseAnonKey = (import.meta as any).env?.VITE_SUPABASE_ANON_KEY || "";
-
-// Only initialize if we have the config, otherwise we'll handle gracefully so the app doesn't crash
-export const supabase = (supabaseUrl && supabaseAnonKey) 
-  ? createClient(supabaseUrl, supabaseAnonKey)
-  : null;
+import { supabase, isSupabaseConfigured } from "./supabase-client";
 
 export interface UserProfile {
   id: string;
@@ -38,43 +29,10 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const isSupabaseConfigured = !!supabase;
-
-  useEffect(() => {
-    if (!supabase) {
-      // Gracefully set isCheckingAuth to false if not configured
-      setIsCheckingAuth(false);
-      return;
-    }
-
-    // Get current session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session?.user) {
-        setUser(mapSupabaseUser(session.user));
-      } else {
-        setUser(null);
-      }
-      setIsCheckingAuth(false);
-    });
-
-    // Listen for auth state changes (sign-in, sign-out, etc.)
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (session?.user) {
-        setUser(mapSupabaseUser(session.user));
-      } else {
-        setUser(null);
-      }
-      setIsCheckingAuth(false);
-    });
-
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, []);
-
-  const mapSupabaseUser = (sbUser: User): UserProfile => {
-    const name = sbUser.user_metadata?.full_name || sbUser.user_metadata?.name || sbUser.email?.split("@")[0] || "User";
-    const image = sbUser.user_metadata?.avatar_url || sbUser.user_metadata?.picture || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(name)}`;
+  // Helper to map Supabase user metadata to UserProfile
+  const mapSupabaseUser = (sbUser: any): UserProfile => {
+    const name = sbUser.user_metadata?.display_name || sbUser.user_metadata?.full_name || sbUser.email?.split("@")[0] || "User";
+    const image = sbUser.user_metadata?.avatar_url || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(name)}`;
     const provider = sbUser.app_metadata?.provider || "email";
     
     return {
@@ -86,57 +44,135 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
     };
   };
 
+  useEffect(() => {
+    if (isSupabaseConfigured) {
+      // 1. REAL SUPABASE LISTENERS
+      supabase.auth.getSession().then(({ data: { session } }) => {
+        if (session?.user) {
+          setUser(mapSupabaseUser(session.user));
+        } else {
+          setUser(null);
+        }
+        setIsCheckingAuth(false);
+      }).catch(err => {
+        console.error("Supabase getSession error:", err);
+        setIsCheckingAuth(false);
+      });
+
+      const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+        if (session?.user) {
+          setUser(mapSupabaseUser(session.user));
+        } else {
+          setUser(null);
+        }
+        setIsCheckingAuth(false);
+      });
+
+      return () => {
+        subscription.unsubscribe();
+      };
+    } else {
+      // 2. MOCK LOCAL AUTH LISTENERS (when Supabase is not configured yet)
+      const cached = localStorage.getItem("mock_current_user");
+      if (cached) {
+        try {
+          setUser(JSON.parse(cached));
+        } catch {
+          setUser(null);
+        }
+      }
+      setIsCheckingAuth(false);
+    }
+  }, []);
+
   const signInWithEmail = async (email: string, password: string) => {
     setError(null);
-    if (!supabase) {
-      const errMsg = "Supabase is not configured yet. Please add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to your env variables.";
-      setError(errMsg);
-      throw new Error(errMsg);
-    }
-
-    const { error: sbError } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-
-    if (sbError) {
-      setError(sbError.message);
-      throw sbError;
+    if (isSupabaseConfigured) {
+      const { data, error: sbError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      if (sbError) {
+        setError(sbError.message);
+        throw sbError;
+      }
+      if (data.user) {
+        setUser(mapSupabaseUser(data.user));
+      }
+    } else {
+      // Mock flow
+      const mockUsers = JSON.parse(localStorage.getItem("mock_users") || "[]");
+      const matched = mockUsers.find((u: any) => u.email === email && u.password === password);
+      if (!matched) {
+        const err = new Error("Invalid email or password");
+        setError(err.message);
+        throw err;
+      }
+      const profile: UserProfile = {
+        id: matched.id,
+        email: matched.email,
+        name: matched.name,
+        image: `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(matched.name)}`,
+        provider: "email",
+      };
+      localStorage.setItem("mock_current_user", JSON.stringify(profile));
+      setUser(profile);
     }
   };
 
   const signUpWithEmail = async (email: string, password: string, name: string) => {
     setError(null);
-    if (!supabase) {
-      const errMsg = "Supabase is not configured yet. Please add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to your env variables.";
-      setError(errMsg);
-      throw new Error(errMsg);
-    }
+    if (isSupabaseConfigured) {
+      const { data, error: sbError } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            display_name: name,
+          }
+        }
+      });
+      if (sbError) {
+        setError(sbError.message);
+        throw sbError;
+      }
+      if (data.user) {
+        setUser(mapSupabaseUser(data.user));
+      }
+    } else {
+      // Mock flow
+      const mockUsers = JSON.parse(localStorage.getItem("mock_users") || "[]");
+      if (mockUsers.some((u: any) => u.email === email)) {
+        const err = new Error("User with this email already exists");
+        setError(err.message);
+        throw err;
+      }
+      const newId = Math.random().toString(36).substr(2, 9);
+      const newUser = { id: newId, email, password, name };
+      mockUsers.push(newUser);
+      localStorage.setItem("mock_users", JSON.stringify(mockUsers));
 
-    const { error: sbError } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          full_name: name,
-        },
-      },
-    });
-
-    if (sbError) {
-      setError(sbError.message);
-      throw sbError;
+      const profile: UserProfile = {
+        id: newId,
+        email,
+        name,
+        image: `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(name)}`,
+        provider: "email",
+      };
+      localStorage.setItem("mock_current_user", JSON.stringify(profile));
+      setUser(profile);
     }
   };
 
   const signOut = async () => {
     setError(null);
-    if (supabase) {
+    if (isSupabaseConfigured) {
       const { error: sbError } = await supabase.auth.signOut();
       if (sbError) {
         setError(sbError.message);
-        return;
       }
+    } else {
+      localStorage.removeItem("mock_current_user");
     }
     setUser(null);
     window.location.reload();
@@ -144,54 +180,58 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
 
   const signInWithSocial = async (providerName: "google" | "github") => {
     setError(null);
-    if (!supabase) {
-      const errMsg = "Supabase is not configured yet. Please add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to your env variables.";
-      setError(errMsg);
-      throw new Error(errMsg);
-    }
-
-    // Determine Redirect URL (Dynamic based on host, preferring impersio.me in prod/redirect scenarios)
-    const origin = window.location.origin;
-    let redirectTo = `${origin}/auth/callback`;
-    if (origin.includes("impersio.me")) {
-      redirectTo = "https://impersio.me/auth/callback";
-    }
-
-    const { error: sbError } = await supabase.auth.signInWithOAuth({
-      provider: providerName,
-      options: {
-        redirectTo,
-      },
-    });
-
-    if (sbError) {
-      setError(sbError.message);
-      throw sbError;
+    if (isSupabaseConfigured) {
+      const { error: sbError } = await supabase.auth.signInWithOAuth({
+        provider: providerName,
+        options: {
+          redirectTo: window.location.origin,
+        }
+      });
+      if (sbError) {
+        setError(sbError.message);
+        throw sbError;
+      }
+    } else {
+      // Mock Social login
+      const name = providerName === "google" ? "Google User" : "GitHub User";
+      const profile: UserProfile = {
+        id: `social_${providerName}_${Math.random().toString(36).substr(2, 9)}`,
+        email: `${providerName}_user@example.com`,
+        name,
+        image: `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(name)}`,
+        provider: providerName,
+      };
+      localStorage.setItem("mock_current_user", JSON.stringify(profile));
+      setUser(profile);
     }
   };
 
   const updateProfileName = async (newName: string) => {
     setError(null);
-    if (!supabase) {
-      setUser(prev => prev ? { 
-        ...prev, 
-        name: newName,
-        image: `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(newName)}`
-      } : null);
-      return;
-    }
+    if (isSupabaseConfigured) {
+      const { data, error: sbError } = await supabase.auth.updateUser({
+        data: { display_name: newName }
+      });
+      if (sbError) {
+        setError(sbError.message);
+        throw sbError;
+      }
+      if (data.user) {
+        setUser(mapSupabaseUser(data.user));
+      }
+    } else {
+      if (!user) return;
+      const updated = { ...user, name: newName, image: `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(newName)}` };
+      localStorage.setItem("mock_current_user", JSON.stringify(updated));
+      setUser(updated);
 
-    const { data, error: sbError } = await supabase.auth.updateUser({
-      data: { full_name: newName }
-    });
-
-    if (sbError) {
-      setError(sbError.message);
-      throw sbError;
-    }
-
-    if (data?.user) {
-      setUser(mapSupabaseUser(data.user));
+      // Update in registered mock users as well
+      const mockUsers = JSON.parse(localStorage.getItem("mock_users") || "[]");
+      const idx = mockUsers.findIndex((u: any) => u.id === user.id);
+      if (idx !== -1) {
+        mockUsers[idx].name = newName;
+        localStorage.setItem("mock_users", JSON.stringify(mockUsers));
+      }
     }
   };
 

@@ -3,6 +3,15 @@ import { motion } from "motion/react";
 import Hls from "hls.js";
 import { useAppAuth } from "./lib/supabase-service";
 import {
+  dbFetchHistory,
+  dbFetchDictionary,
+  dbSaveDictionaryItem,
+  dbDeleteDictionaryItem,
+  dbSaveHistoryItem,
+  dbDeleteHistoryItem,
+  dbClearHistory,
+} from "./lib/db-client";
+import {
   Mic,
   Copy,
   Download,
@@ -58,6 +67,7 @@ import DictionaryDrawer, { DictionaryItem } from "./components/DictionaryDrawer"
 import PricingSection from "./components/ui/pricing-section-4";
 import { Testimonials } from "./components/ui/twitter-testimonial-cards";
 import { DictationSession, ToneOption, TONE_OPTIONS } from "./types";
+import StatusPage from "./components/StatusPage";
 
 const marqueeLogos = [
   { name: "Procure", url: "https://svgl.app/library/preact.svg", gradient: "linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)" },
@@ -147,8 +157,12 @@ export default function App() {
     updateProfileName,
   } = useAppAuth();
 
-  const [page, setPage] = useState<"home" | "about">(
-    typeof window !== "undefined" && window.location.pathname === "/about" ? "about" : "home"
+  const [page, setPage] = useState<"home" | "about" | "workspace" | "status">(
+    typeof window !== "undefined" && window.location.pathname === "/status"
+      ? "status"
+      : typeof window !== "undefined" && window.location.pathname === "/about"
+      ? "about"
+      : "home"
   );
 
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -197,6 +211,10 @@ export default function App() {
       if (window.location.pathname !== "/about") {
         window.history.pushState({ page: "about" }, "", "/about");
       }
+    } else if (page === "status") {
+      if (window.location.pathname !== "/status") {
+        window.history.pushState({ page: "status" }, "", "/status");
+      }
     } else {
       if (window.location.pathname !== "/") {
         window.history.pushState({ page: "home" }, "", "/");
@@ -209,6 +227,8 @@ export default function App() {
     const handlePopState = () => {
       if (window.location.pathname === "/about") {
         setPage("about");
+      } else if (window.location.pathname === "/status") {
+        setPage("status");
       } else {
         setPage("home");
       }
@@ -445,13 +465,18 @@ export default function App() {
 
   const fetchHistory = async () => {
     try {
-      const res = await fetch("/api/history");
-      if (res.ok) {
-        const data = await res.json();
-        setSessions(data);
+      if (user) {
+        const fetchedSessions = await dbFetchHistory(user.id);
+        setSessions(fetchedSessions);
+        localStorage.setItem("ai_dictation_history", JSON.stringify(fetchedSessions));
+      } else {
+        const cached = localStorage.getItem("ai_dictation_history");
+        if (cached) {
+          setSessions(JSON.parse(cached));
+        }
       }
     } catch (err) {
-      console.error("Failed to load history from backend, falling back to local storage", err);
+      console.error("Failed to load history, falling back to local storage", err);
       const cached = localStorage.getItem("ai_dictation_history");
       if (cached) {
         setSessions(JSON.parse(cached));
@@ -461,27 +486,42 @@ export default function App() {
 
   const fetchDictionary = async () => {
     try {
-      const res = await fetch("/api/dictionary");
-      if (res.ok) {
-        const data = await res.json();
-        setDictionaryItems(data);
+      if (user) {
+        const fetchedItems = await dbFetchDictionary(user.id);
+        setDictionaryItems(fetchedItems);
+        localStorage.setItem("ai_dictation_dictionary", JSON.stringify(fetchedItems));
+      } else {
+        const cached = localStorage.getItem("ai_dictation_dictionary");
+        if (cached) {
+          setDictionaryItems(JSON.parse(cached));
+        }
       }
     } catch (err) {
-      console.error("Failed to load dictionary from backend", err);
+      console.error("Failed to load dictionary, falling back to local storage", err);
+      const cached = localStorage.getItem("ai_dictation_dictionary");
+      if (cached) {
+        setDictionaryItems(JSON.parse(cached));
+      }
     }
   };
 
   const addDictionaryItem = async (word: string, replaceWith?: string) => {
+    const itemId = `dict_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const newItem: DictionaryItem = {
+      id: itemId,
+      word,
+      replaceWith: replaceWith || "",
+    };
+
     try {
-      const res = await fetch("/api/dictionary", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ word, replaceWith })
-      });
-      if (res.ok) {
-        const newItem = await res.json();
-        setDictionaryItems(prev => [...prev, newItem]);
+      if (user) {
+        await dbSaveDictionaryItem(user.id, newItem);
       }
+      setDictionaryItems(prev => {
+        const updated = [...prev, newItem];
+        localStorage.setItem("ai_dictation_dictionary", JSON.stringify(updated));
+        return updated;
+      });
     } catch (err) {
       console.error("Failed to add dictionary item", err);
     }
@@ -489,12 +529,14 @@ export default function App() {
 
   const deleteDictionaryItem = async (id: string) => {
     try {
-      const res = await fetch(`/api/dictionary/${id}`, {
-        method: "DELETE"
-      });
-      if (res.ok) {
-        setDictionaryItems(prev => prev.filter(item => item.id !== id));
+      if (user) {
+        await dbDeleteDictionaryItem(user.id, id);
       }
+      setDictionaryItems(prev => {
+        const updated = prev.filter(item => item.id !== id);
+        localStorage.setItem("ai_dictation_dictionary", JSON.stringify(updated));
+        return updated;
+      });
     } catch (err) {
       console.error("Failed to delete dictionary item", err);
     }
@@ -502,29 +544,22 @@ export default function App() {
 
   const saveHistorySession = async (session: DictationSession) => {
     try {
-      const res = await fetch("/api/history", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(session)
-      });
-      if (res.ok) {
-        const saved = await res.json();
-        // Refresh local sessions list
-        setSessions((prev) => {
-          const updated = [...prev];
-          const idx = updated.findIndex((s) => s.id === saved.id);
-          if (idx > -1) {
-            updated[idx] = saved;
-          } else {
-            updated.unshift(saved);
-          }
-          localStorage.setItem("ai_dictation_history", JSON.stringify(updated));
-          return updated;
-        });
+      if (user) {
+        await dbSaveHistoryItem(user.id, session);
       }
+      setSessions((prev) => {
+        const updated = [...prev];
+        const idx = updated.findIndex((s) => s.id === session.id);
+        if (idx > -1) {
+          updated[idx] = session;
+        } else {
+          updated.unshift(session);
+        }
+        localStorage.setItem("ai_dictation_history", JSON.stringify(updated));
+        return updated;
+      });
     } catch (err) {
-      console.error("Failed to save history session to backend", err);
-      // Fallback local save
+      console.error("Failed to save history session", err);
       setSessions((prev) => {
         const updated = [...prev];
         const idx = updated.findIndex((s) => s.id === session.id);
@@ -889,16 +924,16 @@ export default function App() {
   const handleDeleteSession = async (id: string, e: MouseEvent) => {
     e.stopPropagation();
     try {
-      const res = await fetch(`/api/history/${id}`, { method: "DELETE" });
-      if (res.ok) {
-        setSessions((prev) => {
-          const updated = prev.filter((s) => s.id !== id);
-          localStorage.setItem("ai_dictation_history", JSON.stringify(updated));
-          return updated;
-        });
-        if (activeSessionId === id) {
-          handleClearWorkspace();
-        }
+      if (user) {
+        await dbDeleteHistoryItem(user.id, id);
+      }
+      setSessions((prev) => {
+        const updated = prev.filter((s) => s.id !== id);
+        localStorage.setItem("ai_dictation_history", JSON.stringify(updated));
+        return updated;
+      });
+      if (activeSessionId === id) {
+        handleClearWorkspace();
       }
     } catch (err) {
       console.error("Delete session failed", err);
@@ -909,13 +944,13 @@ export default function App() {
   const handleClearHistory = async () => {
     if (confirm("Are you sure you want to clear all history sessions? This is irreversible.")) {
       try {
-        const res = await fetch("/api/history", { method: "DELETE" });
-        if (res.ok) {
-          setSessions([]);
-          localStorage.removeItem("ai_dictation_history");
-          handleClearWorkspace();
-          setIsHistoryOpen(false);
+        if (user) {
+          await dbClearHistory(user.id);
         }
+        setSessions([]);
+        localStorage.removeItem("ai_dictation_history");
+        handleClearWorkspace();
+        setIsHistoryOpen(false);
       } catch (err) {
         console.error("Clear history failed", err);
       }
@@ -1260,7 +1295,8 @@ export default function App() {
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#1f1f2e05_1px,transparent_1px),linear-gradient(to_bottom,#1f1f2e05_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] pointer-events-none" />
 
         {/* Floating Capsule Navigation Bar */}
-        <div className="fixed left-0 right-0 z-50 px-4 top-4">
+        {page !== "dsbuddy" && page !== "status" && (
+          <div className="fixed left-0 right-0 z-50 px-4 top-4">
           <nav className="max-w-4xl mx-auto rounded-full border border-white/20 bg-white/10 backdrop-blur-xl shadow-xl shadow-black/50 px-6 py-2.5 flex items-center justify-between">
             {/* Left Brand */}
             <div 
@@ -1376,6 +1412,7 @@ export default function App() {
             </div>
           </nav>
         </div>
+        )}
 
         {/* Homepage Content */}
         {page === "home" && (
@@ -1886,8 +1923,14 @@ export default function App() {
           </section>
         )}
 
+        {/* Conditional Status Content */}
+        {page === "status" && (
+          <StatusPage onBack={() => setPage("home")} />
+        )}
+
         {/* Public Footer */}
-        <footer className="bg-[#0a0a0a] border-t border-zinc-900 pt-16 pb-8">
+        {page !== "status" && (
+          <footer className="bg-[#0a0a0a] border-t border-zinc-900 pt-16 pb-8">
           <div className="max-w-7xl mx-auto px-6">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
               {/* Column 1 */}
@@ -1921,6 +1964,7 @@ export default function App() {
                 <ul className="space-y-4">
                   <li><button onClick={() => { window.scrollTo(0, 0); setPage("home"); }} className="text-zinc-400 hover:text-zinc-50 transition-colors text-sm cursor-pointer">Home</button></li>
                   <li><button onClick={() => setPage("about")} className="text-zinc-400 hover:text-zinc-50 transition-colors text-sm cursor-pointer">About Us</button></li>
+                  <li><button onClick={() => setPage("status")} className="text-zinc-400 hover:text-zinc-50 transition-colors text-sm cursor-pointer">System Status</button></li>
                   <li><a href="#pricing" onClick={() => setPage("home")} className="text-zinc-400 hover:text-zinc-50 transition-colors text-sm cursor-pointer">Pricing</a></li>
                   <li><a href="#faq" onClick={() => setPage("home")} className="text-zinc-400 hover:text-zinc-50 transition-colors text-sm cursor-pointer">FAQ</a></li>
                 </ul>
@@ -2010,6 +2054,7 @@ export default function App() {
             </div>
           </div>
         </footer>
+        )}
 
         {/* Name Management Modal */}
         {showManageNameModal && (

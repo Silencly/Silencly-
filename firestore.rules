@@ -1,0 +1,70 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Default-deny catch-all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Global helpers
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // Helper to validate history schema
+    function isValidHistory(data) {
+      return data.keys().hasAll(['id', 'createdAt', 'title', 'rawText', 'polishedText', 'durationSeconds', 'userId'])
+        && data.keys().size() == 7
+        && data.id is string && data.id.size() <= 128
+        && data.createdAt is string && data.createdAt.size() <= 128
+        && data.title is string && data.title.size() <= 256
+        && data.rawText is string && data.rawText.size() <= 100000
+        && data.polishedText is string && data.polishedText.size() <= 100000
+        && data.durationSeconds is number
+        && data.userId is string && data.userId == request.auth.uid;
+    }
+
+    // Helper to validate dictionary schema
+    function isValidDictionary(data) {
+      return data.keys().hasAll(['id', 'word', 'replaceWith', 'userId'])
+        && data.keys().size() == 4
+        && data.id is string && data.id.size() <= 128
+        && data.word is string && data.word.size() <= 256
+        && data.replaceWith is string && data.replaceWith.size() <= 256
+        && data.userId is string && data.userId == request.auth.uid;
+    }
+
+    // History rules
+    match /history/{historyId} {
+      allow read, list: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow create: if isSignedIn() && isValidId(historyId) && isValidHistory(incoming()) && incoming().id == historyId;
+      allow update: if isSignedIn() && isValidId(historyId) && isValidHistory(incoming()) && isValidHistory(existing()) && incoming().userId == existing().userId;
+      allow delete: if isSignedIn() && existing().userId == request.auth.uid;
+    }
+
+    // Dictionary rules
+    match /dictionary/{dictionaryId} {
+      allow read, list: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow create: if isSignedIn() && isValidId(dictionaryId) && isValidDictionary(incoming()) && incoming().id == dictionaryId;
+      allow update: if isSignedIn() && isValidId(dictionaryId) && isValidDictionary(incoming()) && isValidDictionary(existing()) && incoming().userId == existing().userId;
+      allow delete: if isSignedIn() && existing().userId == request.auth.uid;
+    }
+  }
+}
