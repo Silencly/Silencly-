@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, MouseEvent, FormEvent, ChangeEvent, ReactN
 import { motion } from "motion/react";
 import Hls from "hls.js";
 import BudPage from "./components/BudPage";
-import HCaptcha from "@hcaptcha/react-hcaptcha";
+import AuditLogFooter from "./components/AuditLogFooter";
 import { useAppAuth } from "./lib/supabase-service";
 import {
   dbFetchHistory,
@@ -163,8 +163,6 @@ export default function App() {
     updateProfileName,
   } = useAppAuth();
 
-  const hcaptchaSiteKey = (import.meta as any).env.VITE_HCAPTCHA_SITEKEY || "10000000-ffff-ffff-ffff-ffffffffffff";
-
   const [page, setPage] = useState<"home" | "about" | "workspace" | "status" | "bud">(
     typeof window !== "undefined" && window.location.pathname === "/status"
       ? "status"
@@ -214,8 +212,6 @@ export default function App() {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [authMode, setAuthMode] = useState<"signin" | "signup">("signin");
-  const [captchaToken, setCaptchaToken] = useState("");
-  const hcaptchaRef = useRef<HCaptcha | null>(null);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -458,14 +454,11 @@ export default function App() {
       return;
     }
     try {
-      await signInWithEmail(authEmail, authPassword, captchaToken);
+      await signInWithEmail(authEmail, authPassword);
       setAuthEmail("");
       setAuthPassword("");
-      setCaptchaToken("");
-      hcaptchaRef.current?.resetCaptcha();
     } catch (err: any) {
-      hcaptchaRef.current?.resetCaptcha();
-      setCaptchaToken("");
+      // Handled by auth provider
     }
   };
 
@@ -477,12 +470,9 @@ export default function App() {
       return;
     }
     try {
-      await signUpWithEmail(authEmail, authPassword, fullName, captchaToken);
-      setCaptchaToken("");
-      hcaptchaRef.current?.resetCaptcha();
+      await signUpWithEmail(authEmail, authPassword, fullName);
     } catch (err: any) {
-      hcaptchaRef.current?.resetCaptcha();
-      setCaptchaToken("");
+      // Handled by auth provider
     }
   };
 
@@ -801,7 +791,7 @@ export default function App() {
       const transcribeRes = await fetch("/api/transcribe", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ audio: base64Audio, mimeType })
+        body: JSON.stringify({ audio: base64Audio, mimeType, email: user?.email })
       });
 
       let transcribedText = rawText; // Fallback to live browser Speech Recognition if available
@@ -831,7 +821,7 @@ export default function App() {
       const polishRes = await fetch("/api/polish", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text: transcribedText, tone: selectedTone })
+        body: JSON.stringify({ text: transcribedText, tone: selectedTone, email: user?.email })
       });
 
       let polishedResult = "";
@@ -880,7 +870,7 @@ export default function App() {
       const res = await fetch("/api/polish", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text: rawText, tone })
+        body: JSON.stringify({ text: rawText, tone, email: user?.email })
       });
 
       if (res.ok) {
@@ -1270,19 +1260,6 @@ export default function App() {
                     <p className="text-[11px] text-white/40 mt-1">Requires at least 8 symbols.</p>
                   )}
                 </div>
-
-                {isSupabaseConfigured && (
-                  <div className="flex justify-center py-2 h-auto">
-                    <HCaptcha
-                      ref={hcaptchaRef}
-                      sitekey={hcaptchaSiteKey}
-                      onVerify={(token) => setCaptchaToken(token)}
-                      onExpire={() => setCaptchaToken("")}
-                      onError={() => setCaptchaToken("")}
-                      theme="dark"
-                    />
-                  </div>
-                )}
 
                 <button
                   type="submit"
@@ -1989,6 +1966,7 @@ export default function App() {
         {page !== "status" && page !== "bud" && (
           <footer className="bg-[#0a0a0a] border-t border-zinc-900 pt-16 pb-8">
           <div className="max-w-7xl mx-auto px-6">
+            <AuditLogFooter user={user} />
             <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
               {/* Column 1 */}
               <div className="col-span-1 md:col-span-1">

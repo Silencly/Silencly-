@@ -24,6 +24,68 @@ const ai = new GoogleGenAI({
 app.use(express.json({ limit: "50mb" }));
 
 const HISTORY_FILE = path.join(process.cwd(), "history.json");
+const AUDIT_LOGS_FILE = path.join(process.cwd(), "audit_logs.json");
+
+// Helper to read audit logs safely
+function readAuditLogs(): any[] {
+  try {
+    if (fs.existsSync(AUDIT_LOGS_FILE)) {
+      return JSON.parse(fs.readFileSync(AUDIT_LOGS_FILE, "utf-8"));
+    }
+  } catch (error) {
+    console.error("Failed to read audit logs", error);
+  }
+  return [];
+}
+
+// Helper to write audit logs safely
+function writeAuditLogs(logs: any[]) {
+  try {
+    fs.writeFileSync(AUDIT_LOGS_FILE, JSON.stringify(logs, null, 2), "utf-8");
+  } catch (error) {
+    console.error("Failed to write audit logs", error);
+  }
+}
+
+// Resolve user email to authorized worker display name (Gemini, Anubhav, Daksh)
+function resolveActorName(email: string | undefined): string {
+  if (!email) return "Gemini";
+  const em = email.trim().toLowerCase();
+  if (em === "sapkotaanubhav91@gmail.com" || em === "gmanubhavsapkota@gmail.com" || em === "neurox919@gmail.com") {
+    return "Anubhav";
+  }
+  if (em === "dakshshetty506@gmail.com" || em === "s.impersio@gmail.com") {
+    return "Daksh";
+  }
+  return email.split("@")[0];
+}
+
+// Write a log entry
+function addAuditLog(actor: string, action: string, category: string, details?: string) {
+  const logs = readAuditLogs();
+  const newLog = {
+    id: "log_" + Date.now() + "_" + Math.random().toString(36).substr(2, 9),
+    timestamp: new Date().toISOString(),
+    actor: actor || "Gemini",
+    action,
+    category,
+    details: details || ""
+  };
+  logs.unshift(newLog); // newer first
+  if (logs.length > 500) {
+    logs.length = 500;
+  }
+  writeAuditLogs(logs);
+  return newLog;
+}
+
+const AUDIT_ALLOWED_EMAILS = [
+  "sapkotaanubhav91@gmail.com",
+  "gmanubhavsapkota@gmail.com",
+  "dakshshetty506@gmail.com",
+  "neurox919@gmail.com",
+  "s.impersio@gmail.com"
+];
 
 // Helper to read history sessions safely
 function readHistory(): any[] {
@@ -244,10 +306,54 @@ app.delete("/api/dictionary/:id", (req, res) => {
   }
 });
 
+// ==========================================
+// SYSTEM AUDIT & WORK ACTIVITY LOGS ENDPOINTS
+// ==========================================
+
+// GET Audit Logs (Requires authorized email)
+app.get("/api/audit-logs", (req, res) => {
+  try {
+    const { email } = req.query;
+    if (!email) {
+      return res.status(400).json({ error: "Email parameter is required." });
+    }
+    const cleanEmail = String(email).trim().toLowerCase();
+    if (!AUDIT_ALLOWED_EMAILS.includes(cleanEmail)) {
+      return res.status(403).json({ error: "Access Denied. You do not have permissions to view audit logs." });
+    }
+    const logs = readAuditLogs();
+    res.json({ logs });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message || "Failed to retrieve audit logs." });
+  }
+});
+
+// POST Audit Log (Manual or Programmatic entry, requires authorized email)
+app.post("/api/audit-logs", (req, res) => {
+  try {
+    const { email, actor, action, category, details } = req.body;
+    if (!email) {
+      return res.status(400).json({ error: "Email is required." });
+    }
+    const cleanEmail = String(email).trim().toLowerCase();
+    if (!AUDIT_ALLOWED_EMAILS.includes(cleanEmail)) {
+      return res.status(403).json({ error: "Access Denied. You do not have permissions to create audit logs." });
+    }
+    if (!actor || !action || !category) {
+      return res.status(400).json({ error: "Actor, action, and category are required." });
+    }
+    
+    const newLog = addAuditLog(actor, action, category, details);
+    res.json({ success: true, log: newLog });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message || "Failed to create audit log." });
+  }
+});
+
 // AI Text Polishing Endpoint using Gemini 3.5 Flash with fallback to Groq Llama 3.1
 app.post("/api/polish", async (req, res) => {
   try {
-    const { text, tone = "polished" } = req.body;
+    const { text, tone = "polished", email } = req.body;
     if (!text || text.trim() === "") {
       return res.json({ polishedText: "" });
     }
@@ -369,6 +475,7 @@ Output: "Remind me to buy groceries — specifically milk and eggs"`;
       console.log("Groq Llama 3.1 fallback text polishing successful!");
     }
 
+    addAuditLog(resolveActorName(email), `Polished audio transcript to ${tone} style using Gemini`, "Polishing", `Result length: ${polishedText.length} chars`);
     res.json({ polishedText });
   } catch (err: any) {
     console.error("Polishing text failed:", err);
@@ -379,7 +486,7 @@ Output: "Remind me to buy groceries — specifically milk and eggs"`;
 // AI Direct Audio Transcription Endpoint using AssemblyAI Universal 3.5 Pro
 app.post("/api/transcribe", async (req, res) => {
   try {
-    const { audio, mimeType } = req.body;
+    const { audio, mimeType, email } = req.body;
     if (!audio) {
       return res.status(400).json({ error: "Audio base64 data is required." });
     }
@@ -411,6 +518,7 @@ app.post("/api/transcribe", async (req, res) => {
 
         const textResult = (response.text || "").trim();
         console.log("Gemini 3.5 Flash transcription successful!");
+        addAuditLog(resolveActorName(email), "Transcribed audio using Gemini 3.5 Flash", "Transcription", `Length: ${textResult.length} chars`);
         return res.json({ text: textResult });
       } catch (geminiErr: any) {
         console.error("Gemini native transcription failed, falling back to AssemblyAI:", geminiErr);
@@ -520,6 +628,7 @@ app.post("/api/transcribe", async (req, res) => {
       throw new Error("AssemblyAI transcription timed out. Please try again.");
     }
 
+    addAuditLog(resolveActorName(email), "Transcribed audio using AssemblyAI Universal 3.5 Pro", "Transcription", `Length: ${text.length} chars`);
     res.json({ text });
   } catch (err: any) {
     console.error("Transcription failed:", err);
@@ -1155,7 +1264,7 @@ app.get("/api/composio/connected", async (req, res) => {
 // Bud Chat Endpoint using Qwen 3.6 via Groq for authentic AI-powered worker operations
 app.post("/api/bud/chat", async (req, res) => {
   try {
-    const { message, history = [] } = req.body;
+    const { message, history = [], email } = req.body;
     if (!message) {
       return res.status(400).json({ error: "Message is required." });
     }
@@ -1333,6 +1442,7 @@ Yes, I can certainly structure that data set for you!`;
       console.log("Gemini fallback successful!");
     }
 
+    addAuditLog(resolveActorName(email), `Bud AI answered conversation: "${message.substring(0, 45)}..."`, "Chatbot", `Reply length: ${reply.length} chars`);
     res.json({ reply });
   } catch (err: any) {
     console.error("Bud AI Chat failed:", err);

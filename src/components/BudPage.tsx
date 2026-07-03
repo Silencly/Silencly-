@@ -170,7 +170,8 @@ export default function BudPage({ onBack, user, onAuthClick }: BudPageProps) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           message: text,
-          history: messages.map(m => ({ role: m.role, content: m.content }))
+          history: messages.map(m => ({ role: m.role, content: m.content })),
+          email: activeUser?.email
         })
       });
 
