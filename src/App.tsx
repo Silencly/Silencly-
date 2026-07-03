@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, MouseEvent, FormEvent, ChangeEvent, ReactNode } from "react";
 import { motion } from "motion/react";
 import Hls from "hls.js";
+import BudPage from "./components/BudPage";
 import { useAppAuth } from "./lib/supabase-service";
 import {
   dbFetchHistory,
@@ -87,6 +88,10 @@ const faqData = {
       a: "Traditional voice-to-text transcribes your words literally, keeping all filler words, grammar mistakes, and disjointed pacing. Silencly acts as an real-time professional editor—listening to your raw thoughts and instantly rewriting them into perfectly organized bullet points, clean paragraphs, or checklists."
     },
     {
+      q: "What is Bud?",
+      a: "Bud is an intelligent AI knowledge companion app under the Impersio brand, integrating seamlessly with Silencly to help you store, categorize, and recall your polished dictations as an interactive personal knowledge base."
+    },
+    {
       q: "Who is this for?",
       a: "For creators, researchers, professionals, and anyone who thinks faster than they type. If you regularly use scratchpads or voice memos to braindump unorganized thoughts, Silencly will save you hours of editing."
     },
@@ -157,11 +162,13 @@ export default function App() {
     updateProfileName,
   } = useAppAuth();
 
-  const [page, setPage] = useState<"home" | "about" | "workspace" | "status">(
+  const [page, setPage] = useState<"home" | "about" | "workspace" | "status" | "bud">(
     typeof window !== "undefined" && window.location.pathname === "/status"
       ? "status"
       : typeof window !== "undefined" && window.location.pathname === "/about"
       ? "about"
+      : typeof window !== "undefined" && (window.location.pathname === "/bud" || window.location.pathname === "/dsbuddy")
+      ? "bud"
       : "home"
   );
 
@@ -215,6 +222,10 @@ export default function App() {
       if (window.location.pathname !== "/status") {
         window.history.pushState({ page: "status" }, "", "/status");
       }
+    } else if (page === "bud") {
+      if (window.location.pathname !== "/bud") {
+        window.history.pushState({ page: "bud" }, "", "/bud");
+      }
     } else {
       if (window.location.pathname !== "/") {
         window.history.pushState({ page: "home" }, "", "/");
@@ -229,6 +240,8 @@ export default function App() {
         setPage("about");
       } else if (window.location.pathname === "/status") {
         setPage("status");
+      } else if (window.location.pathname === "/bud" || window.location.pathname === "/dsbuddy") {
+        setPage("bud");
       } else {
         setPage("home");
       }
@@ -269,7 +282,8 @@ export default function App() {
   useEffect(() => {
     if (user) {
       setShowAuthModal(false);
-      setPage("home");
+      // Only reset page to home if we aren't already on one of the inner routed sections on initial load
+      setPage((prev) => (prev === "bud" || prev === "about" || prev === "status" || prev === "workspace" ? prev : "home"));
     }
   }, [user]);
 
@@ -1295,7 +1309,7 @@ export default function App() {
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#1f1f2e05_1px,transparent_1px),linear-gradient(to_bottom,#1f1f2e05_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] pointer-events-none" />
 
         {/* Floating Capsule Navigation Bar */}
-        {page !== "dsbuddy" && page !== "status" && (
+        {page !== "bud" && page !== "status" && (
           <div className="fixed left-0 right-0 z-50 px-4 top-4">
           <nav className="max-w-4xl mx-auto rounded-full border border-white/20 bg-white/10 backdrop-blur-xl shadow-xl shadow-black/50 px-6 py-2.5 flex items-center justify-between">
             {/* Left Brand */}
@@ -1312,6 +1326,7 @@ export default function App() {
 
             {/* Center Navigation Links */}
             <div className="hidden md:flex items-center gap-8 text-sm font-semibold text-white/80">
+              <a href="/bud" onClick={(e) => { e.preventDefault(); setPage("bud"); }} className="hover:text-white transition-colors">Bud</a>
               <a href="#pricing" onClick={() => setPage("home")} className="hover:text-white transition-colors">Pricing</a>
               <a href="#faq" onClick={() => setPage("home")} className="hover:text-white transition-colors">FAQ</a>
               {user && (
@@ -1937,8 +1952,13 @@ export default function App() {
           <StatusPage onBack={() => setPage("home")} />
         )}
 
+        {/* Bud AI Worker Dashboard */}
+        {page === "bud" && (
+          <BudPage onBack={() => setPage("home")} user={user} onAuthClick={() => { setAuthMode("signin"); setShowAuthModal(true); }} />
+        )}
+
         {/* Public Footer */}
-        {page !== "status" && (
+        {page !== "status" && page !== "bud" && (
           <footer className="bg-[#0a0a0a] border-t border-zinc-900 pt-16 pb-8">
           <div className="max-w-7xl mx-auto px-6">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
@@ -1974,6 +1994,7 @@ export default function App() {
                   <li><button onClick={() => { window.scrollTo(0, 0); setPage("home"); }} className="text-zinc-400 hover:text-zinc-50 transition-colors text-sm cursor-pointer">Home</button></li>
                   <li><button onClick={() => setPage("about")} className="text-zinc-400 hover:text-zinc-50 transition-colors text-sm cursor-pointer">About Us</button></li>
                   <li><button onClick={() => setPage("status")} className="text-zinc-400 hover:text-zinc-50 transition-colors text-sm cursor-pointer">System Status</button></li>
+                  <li><a href="/bud" onClick={(e) => { e.preventDefault(); setPage("bud"); }} className="text-zinc-400 hover:text-zinc-50 transition-colors text-sm cursor-pointer">Bud</a></li>
                   <li><a href="#pricing" onClick={() => setPage("home")} className="text-zinc-400 hover:text-zinc-50 transition-colors text-sm cursor-pointer">Pricing</a></li>
                   <li><a href="#faq" onClick={() => setPage("home")} className="text-zinc-400 hover:text-zinc-50 transition-colors text-sm cursor-pointer">FAQ</a></li>
                 </ul>

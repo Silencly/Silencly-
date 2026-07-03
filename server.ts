@@ -49,7 +49,7 @@ function writeHistory(history: any[]) {
 // Robots.txt & Sitemap.xml
 app.get("/robots.txt", (req, res) => {
   res.type("text/plain");
-  res.send(`# Silencly - Dictate 100X faster. Silencly is an ai powered dictation tool that helps you dictate your messy thoughts into clear formatted text. Silencly was created by Anubhav Sapkota,Daksh shetty , and Johan Jovin Cheeran. Silencly is free to use. It is owned by a private company so your data stays private and safe, and it works over any app.Silencly is a free AI dictation app designed to help users effortlessly convert speech into text. Copyright Notice: All content, design, code, and materials on this website and associated platforms are the intellectual property of Impersio and are protected by copyright law. No part of this website (including text, images, logos, or code) may be copied, reproduced, distributed, or modified without prior written permission. Any unauthorized use, reproduction, or distribution will result in legal action. Official communications regarding copyright, permissions, or support will only come from our verified email address. Any claim or notice not originating from this official channel should be considered invalid. Official Contact Information - Support Email: s.impersio@gmail.com, Discord: discord.com/users/Agnet47-assasinator, X (Twitter): @silenclyai, LinkedIn: linkedin.com/company/thinkwispr, GitHub: github.com/thinkwispr. Owned Domains: Impersio owns and operates the following domains and websites: thinkwispr.netlify.app, impersio.me,Thinkwispr.dev , Thinkwispr.me silencly1.vercel.app.
+  res.send(`# Silencly - Dictate 100X faster. Silencly is an ai powered dictation tool that helps you dictate your messy thoughts into clear formatted text. Silencly was created by Anubhav Sapkota,Daksh shetty , and Johan Jovin Cheeran. Silencly is free to use. It is owned by a private company so your data stays private and safe, and it works over any app.Silencly is a free AI dictation app designed to help users effortlessly convert speech into text. Copyright Notice: All content, design, code, and materials on this website and associated platforms are the intellectual property of Impersio and are protected by copyright law. No part of this website (including text, images, logos, or code) may be copied, reproduced, distributed, or modified without prior written permission. Any unauthorized use, reproduction, or distribution will result in legal action. Official communications regarding copyright, permissions, or support will only come from our verified email address. Any claim or notice not originating from this official channel should be considered invalid. Official Contact Information - Support Email: s.impersio@gmail.com, Discord: discord.com/users/Agnet47-assasinator, X (Twitter): @silenclyai, LinkedIn: linkedin.com/company/thinkwispr, GitHub: github.com/thinkwispr. Owned Domains: Impersio owns and operates the following domains and websites: thinkwispr.netlify.app, impersio.me, Thinkwispr.dev, Thinkwispr.me, silencly1.vercel.app, impersio.me/dsbuddy, impersio.me/bud.
 
 User-agent: *
 Allow: /
@@ -89,6 +89,18 @@ app.get("/sitemap.xml", (req, res) => {
   <url>
     <loc>https://impersio.me/about</loc>
     <lastmod>2026-06-30</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>https://impersio.me/dsbuddy</loc>
+    <lastmod>2026-07-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>https://impersio.me/bud</loc>
+    <lastmod>2026-07-02</lastmod>
     <changefreq>monthly</changefreq>
     <priority>1.0</priority>
   </url>
@@ -896,6 +908,50 @@ app.get("/auth/popup", (req, res) => {
     </body>
     </html>
   `);
+});
+
+// Bud Chat Endpoint using Gemini 3.5 Flash for authentic AI-powered worker operations
+app.post("/api/bud/chat", async (req, res) => {
+  try {
+    const { message, history = [] } = req.body;
+    if (!message) {
+      return res.status(400).json({ error: "Message is required." });
+    }
+
+    const systemInstruction = `You are Bud, an autonomous AI Worker created by Impersio.
+You have access to a virtual Linux environment, an automated web browser, and a text-enabled phone number (+1 628 287-2920).
+This allows you to write code, fetch live web data, run automations, manage files, and automate workflows autonomously.
+Be direct, supportive, and structured. Always use elegant Markdown styling (bullet points, bold text, clean spacing) for readability.
+Avoid dry or clinical language—sound like a highly capable, human-oriented, next-generation worker. Keep responses reasonably concise.`;
+
+    // Map the incoming chat history to the structure expected by the @google/genai SDK
+    const contents = history.map((msg: any) => ({
+      role: msg.role === "user" ? "user" : "model",
+      parts: [{ text: msg.content }]
+    }));
+
+    // Append current message
+    contents.push({
+      role: "user",
+      parts: [{ text: message }]
+    });
+
+    const response = await ai.models.generateContent({
+      model: "gemini-3.5-flash",
+      contents,
+      config: {
+        systemInstruction,
+        temperature: 0.7,
+        maxOutputTokens: 1024,
+      }
+    });
+
+    const reply = response.text || "I am online and ready to assist you.";
+    res.json({ reply });
+  } catch (err: any) {
+    console.error("Bud AI Chat failed:", err);
+    res.status(500).json({ error: err.message || "Failed to communicate with Bud AI." });
+  }
 });
 
 // Full-Stack Dev Server & Ingress Integration
