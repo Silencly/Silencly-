@@ -384,6 +384,40 @@ app.post("/api/transcribe", async (req, res) => {
       return res.status(400).json({ error: "Audio base64 data is required." });
     }
 
+    // Try Gemini 3.5 Flash first: it is native, extremely fast, highly accurate, and supports custom dictionary natively
+    if (process.env.GEMINI_API_KEY) {
+      try {
+        console.log("Attempting native audio transcription using Gemini 3.5 Flash...");
+        
+        let promptText = "Please transcribe the audio exactly as spoken. Do not add any extra commentary, explanations, or headers. If there is no clear speech, return an empty response.";
+        const dict = readDictionary();
+        if (dict.length > 0) {
+          promptText += "\n\nCRITICAL SPELLING DICTIONARY:\nPlease correct any phonetic approximations or spelling of the following words/phrases to match these exact spellings:\n" + 
+            dict.map((item: any) => `- "${item.word}" -> "${item.replaceWith || item.word}"`).join("\n");
+        }
+
+        const response = await ai.models.generateContent({
+          model: "gemini-3.5-flash",
+          contents: [
+            {
+              inlineData: {
+                data: audio,
+                mimeType: mimeType || "audio/webm"
+              }
+            },
+            { text: promptText }
+          ]
+        });
+
+        const textResult = (response.text || "").trim();
+        console.log("Gemini 3.5 Flash transcription successful!");
+        return res.json({ text: textResult });
+      } catch (geminiErr: any) {
+        console.error("Gemini native transcription failed, falling back to AssemblyAI:", geminiErr);
+      }
+    }
+
+    console.log("Using AssemblyAI for transcription fallback...");
     const apiKey = process.env.ASSEMBLYAI_API_KEY || "8c7d46c2a0ca4c3bacf169ca9d4b0f79";
     if (!apiKey) {
       return res.status(500).json({ error: "ASSEMBLYAI_API_KEY environment variable is missing on the server. Please check your Secrets settings." });
@@ -488,8 +522,8 @@ app.post("/api/transcribe", async (req, res) => {
 
     res.json({ text });
   } catch (err: any) {
-    console.error("AssemblyAI transcription failed:", err);
-    res.status(500).json({ error: err.message || "Failed to transcribe audio using AssemblyAI Universal 3.5 Pro." });
+    console.error("Transcription failed:", err);
+    res.status(500).json({ error: err.message || "Failed to transcribe audio." });
   }
 });
 
@@ -1130,7 +1164,16 @@ app.post("/api/bud/chat", async (req, res) => {
 You have access to a virtual Linux environment, an automated web browser, and a text-enabled phone number (+1 628 287-2920).
 This allows you to write code, fetch live web data, run automations, manage files, and automate workflows autonomously.
 Be direct, supportive, and structured. Always use elegant Markdown styling (bullet points, bold text, clean spacing) for readability.
-Avoid dry or clinical language—sound like a highly capable, human-oriented, next-generation worker. Keep responses reasonably concise.`;
+Avoid dry or clinical language—sound like a highly capable, human-oriented, next-generation worker. Keep responses reasonably concise.
+
+CRITICAL: For logical, analytical, or multi-step questions, you must occasionally display your internal step-by-step reasoning or technical design plan wrapped inside "<think>" and "</think>" tags at the absolute beginning of your reply.
+Example:
+<think>
+1. Evaluate user request for data structure integration.
+2. Formulate optimized steps to parse files.
+3. Outline final response.
+</think>
+Yes, I can certainly structure that data set for you!`;
 
     const groqApiKey = process.env.GROQ_API_KEY || "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";
     let reply = "";

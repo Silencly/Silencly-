@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@400;500;600&family=Instrument+Sans:ital,wght@0,400..700;1,400..700&family=Instrument+Serif:ital@0;1&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@400;500;600&family=Instrument+Sans:ital,wght@0,400..700;1,400..700&family=Instrument+Serif:ital@0;1&family=Plus+Jakarta+Sans:ital,wght@0,400..800;1,400..800&display=swap');
 @import "tailwindcss";
 
 @theme {
@@ -6,6 +6,7 @@
   --font-display: "Outfit", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
   --font-serif: "Instrument Serif", Georgia, serif;
+  --font-jakarta: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
   --color-brand-gray: #1A1A1A;
   --color-sparkles-color: var(--sparkles-color);
   --color-gradient-color: var(--gradient-color);
@@ -23,6 +24,13 @@
 
 body {
   @apply font-sans bg-[#000000] text-[#ffffff] antialiased;
+}
+
+/* Custom Cursor for computer users (pointer devices) */
+@media (pointer: fine) {
+  html, body, button, a, [role="button"], select, label, input[type="button"], input[type="submit"], iframe {
+    cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='36' height='36' viewBox='0 0 36 36' fill='none'><path d='M4 4L8 26L15 18L26 17Z' fill='white' stroke='black' stroke-width='3' stroke-linejoin='round'/></svg>") 4 4, auto !important;
+  }
 }
 
 /* Custom fade transitions for output panels */
