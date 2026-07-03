@@ -2,7 +2,6 @@ import { useState, useEffect, useRef, MouseEvent, FormEvent, ChangeEvent, ReactN
 import { motion } from "motion/react";
 import Hls from "hls.js";
 import BudPage from "./components/BudPage";
-import AuditLogFooter from "./components/AuditLogFooter";
 import { useAppAuth } from "./lib/supabase-service";
 import {
   dbFetchHistory,
@@ -1966,7 +1965,6 @@ export default function App() {
         {page !== "status" && page !== "bud" && (
           <footer className="bg-[#0a0a0a] border-t border-zinc-900 pt-16 pb-8">
           <div className="max-w-7xl mx-auto px-6">
-            <AuditLogFooter user={user} />
             <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
               {/* Column 1 */}
               <div className="col-span-1 md:col-span-1">
