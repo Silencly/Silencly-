@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, MouseEvent, FormEvent, ChangeEvent, ReactN
 import { motion } from "motion/react";
 import Hls from "hls.js";
 import BudPage from "./components/BudPage";
+import HCaptcha from "@hcaptcha/react-hcaptcha";
 import { useAppAuth } from "./lib/supabase-service";
 import {
   dbFetchHistory,
@@ -162,6 +163,8 @@ export default function App() {
     updateProfileName,
   } = useAppAuth();
 
+  const hcaptchaSiteKey = (import.meta as any).env.VITE_HCAPTCHA_SITEKEY || "10000000-ffff-ffff-ffff-ffffffffffff";
+
   const [page, setPage] = useState<"home" | "about" | "workspace" | "status" | "bud">(
     typeof window !== "undefined" && window.location.pathname === "/status"
       ? "status"
@@ -211,6 +214,8 @@ export default function App() {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [authMode, setAuthMode] = useState<"signin" | "signup">("signin");
+  const [captchaToken, setCaptchaToken] = useState("");
+  const hcaptchaRef = useRef<HCaptcha | null>(null);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -453,10 +458,15 @@ export default function App() {
       return;
     }
     try {
-      await signInWithEmail(authEmail, authPassword);
+      await signInWithEmail(authEmail, authPassword, captchaToken);
       setAuthEmail("");
       setAuthPassword("");
-    } catch (err) {}
+      setCaptchaToken("");
+      hcaptchaRef.current?.resetCaptcha();
+    } catch (err: any) {
+      hcaptchaRef.current?.resetCaptcha();
+      setCaptchaToken("");
+    }
   };
 
   const handleEmailSignUp = async (e: FormEvent) => {
@@ -467,8 +477,13 @@ export default function App() {
       return;
     }
     try {
-      await signUpWithEmail(authEmail, authPassword, fullName);
-    } catch (err) {}
+      await signUpWithEmail(authEmail, authPassword, fullName, captchaToken);
+      setCaptchaToken("");
+      hcaptchaRef.current?.resetCaptcha();
+    } catch (err: any) {
+      hcaptchaRef.current?.resetCaptcha();
+      setCaptchaToken("");
+    }
   };
 
   const openOAuthPopup = async (provider: string) => {
@@ -1255,6 +1270,19 @@ export default function App() {
                     <p className="text-[11px] text-white/40 mt-1">Requires at least 8 symbols.</p>
                   )}
                 </div>
+
+                {isSupabaseConfigured && (
+                  <div className="flex justify-center py-2 h-auto">
+                    <HCaptcha
+                      ref={hcaptchaRef}
+                      sitekey={hcaptchaSiteKey}
+                      onVerify={(token) => setCaptchaToken(token)}
+                      onExpire={() => setCaptchaToken("")}
+                      onError={() => setCaptchaToken("")}
+                      theme="dark"
+                    />
+                  </div>
+                )}
 
                 <button
                   type="submit"

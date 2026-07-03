@@ -15,8 +15,8 @@ interface AuthContextType {
   error: string | null;
   setError: (err: string | null) => void;
   isSupabaseConfigured: boolean;
-  signInWithEmail: (email: string, password: string) => Promise<void>;
-  signUpWithEmail: (email: string, password: string, name: string) => Promise<void>;
+  signInWithEmail: (email: string, password: string, captchaToken?: string) => Promise<void>;
+  signUpWithEmail: (email: string, password: string, name: string, captchaToken?: string) => Promise<void>;
   signOut: () => Promise<void>;
   signInWithSocial: (provider: "google" | "github") => Promise<void>;
   updateProfileName: (name: string) => Promise<void>;
@@ -85,12 +85,13 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
     }
   }, []);
 
-  const signInWithEmail = async (email: string, password: string) => {
+  const signInWithEmail = async (email: string, password: string, captchaToken?: string) => {
     setError(null);
     if (isSupabaseConfigured) {
       const { data, error: sbError } = await supabase.auth.signInWithPassword({
         email,
         password,
+        options: captchaToken ? { captchaToken } : undefined,
       });
       if (sbError) {
         setError(sbError.message);
@@ -120,13 +121,14 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
     }
   };
 
-  const signUpWithEmail = async (email: string, password: string, name: string) => {
+  const signUpWithEmail = async (email: string, password: string, name: string, captchaToken?: string) => {
     setError(null);
     if (isSupabaseConfigured) {
       const { data, error: sbError } = await supabase.auth.signUp({
         email,
         password,
         options: {
+          captchaToken,
           data: {
             display_name: name,
           }
