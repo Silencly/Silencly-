@@ -5,6 +5,7 @@ import express from "express";
 import path from "path";
 import fs from "fs";
 import { GoogleGenAI } from "@google/genai";
+import { Composio } from "@composio/core";
 
 const app = express();
 const PORT = 3000;
@@ -920,45 +921,36 @@ app.post("/api/composio/connect", async (req, res) => {
 
     const composioKey = process.env.COMPOSIO_API_KEY;
     const resolvedEntityId = entityId || "default_developer_user";
-    const redirectUrl = req.headers.referer || "http://localhost:3000";
+    const host = req.headers.host || "localhost:3000";
+    const protocol = req.headers["x-forwarded-proto"] || "http";
+    const callbackUrl = `${protocol}://${host}/api/composio/callback?appName=${encodeURIComponent(appName)}`;
 
-    // If API key is present, try to hit the official Composio REST API
+    // If API key is present, try to hit the official Composio REST API via SDK
     if (composioKey && composioKey !== "comp_test_key_placeholder") {
       try {
-        console.log(`Initiating real Composio connection for entity ${resolvedEntityId} with app ${appName}`);
-        const response = await fetch("https://api.composio.dev/v1/active-connectors", {
-          method: "POST",
-          headers: {
-            "x-api-key": composioKey,
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            appName,
-            entityId: resolvedEntityId,
-            redirectUrl
-          })
+        console.log(`Initiating real Composio connection for user ${resolvedEntityId} with toolkit ${appName}`);
+        const composio = new Composio({ apiKey: composioKey });
+        const session = await composio.create(resolvedEntityId);
+        const connectionRequest = await session.authorize(appName, {
+          callbackUrl: callbackUrl
         });
 
-        if (response.ok) {
-          const data: any = await response.json();
-          console.log("Composio API Response successful:", data);
+        if (connectionRequest && connectionRequest.redirectUrl) {
+          console.log("Composio SDK Authorize successful:", connectionRequest.redirectUrl);
           return res.json({
             isReal: true,
-            redirectUrl: data.redirectUrl || data.url,
-            connectionStatus: data.connectionStatus || "INITIATED",
+            redirectUrl: connectionRequest.redirectUrl,
+            connectionStatus: "INITIATED",
             message: "Successfully generated official Composio connection flow."
           });
-        } else {
-          const errText = await response.text();
-          console.warn(`Composio API returned error status ${response.status}: ${errText}`);
         }
-      } catch (err) {
-        console.error("Failed to query Composio API:", err);
+      } catch (err: any) {
+        console.error("Failed to query Composio SDK:", err);
       }
     }
 
     // Elegant fallback: Branded Sandbox Simulator
-    // Generates a mock popup link that runs a simulated oauth process and redirects back to the main app
+    const redirectUrl = req.headers.referer || `${protocol}://${host}/`;
     const simulateUrl = `/composio/simulate-auth?appName=${encodeURIComponent(appName)}&entityId=${encodeURIComponent(resolvedEntityId)}&redirect=${encodeURIComponent(redirectUrl)}`;
     
     return res.json({
@@ -1057,6 +1049,73 @@ app.get("/composio/simulate-auth", (req, res) => {
     </body>
     </html>
   `);
+});
+
+// Composio Connection Callback Endpoint
+app.get("/api/composio/callback", (req, res) => {
+  const { status, connected_account_id, appName } = req.query;
+  res.send(`
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8">
+      <title>Authentication Complete</title>
+      <script src="https://cdn.tailwindcss.com"></script>
+      <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+      <style>
+        body { font-family: 'Inter', sans-serif; }
+      </style>
+    </head>
+    <body class="bg-zinc-50 flex items-center justify-center min-h-screen p-6">
+      <div class="bg-white border border-zinc-200 rounded-3xl p-8 max-w-sm w-full shadow-xl text-center space-y-4">
+        <div class="w-12 h-12 bg-green-500 text-white rounded-2xl flex items-center justify-center mx-auto text-xl font-bold shadow-sm">
+          ✓
+        </div>
+        <h1 class="text-xl font-bold text-zinc-900">Connection Successful</h1>
+        <p class="text-xs text-zinc-500 leading-relaxed">Your account has been securely connected to Bud. This window will close automatically.</p>
+      </div>
+      <script>
+        if (window.opener) {
+          window.opener.postMessage({ 
+            type: 'COMPOSIO_AUTH_SUCCESS', 
+            appName: '${appName || ""}',
+            status: '${status || "success"}',
+            connectedAccountId: '${connected_account_id || ""}'
+          }, '*');
+        }
+        setTimeout(() => {
+          window.close();
+        }, 1500);
+      </script>
+    </body>
+    </html>
+  `);
+});
+
+// Endpoint to fetch active connected toolkits for a user
+app.get("/api/composio/connected", async (req, res) => {
+  try {
+    const entityId = req.query.entityId || "default_developer_user";
+    const composioKey = process.env.COMPOSIO_API_KEY;
+
+    if (!composioKey || composioKey === "comp_test_key_placeholder") {
+      return res.json({ connectedApps: [] });
+    }
+
+    console.log(`Fetching active connections for user: ${entityId}`);
+    const composio = new Composio({ apiKey: composioKey });
+    const session = await composio.create(String(entityId));
+    const toolkits = await session.toolkits({ isConnected: true });
+
+    const connectedSlugs = toolkits.items
+      .filter((t: any) => t.connection?.is_active || t.connection?.connectedAccount)
+      .map((t: any) => t.slug);
+
+    return res.json({ connectedApps: connectedSlugs });
+  } catch (err: any) {
+    console.error("Failed to list connected apps:", err);
+    res.status(500).json({ error: err.message || "Failed to retrieve connected apps" });
+  }
 });
 
 // Bud Chat Endpoint using Qwen 3.6 via Groq for authentic AI-powered worker operations

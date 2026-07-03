@@ -58,10 +58,7 @@ export default function BudPage({ onBack, user, onAuthClick }: BudPageProps) {
   const activeUser = auth?.user || user;
 
   // Local onboarding states
-  const [onboardingCompleted, setOnboardingCompleted] = useState<boolean>(() => {
-    const email = auth?.user?.email || user?.email || "anonymous";
-    return localStorage.getItem(`bud_onboarding_done_${email}`) === "true";
-  });
+  const [onboardingCompleted, setOnboardingCompleted] = useState<boolean>(true);
   
   const [onboardingStep, setOnboardingStep] = useState<"auth" | "name" | "apps" | "plans">(() => {
     return (auth?.user || user) ? "name" : "auth";
@@ -91,13 +88,7 @@ export default function BudPage({ onBack, user, onAuthClick }: BudPageProps) {
 
   // Sync completion flag if current logged in user changes
   useEffect(() => {
-    if (activeUser) {
-      const isDone = localStorage.getItem(`bud_onboarding_done_${activeUser.email}`) === "true";
-      setOnboardingCompleted(isDone);
-    } else {
-      setOnboardingCompleted(false);
-      setOnboardingStep("auth");
-    }
+    setOnboardingCompleted(true);
   }, [activeUser]);
 
   const [activeTab, setActiveTab] = useState<"chat" | "skills" | "automations" | "personalization" | "models">("chat");
@@ -398,6 +389,26 @@ export default function BudPage({ onBack, user, onAuthClick }: BudPageProps) {
     window.addEventListener("message", handleMessage);
     return () => window.removeEventListener("message", handleMessage);
   }, []);
+
+  // Fetch active connected apps on mount or activeUser change
+  useEffect(() => {
+    if (!activeUser) return;
+    const fetchConnectedApps = async () => {
+      try {
+        const entityId = activeUser.id || activeUser.email || "anonymous_dev";
+        const res = await fetch(`/api/composio/connected?entityId=${encodeURIComponent(entityId)}`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.connectedApps) {
+            setConnectedApps(data.connectedApps);
+          }
+        }
+      } catch (err) {
+        console.error("Failed to load connected apps from backend:", err);
+      }
+    };
+    fetchConnectedApps();
+  }, [activeUser]);
 
   const handleConnectApp = async (appId: string) => {
     if (connectedApps.includes(appId)) return;
@@ -1067,6 +1078,58 @@ export default function BudPage({ onBack, user, onAuthClick }: BudPageProps) {
                       <p className="text-sm text-zinc-600 leading-relaxed">
                         Skills are active functional blocks that allow Bud to interact with external environments. These include reading web pages, formatting spreadsheets, generating visual models, and scraping directories.
                       </p>
+
+                      <div className="space-y-3 pt-3">
+                        <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400">Connected & Available Apps</h3>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-h-[360px] overflow-y-auto pr-1">
+                          {appsList.map((app) => {
+                            const isConnected = connectedApps.includes(app.id);
+                            const isConnecting = connectingApp === app.id;
+                            const Icon = app.icon;
+                            return (
+                              <div 
+                                key={app.id}
+                                className={`border p-4 rounded-2xl flex items-start gap-3.5 transition-all ${isConnected ? "bg-zinc-50/50 border-zinc-300" : "bg-white border-zinc-200"}`}
+                              >
+                                <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border ${app.color}`}>
+                                  <Icon className="w-5 h-5" />
+                                </div>
+                                
+                                <div className="flex-1 min-w-0 text-left">
+                                  <div className="flex items-center justify-between">
+                                    <span className="text-xs font-bold text-zinc-950">{app.name}</span>
+                                    {isConnected && (
+                                      <span className="text-[9px] font-mono bg-emerald-50 text-emerald-600 border border-emerald-100 rounded-md px-1.5 py-0.5 font-bold flex items-center gap-0.5">
+                                        <Check className="w-2.5 h-2.5" />
+                                        Active
+                                      </span>
+                                    )}
+                                  </div>
+                                  <p className="text-[10px] text-zinc-500 leading-relaxed mt-1 truncate">{app.desc}</p>
+                                  
+                                  <button
+                                    onClick={() => handleConnectApp(app.id)}
+                                    disabled={isConnected || isConnecting}
+                                    className={`mt-2 text-[10px] font-bold px-3 py-1.5 rounded-lg transition-all ${
+                                      isConnected 
+                                        ? "bg-zinc-100 text-zinc-400 cursor-not-allowed" 
+                                        : isConnecting 
+                                        ? "bg-zinc-50 text-zinc-500 cursor-wait animate-pulse" 
+                                        : "bg-zinc-950 hover:bg-zinc-800 text-white cursor-pointer"
+                                    }`}
+                                  >
+                                    {isConnecting ? "Securing link..." : isConnected ? "Connected" : "Connect App"}
+                                  </button>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+                      <div className="h-px bg-zinc-200 my-4" />
+
+                      <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400">Core Capabilities</h3>
                       <div className="grid grid-cols-2 gap-3.5 pt-2">
                         <div onClick={() => handleQuickAction("Explain how to use your Web Search skill")} className="p-3 bg-zinc-50 border border-zinc-200 rounded-2xl hover:border-zinc-400 transition-all cursor-pointer">
                           <span className="text-xs font-bold text-zinc-900 block">Web Search & Browse</span>
