@@ -910,7 +910,156 @@ app.get("/auth/popup", (req, res) => {
   `);
 });
 
-// Bud Chat Endpoint using Gemini 3.5 Flash for authentic AI-powered worker operations
+// Secure Composio Authentication Proxy Endpoints
+app.post("/api/composio/connect", async (req, res) => {
+  try {
+    const { appName, entityId } = req.body;
+    if (!appName) {
+      return res.status(400).json({ error: "appName is required." });
+    }
+
+    const composioKey = process.env.COMPOSIO_API_KEY;
+    const resolvedEntityId = entityId || "default_developer_user";
+    const redirectUrl = req.headers.referer || "http://localhost:3000";
+
+    // If API key is present, try to hit the official Composio REST API
+    if (composioKey && composioKey !== "comp_test_key_placeholder") {
+      try {
+        console.log(`Initiating real Composio connection for entity ${resolvedEntityId} with app ${appName}`);
+        const response = await fetch("https://api.composio.dev/v1/active-connectors", {
+          method: "POST",
+          headers: {
+            "x-api-key": composioKey,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            appName,
+            entityId: resolvedEntityId,
+            redirectUrl
+          })
+        });
+
+        if (response.ok) {
+          const data: any = await response.json();
+          console.log("Composio API Response successful:", data);
+          return res.json({
+            isReal: true,
+            redirectUrl: data.redirectUrl || data.url,
+            connectionStatus: data.connectionStatus || "INITIATED",
+            message: "Successfully generated official Composio connection flow."
+          });
+        } else {
+          const errText = await response.text();
+          console.warn(`Composio API returned error status ${response.status}: ${errText}`);
+        }
+      } catch (err) {
+        console.error("Failed to query Composio API:", err);
+      }
+    }
+
+    // Elegant fallback: Branded Sandbox Simulator
+    // Generates a mock popup link that runs a simulated oauth process and redirects back to the main app
+    const simulateUrl = `/composio/simulate-auth?appName=${encodeURIComponent(appName)}&entityId=${encodeURIComponent(resolvedEntityId)}&redirect=${encodeURIComponent(redirectUrl)}`;
+    
+    return res.json({
+      isReal: false,
+      redirectUrl: simulateUrl,
+      connectionStatus: "INITIATED",
+      message: "No Composio API Key found or API call failed. Falling back to Sandbox Simulation mode."
+    });
+  } catch (err: any) {
+    console.error("Composio connection initiation failed:", err);
+    res.status(500).json({ error: err.message || "Internal server error" });
+  }
+});
+
+// Simulate Composio interactive auth gateway page
+app.get("/composio/simulate-auth", (req, res) => {
+  const { appName, entityId, redirect } = req.query;
+  const capitalizedApp = String(appName || "app").toUpperCase();
+  
+  res.send(`
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Composio Security Gate - ${capitalizedApp}</title>
+      <script src="https://cdn.tailwindcss.com"></script>
+      <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+      <style>
+        body { font-family: 'Inter', sans-serif; }
+      </style>
+    </head>
+    <body class="bg-zinc-50 flex items-center justify-center min-h-screen p-6">
+      <div class="bg-white border border-zinc-200 rounded-3xl p-8 max-w-md w-full shadow-xl text-center space-y-6">
+        <!-- Header -->
+        <div class="flex flex-col items-center">
+          <div class="w-12 h-12 bg-zinc-950 text-white rounded-2xl flex items-center justify-center font-bold text-lg mb-4 shadow-sm">
+            C
+          </div>
+          <h1 class="text-xl font-bold text-zinc-900">Authorize ${capitalizedApp}</h1>
+          <p class="text-xs text-zinc-500 mt-1">Composio requests access to authorize Bud for ${capitalizedApp} actions.</p>
+        </div>
+
+        <!-- Info panel -->
+        <div class="bg-zinc-50 border border-zinc-150 rounded-2xl p-4 text-left space-y-2">
+          <div class="flex items-center justify-between text-[11px] text-zinc-500 font-mono">
+            <span>Entity ID:</span>
+            <span class="font-bold text-zinc-800">${entityId || "default"}</span>
+          </div>
+          <div class="flex items-center justify-between text-[11px] text-zinc-500 font-mono">
+            <span>Auth Mode:</span>
+            <span class="font-bold text-zinc-800">Sandbox Simulation</span>
+          </div>
+          <div class="flex items-center justify-between text-[11px] text-zinc-500 font-mono">
+            <span>Permissions:</span>
+            <span class="font-bold text-zinc-800">Read & Write (Interactive)</span>
+          </div>
+        </div>
+
+        <div class="text-[10px] text-zinc-400 leading-normal">
+          💡 <strong>Setup Note:</strong> To make this link live, configure your <code class="bg-zinc-100 px-1 py-0.5 rounded text-zinc-700">COMPOSIO_API_KEY</code> environment secret in AI Studio settings.
+        </div>
+
+        <!-- Buttons -->
+        <div class="flex flex-col gap-2.5">
+          <button id="approve-btn" class="w-full bg-zinc-950 hover:bg-zinc-800 text-white font-semibold py-3 px-4 rounded-xl text-sm shadow-md transition-all cursor-pointer">
+            Approve Connection
+          </button>
+          <button id="cancel-btn" class="w-full bg-transparent hover:bg-zinc-100 text-zinc-500 font-semibold py-2.5 px-4 rounded-xl text-sm transition-all cursor-pointer">
+            Cancel
+          </button>
+        </div>
+      </div>
+
+      <script>
+        document.getElementById('approve-btn').addEventListener('click', () => {
+          // Send message to opener to update state, and redirect back
+          if (window.opener) {
+            window.opener.postMessage({ 
+              type: 'COMPOSIO_AUTH_SUCCESS', 
+              appName: '${appName}' 
+            }, '*');
+          }
+          
+          // Fallback redirect
+          const dest = "${redirect || '/'}";
+          setTimeout(() => {
+            window.location.href = dest;
+          }, 400);
+        });
+
+        document.getElementById('cancel-btn').addEventListener('click', () => {
+          window.close();
+        });
+      </script>
+    </body>
+    </html>
+  `);
+});
+
+// Bud Chat Endpoint using Qwen 3.6 via Groq for authentic AI-powered worker operations
 app.post("/api/bud/chat", async (req, res) => {
   try {
     const { message, history = [] } = req.body;
@@ -924,29 +1073,164 @@ This allows you to write code, fetch live web data, run automations, manage file
 Be direct, supportive, and structured. Always use elegant Markdown styling (bullet points, bold text, clean spacing) for readability.
 Avoid dry or clinical language—sound like a highly capable, human-oriented, next-generation worker. Keep responses reasonably concise.`;
 
-    // Map the incoming chat history to the structure expected by the @google/genai SDK
-    const contents = history.map((msg: any) => ({
-      role: msg.role === "user" ? "user" : "model",
-      parts: [{ text: msg.content }]
-    }));
+    const groqApiKey = process.env.GROQ_API_KEY || "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";
+    let reply = "";
+    let success = false;
 
-    // Append current message
-    contents.push({
-      role: "user",
-      parts: [{ text: message }]
-    });
+    // Try calling Groq with Qwen 3.6 model as requested by the user
+    try {
+      console.log("Attempting Bud Chat with Groq qwen/qwen3.6-27b...");
+      const groqHistory = history.map((msg: any) => ({
+        role: msg.role === "user" ? "user" : "assistant",
+        content: msg.content
+      }));
 
-    const response = await ai.models.generateContent({
-      model: "gemini-3.5-flash",
-      contents,
-      config: {
-        systemInstruction,
-        temperature: 0.7,
-        maxOutputTokens: 1024,
+      const groqResponse = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${groqApiKey}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          model: "qwen/qwen3.6-27b",
+          messages: [
+            { role: "system", content: systemInstruction },
+            ...groqHistory,
+            { role: "user", content: message }
+          ],
+          temperature: 0.6,
+          max_tokens: 2048,
+          top_p: 0.95
+        })
+      });
+
+      if (groqResponse.ok) {
+        const groqData: any = await groqResponse.json();
+        reply = groqData.choices?.[0]?.message?.content || "";
+        if (reply.trim()) {
+          success = true;
+          console.log("Groq qwen/qwen3.6-27b call successful!");
+        }
+      } else {
+        const errorText = await groqResponse.text();
+        console.warn(`Groq qwen/qwen3.6-27b failed, trying qwen-2.5-32b. Error: ${errorText}`);
       }
-    });
+    } catch (err) {
+      console.error("Failed to query Groq with qwen/qwen3.6-27b:", err);
+    }
 
-    const reply = response.text || "I am online and ready to assist you.";
+    // Fallback 1: Try qwen-2.5-32b via Groq
+    if (!success) {
+      try {
+        console.log("Attempting Bud Chat with Groq qwen-2.5-32b fallback...");
+        const groqHistory = history.map((msg: any) => ({
+          role: msg.role === "user" ? "user" : "assistant",
+          content: msg.content
+        }));
+
+        const groqResponse = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${groqApiKey}`,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            model: "qwen-2.5-32b",
+            messages: [
+              { role: "system", content: systemInstruction },
+              ...groqHistory,
+              { role: "user", content: message }
+            ],
+            temperature: 0.6,
+            max_tokens: 2048,
+            top_p: 0.95
+          })
+        });
+
+        if (groqResponse.ok) {
+          const groqData: any = await groqResponse.json();
+          reply = groqData.choices?.[0]?.message?.content || "";
+          if (reply.trim()) {
+            success = true;
+            console.log("Groq qwen-2.5-32b call successful!");
+          }
+        } else {
+          const errorText = await groqResponse.text();
+          console.warn(`Groq qwen-2.5-32b failed. Error: ${errorText}`);
+        }
+      } catch (err) {
+        console.error("Failed to query Groq with qwen-2.5-32b:", err);
+      }
+    }
+
+    // Fallback 2: Try Llama 3.3 70b via Groq
+    if (!success) {
+      try {
+        console.log("Attempting Bud Chat with Llama-3.3-70b-specdec via Groq...");
+        const groqHistory = history.map((msg: any) => ({
+          role: msg.role === "user" ? "user" : "assistant",
+          content: msg.content
+        }));
+
+        const groqResponse = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${groqApiKey}`,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            model: "llama-3.3-70b-specdec",
+            messages: [
+              { role: "system", content: systemInstruction },
+              ...groqHistory,
+              { role: "user", content: message }
+            ],
+            temperature: 0.7,
+            max_tokens: 2048,
+            top_p: 0.9
+          })
+        });
+
+        if (groqResponse.ok) {
+          const groqData: any = await groqResponse.json();
+          reply = groqData.choices?.[0]?.message?.content || "";
+          if (reply.trim()) {
+            success = true;
+            console.log("Groq Llama 3.3 70b call successful!");
+          }
+        }
+      } catch (err) {
+        console.error("Failed to query Groq with Llama 3.3:", err);
+      }
+    }
+
+    // Fallback 3: Try Gemini 3.5 Flash
+    if (!success) {
+      console.log("Attempting Bud Chat with Gemini 3.5 Flash fallback...");
+      const contents = history.map((msg: any) => ({
+        role: msg.role === "user" ? "user" : "model",
+        parts: [{ text: msg.content }]
+      }));
+
+      contents.push({
+        role: "user",
+        parts: [{ text: message }]
+      });
+
+      const response = await ai.models.generateContent({
+        model: "gemini-3.5-flash",
+        contents,
+        config: {
+          systemInstruction,
+          temperature: 0.7,
+          maxOutputTokens: 1024,
+        }
+      });
+
+      reply = response.text || "I am online and ready to assist you.";
+      console.log("Gemini fallback successful!");
+    }
+
     res.json({ reply });
   } catch (err: any) {
     console.error("Bud AI Chat failed:", err);
