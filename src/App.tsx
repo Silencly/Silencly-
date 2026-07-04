@@ -162,15 +162,32 @@ export default function App() {
     updateProfileName,
   } = useAppAuth();
 
-  const [page, setPage] = useState<"home" | "about" | "workspace" | "status" | "bud">(
-    typeof window !== "undefined" && window.location.pathname === "/status"
-      ? "status"
-      : typeof window !== "undefined" && window.location.pathname === "/about"
-      ? "about"
-      : typeof window !== "undefined" && (window.location.pathname === "/bud" || window.location.pathname === "/dsbuddy")
-      ? "bud"
-      : "home"
-  );
+  const [page, setPage] = useState<"home" | "about" | "workspace" | "status" | "bud">(() => {
+    if (typeof window === "undefined") return "home";
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("page") === "workspace" || window.location.pathname === "/workspace") {
+      return "workspace";
+    }
+    if (window.location.pathname === "/status") return "status";
+    if (window.location.pathname === "/about") return "about";
+    if (window.location.pathname === "/bud" || window.location.pathname === "/dsbuddy") return "bud";
+    return "home";
+  });
+
+  const handleWorkspaceClick = () => {
+    const devUrl = "https://ais-dev-rsvudnxxdget4dbykwppnk-916763961142.europe-west2.run.app";
+    const isDev = typeof window !== "undefined" && window.location.origin.includes("ais-dev");
+    
+    if (!isDev) {
+      window.location.href = `${devUrl}/?page=workspace`;
+    } else {
+      setPage("workspace");
+    }
+  };
+
+  const handleBackToHome = () => {
+    window.location.href = "https://ais-pre-rsvudnxxdget4dbykwppnk-916763961142.europe-west2.run.app";
+  };
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const videoSrc = "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260319_055001_8e16d972-3b2b-441c-86ad-2901a54682f9.mp4";
@@ -226,8 +243,12 @@ export default function App() {
       if (window.location.pathname !== "/bud") {
         window.history.pushState({ page: "bud" }, "", "/bud");
       }
+    } else if (page === "workspace") {
+      if (!window.location.search.includes("page=workspace")) {
+        window.history.pushState({ page: "workspace" }, "", "/?page=workspace");
+      }
     } else {
-      if (window.location.pathname !== "/") {
+      if (window.location.pathname !== "/" && !window.location.search.includes("page=workspace")) {
         window.history.pushState({ page: "home" }, "", "/");
       }
     }
@@ -236,6 +257,11 @@ export default function App() {
   useEffect(() => {
     if (typeof window === "undefined") return;
     const handlePopState = () => {
+      if (page === "workspace") {
+        window.location.href = "https://ais-pre-rsvudnxxdget4dbykwppnk-916763961142.europe-west2.run.app";
+        return;
+      }
+
       if (window.location.pathname === "/about") {
         setPage("about");
       } else if (window.location.pathname === "/status") {
@@ -243,12 +269,17 @@ export default function App() {
       } else if (window.location.pathname === "/bud" || window.location.pathname === "/dsbuddy") {
         setPage("bud");
       } else {
-        setPage("home");
+        const params = new URLSearchParams(window.location.search);
+        if (params.get("page") === "workspace") {
+          setPage("workspace");
+        } else {
+          setPage("home");
+        }
       }
     };
     window.addEventListener("popstate", handlePopState);
     return () => window.removeEventListener("popstate", handlePopState);
-  }, []);
+  }, [page]);
 
   const [showConfigPanel, setShowConfigPanel] = useState(false);
   const [tempKey, setTempKey] = useState("");
@@ -1334,7 +1365,7 @@ export default function App() {
               <a href="#pricing" onClick={() => setPage("home")} className="hover:text-white transition-colors">Pricing</a>
               <a href="#faq" onClick={() => setPage("home")} className="hover:text-white transition-colors">FAQ</a>
               {user && (
-                <button onClick={() => setPage("workspace")} className="hover:text-white transition-colors cursor-pointer text-sm font-semibold">Workspace</button>
+                <button onClick={handleWorkspaceClick} className="hover:text-white transition-colors cursor-pointer text-sm font-semibold">Workspace</button>
               )}
             </div>
 
@@ -1369,7 +1400,7 @@ export default function App() {
                       <div className="flex flex-col gap-1 text-xs">
                         <button
                           onClick={() => {
-                            setPage("workspace");
+                            handleWorkspaceClick();
                             setShowProfileDropdown(false);
                           }}
                           className="flex items-center gap-2.5 text-left text-zinc-300 hover:text-white hover:bg-white/5 rounded-xl px-3 py-2 transition-all cursor-pointer w-full font-medium"
@@ -2181,7 +2212,7 @@ export default function App() {
       {/* Workspace Header Panel */}
       <header className="border-b border-zinc-900 bg-black px-6 py-4">
         <div className="max-w-3xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-2.5 cursor-pointer select-none animate-pulse-slow" onClick={() => setPage("home")}>
+          <div className="flex items-center gap-2.5 cursor-pointer select-none animate-pulse-slow" onClick={handleBackToHome}>
             <img src="https://i.ibb.co/Q742H44R/gemini-watermark-removed.png" alt="Silencly Logo" className="w-6.5 h-6.5 object-contain" referrerPolicy="no-referrer" />
             <span className="text-base font-bold font-display tracking-tight text-white hover:text-white/90 transition-colors">Silencly Workspace</span>
           </div>
@@ -2194,10 +2225,10 @@ export default function App() {
               <span className="text-[8px] text-zinc-500 font-mono tracking-wide leading-none uppercase mt-0.5">{user.provider || "email"}</span>
             </div>
             <button
-              onClick={() => setPage("home")}
+              onClick={handleBackToHome}
               className="ml-1 text-zinc-500 hover:text-zinc-300 text-[9px] font-bold uppercase transition-colors cursor-pointer border-r border-zinc-800/80 pr-2"
             >
-              Home
+              ← Back to Home
             </button>
             <button
               onClick={handleSignOut}
