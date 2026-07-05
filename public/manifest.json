@@ -1,0 +1,18 @@
+{
+  "short_name": "Silencly",
+  "name": "Silencly - AI Dictation Tool",
+  "description": "Dictate 100X faster. Convert messy thoughts and voice brain dumps into perfectly formatted documents instantly.",
+  "icons": [
+    {
+      "src": "https://i.ibb.co/Q742H44R/gemini-watermark-removed.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": "/?page=workspace",
+  "background_color": "#09090b",
+  "theme_color": "#a855f7",
+  "display": "standalone",
+  "orientation": "any"
+}
