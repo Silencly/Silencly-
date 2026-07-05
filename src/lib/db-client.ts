@@ -19,6 +19,20 @@ export async function dbFetchHistory(userId: string): Promise<DictationSession[]
     sorted.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
     return sorted;
   } else {
+    try {
+      const res = await fetch(`/api/history?userId=${encodeURIComponent(userId)}`);
+      if (res.ok) {
+        const data = await res.json();
+        // Sort descending by createdAt
+        const sorted = (data || []) as DictationSession[];
+        sorted.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        // Synchronize local cache
+        localStorage.setItem("ai_dictation_history", JSON.stringify(sorted));
+        return sorted;
+      }
+    } catch (err) {
+      console.error("Server fetchHistory error, fallback to local storage:", err);
+    }
     const cached = localStorage.getItem("ai_dictation_history");
     return cached ? JSON.parse(cached) : [];
   }
@@ -38,6 +52,16 @@ export async function dbFetchDictionary(userId: string): Promise<DictionaryItem[
     }
     return (data || []) as DictionaryItem[];
   } else {
+    try {
+      const res = await fetch(`/api/dictionary?userId=${encodeURIComponent(userId)}`);
+      if (res.ok) {
+        const data = await res.json();
+        localStorage.setItem("ai_dictation_dictionary", JSON.stringify(data));
+        return data;
+      }
+    } catch (err) {
+      console.error("Server fetchDictionary error, fallback to local storage:", err);
+    }
     const cached = localStorage.getItem("ai_dictation_dictionary");
     return cached ? JSON.parse(cached) : [];
   }
@@ -53,6 +77,21 @@ export async function dbSaveDictionaryItem(userId: string, item: DictionaryItem)
     if (error) {
       console.error("Supabase saveDictionaryItem error:", error);
       throw error;
+    }
+  } else {
+    try {
+      const res = await fetch("/api/dictionary", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ ...item, userId })
+      });
+      if (!res.ok) {
+        throw new Error(await res.text());
+      }
+    } catch (err) {
+      console.error("Server saveDictionaryItem error:", err);
     }
   }
 }
@@ -70,6 +109,17 @@ export async function dbDeleteDictionaryItem(userId: string, itemId: string): Pr
       console.error("Supabase deleteDictionaryItem error:", error);
       throw error;
     }
+  } else {
+    try {
+      const res = await fetch(`/api/dictionary/${itemId}?userId=${encodeURIComponent(userId)}`, {
+        method: "DELETE"
+      });
+      if (!res.ok) {
+        throw new Error(await res.text());
+      }
+    } catch (err) {
+      console.error("Server deleteDictionaryItem error:", err);
+    }
   }
 }
 
@@ -83,6 +133,21 @@ export async function dbSaveHistoryItem(userId: string, item: DictationSession):
     if (error) {
       console.error("Supabase saveHistoryItem error:", error);
       throw error;
+    }
+  } else {
+    try {
+      const res = await fetch("/api/history", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ ...item, userId })
+      });
+      if (!res.ok) {
+        throw new Error(await res.text());
+      }
+    } catch (err) {
+      console.error("Server saveHistoryItem error:", err);
     }
   }
 }
@@ -100,6 +165,17 @@ export async function dbDeleteHistoryItem(userId: string, itemId: string): Promi
       console.error("Supabase deleteHistoryItem error:", error);
       throw error;
     }
+  } else {
+    try {
+      const res = await fetch(`/api/history/${itemId}?userId=${encodeURIComponent(userId)}`, {
+        method: "DELETE"
+      });
+      if (!res.ok) {
+        throw new Error(await res.text());
+      }
+    } catch (err) {
+      console.error("Server deleteHistoryItem error:", err);
+    }
   }
 }
 
@@ -114,6 +190,17 @@ export async function dbClearHistory(userId: string): Promise<void> {
     if (error) {
       console.error("Supabase clearHistory error:", error);
       throw error;
+    }
+  } else {
+    try {
+      const res = await fetch(`/api/history?userId=${encodeURIComponent(userId)}`, {
+        method: "DELETE"
+      });
+      if (!res.ok) {
+        throw new Error(await res.text());
+      }
+    } catch (err) {
+      console.error("Server clearHistory error:", err);
     }
   }
 }

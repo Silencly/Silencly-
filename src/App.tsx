@@ -466,11 +466,11 @@ export default function App() {
   const initialTextRef = useRef("");
 
 
-  // Fetch history and dictionary from backend on load
+  // Fetch history and dictionary from backend on load or when user state transitions
   useEffect(() => {
     fetchHistory();
     fetchDictionary();
-  }, []);
+  }, [user]);
 
   // Preset demo options for the interactive playground
   const demoPresets = {

@@ -190,7 +190,11 @@ app.get("/sitemap.xml", (req, res) => {
 // API Endpoints for Dictation History
 app.get("/api/history", (req, res) => {
   try {
-    const history = readHistory();
+    const { userId } = req.query;
+    let history = readHistory();
+    if (userId) {
+      history = history.filter(item => item.userId === userId);
+    }
     res.json(history);
   } catch (err: any) {
     res.status(500).json({ error: err.message || "Failed to load history." });
@@ -199,7 +203,7 @@ app.get("/api/history", (req, res) => {
 
 app.post("/api/history", (req, res) => {
   try {
-    const { id, title, rawText, polishedText, durationSeconds, createdAt } = req.body;
+    const { id, title, rawText, polishedText, durationSeconds, createdAt, userId } = req.body;
     if (!id) {
       return res.status(400).json({ error: "id is required" });
     }
@@ -212,7 +216,8 @@ app.post("/api/history", (req, res) => {
       title: title || "Untitled Dictation",
       rawText: rawText || "",
       polishedText: polishedText || "",
-      durationSeconds: durationSeconds || 0
+      durationSeconds: durationSeconds || 0,
+      userId: userId || ""
     };
 
     if (existingIndex > -1) {
@@ -231,8 +236,13 @@ app.post("/api/history", (req, res) => {
 app.delete("/api/history/:id", (req, res) => {
   try {
     const { id } = req.params;
+    const { userId } = req.query;
     let history = readHistory();
-    history = history.filter(item => item.id !== id);
+    if (userId) {
+      history = history.filter(item => !(item.id === id && item.userId === userId));
+    } else {
+      history = history.filter(item => item.id !== id);
+    }
     writeHistory(history);
     res.json({ success: true });
   } catch (err: any) {
@@ -242,7 +252,14 @@ app.delete("/api/history/:id", (req, res) => {
 
 app.delete("/api/history", (req, res) => {
   try {
-    writeHistory([]);
+    const { userId } = req.query;
+    let history = readHistory();
+    if (userId) {
+      history = history.filter(item => item.userId !== userId);
+    } else {
+      history = [];
+    }
+    writeHistory(history);
     res.json({ success: true });
   } catch (err: any) {
     res.status(500).json({ error: err.message || "Failed to clear history." });
@@ -274,7 +291,11 @@ function writeDictionary(dict: any[]) {
 
 app.get("/api/dictionary", (req, res) => {
   try {
-    const dict = readDictionary();
+    const { userId } = req.query;
+    let dict = readDictionary();
+    if (userId) {
+      dict = dict.filter(item => item.userId === userId);
+    }
     res.json(dict);
   } catch (err: any) {
     res.status(500).json({ error: err.message || "Failed to load dictionary." });
@@ -283,7 +304,7 @@ app.get("/api/dictionary", (req, res) => {
 
 app.post("/api/dictionary", (req, res) => {
   try {
-    const { id, word, replaceWith } = req.body;
+    const { id, word, replaceWith, userId } = req.body;
     if (!word) {
       return res.status(400).json({ error: "word is required" });
     }
@@ -294,7 +315,8 @@ app.post("/api/dictionary", (req, res) => {
     const newItem = {
       id: itemId,
       word,
-      replaceWith
+      replaceWith,
+      userId: userId || ""
     };
 
     const existingIndex = dict.findIndex(item => item.id === itemId);
@@ -314,8 +336,13 @@ app.post("/api/dictionary", (req, res) => {
 app.delete("/api/dictionary/:id", (req, res) => {
   try {
     const { id } = req.params;
+    const { userId } = req.query;
     let dict = readDictionary();
-    dict = dict.filter(item => item.id !== id);
+    if (userId) {
+      dict = dict.filter(item => !(item.id === id && item.userId === userId));
+    } else {
+      dict = dict.filter(item => item.id !== id);
+    }
     writeDictionary(dict);
     res.json({ success: true });
   } catch (err: any) {
@@ -418,46 +445,47 @@ RULES:
 
 6. If input is empty or pure filler with no actual content, output an empty string.
 
-7. Output ONLY the formatted text. No preamble, no "Here's your text:", no meta-commentary.
+7. Output ONLY the formatted text — plain text, no surrounding quotation marks, no code blocks, no backticks, no preamble like "Here's your text:", no meta-commentary.
 
 ${dictionaryGuidance}
 
 EXAMPLES:
 
-Input: "what is ai"
-Output: "What is AI?"
+Input: what is ai
+Output: What is AI?
 
-Input: "i need to buy milk eggs bread and butter"
+Input: i need to buy milk eggs bread and butter
 Output:
 - Milk
 - Eggs
 - Bread
 - Butter
 
-Input: "call mom dad and my brother about the trip"
-Output: "Call Mom, Dad, and my brother about the trip."
+Input: call mom dad and my brother about the trip
+Output: Call Mom, Dad, and my brother about the trip.
 
-Input: "grocery list milk eggs bread no not bread butter and cheese"
+Input: grocery list milk eggs bread no not bread butter and cheese
 Output:
 - Milk
 - Eggs
 - Butter
 - Cheese
 
-Input: "lets meet at 5 no lets do at 6"
-Output: "Let's meet at 6."
+Input: lets meet at 5 no lets do at 6
+Output: Let's meet at 6.
 
-Input: "meet bob at 3 no wait 4 actually let's just say 5 at the cafe no make it the office"
-Output: "Meet Bob at 5 at the office."
+Input: meet bob at 3 no wait 4 actually let's just say 5 at the cafe no make it the office
+Output: Meet Bob at 5 at the office.
 
-Input: "my number is 9 8 7 no wait that's not right it's 9 8 6"
-Output: "My number is 986."
+Input: my number is 9 8 7 no wait that's not right it's 9 8 6
+Output: My number is 986.
 
-Input: "i don't think we should launch friday actually i take that back we should launch friday"
-Output: "We should launch Friday."
+Input: i don't think we should launch friday actually i take that back we should launch friday
+Output: We should launch Friday.
 
-Input: "um uh um"
-Output: ""`;
+Input: um uh um
+Output:
+`;
 
     let polishedText = "";
     console.log("Polishing text using Groq Llama...");
