@@ -60,7 +60,8 @@ import {
   Instagram,
   Linkedin,
   Sun,
-  Moon
+  Moon,
+  Monitor
 } from "lucide-react";
 import Waveform from "./components/Waveform";
 import HistoryDrawer from "./components/HistoryDrawer";
@@ -338,9 +339,130 @@ export default function App() {
     return () => clearInterval(interval);
   }, []);
 
+  // Floating widget & screen share states
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  const [widgetPos, setWidgetPos] = useState({ x: 0, y: 0 });
+  const [isFocusedOnWriting, setIsFocusedOnWriting] = useState(false);
+  const [showAltOption, setShowAltOption] = useState(false);
+  const [altOptionPos, setAltOptionPos] = useState({ x: 0, y: 0 });
+  const [screenStream, setScreenStream] = useState<MediaStream | null>(null);
+  const [showInjectedToast, setShowInjectedToast] = useState(false);
+
+  // Floating widget & Keyboard insertion effect handlers
+  useEffect(() => {
+    if (page !== "workspace") return;
+
+    let rAFId: number;
+    const lerpSpeed = 0.15; // smooth physics damping
+    
+    const updateWidgetPos = () => {
+      setWidgetPos((prev) => {
+        const dx = mousePos.x - prev.x;
+        const dy = mousePos.y - prev.y;
+        return {
+          x: prev.x + dx * lerpSpeed,
+          y: prev.y + dy * lerpSpeed
+        };
+      });
+      rAFId = requestAnimationFrame(updateWidgetPos);
+    };
+    
+    rAFId = requestAnimationFrame(updateWidgetPos);
+    return () => cancelAnimationFrame(rAFId);
+  }, [mousePos, page]);
+
+  useEffect(() => {
+    if (page !== "workspace") return;
+
+    const handleMouseMove = (e: MouseEvent | any) => {
+      // Offset slightly to render the logo floating beautifully above the cursor
+      setMousePos({ x: e.clientX + 16, y: e.clientY + 16 });
+    };
+
+    window.addEventListener("mousemove", handleMouseMove);
+    return () => window.removeEventListener("mousemove", handleMouseMove);
+  }, [page]);
+
+  useEffect(() => {
+    if (page !== "workspace") return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Alt") {
+        e.preventDefault();
+        setAltOptionPos({ x: mousePos.x, y: mousePos.y });
+        setShowAltOption(true);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [page, mousePos]);
+
+  useEffect(() => {
+    if (!showAltOption) return;
+    const handleCloseOption = () => {
+      setShowAltOption(false);
+    };
+    window.addEventListener("click", handleCloseOption);
+    window.addEventListener("keydown", handleCloseOption);
+    return () => {
+      window.removeEventListener("click", handleCloseOption);
+      window.removeEventListener("keydown", handleCloseOption);
+    };
+  }, [showAltOption]);
+
+  useEffect(() => {
+    if (page !== "workspace") return;
+
+    const handleFocusIn = (e: FocusEvent) => {
+      const target = e.target as HTMLElement;
+      if (target && (target.tagName === "TEXTAREA" || target.tagName === "INPUT")) {
+        setIsFocusedOnWriting(true);
+      }
+    };
+
+    const handleFocusOut = () => {
+      setTimeout(() => {
+        const active = document.activeElement;
+        if (!active || (active.tagName !== "TEXTAREA" && active.tagName !== "INPUT")) {
+          setIsFocusedOnWriting(false);
+        }
+      }, 200);
+    };
+
+    window.addEventListener("focusin", handleFocusIn);
+    window.addEventListener("focusout", handleFocusOut);
+    return () => {
+      window.removeEventListener("focusin", handleFocusIn);
+      window.removeEventListener("focusout", handleFocusOut);
+    };
+  }, [page]);
+
+  const handleToggleScreenShare = async () => {
+    if (screenStream) {
+      screenStream.getTracks().forEach((track) => track.stop());
+      setScreenStream(null);
+    } else {
+      try {
+        const stream = await navigator.mediaDevices.getDisplayMedia({
+          video: true,
+          audio: false,
+        });
+        setScreenStream(stream);
+        
+        stream.getVideoTracks()[0].onended = () => {
+          setScreenStream(null);
+        };
+      } catch (err: any) {
+        console.error("Screen sharing failed:", err);
+        setError("Screen share permission declined or not supported in this frame. Check browser settings.");
+      }
+    }
+  };
+
   // Core Dictation States
   const [isRecording, setIsRecording] = useState(false);
-  const [status, setStatus] = useState<"idle" | "recording" | "transcribing" | "polishing">("idle");
+  const [status, setStatus] = useState<"idle" | "initializing" | "recording" | "transcribing" | "polishing">("idle");
   const [duration, setDuration] = useState(0);
   const [rawText, setRawText] = useState("");
   const [polishedText, setPolishedText] = useState("");
@@ -371,6 +493,16 @@ export default function App() {
   const recognitionRef = useRef<any>(null);
   const timerIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const initialTextRef = useRef("");
+  const pipVideoRef = useRef<HTMLVideoElement | null>(null);
+
+  useEffect(() => {
+    if (screenStream && pipVideoRef.current) {
+      pipVideoRef.current.srcObject = screenStream;
+      pipVideoRef.current.play().catch((e) => {
+        console.error("Failed to autoplay screen PiP stream:", e);
+      });
+    }
+  }, [screenStream]);
 
   // Fetch history and dictionary from backend on load
   useEffect(() => {
@@ -678,6 +810,7 @@ export default function App() {
   const startRecording = async () => {
     setError(null);
     setDuration(0);
+    setStatus("initializing"); // Instant UI response
     audioChunksRef.current = [];
 
     // Auto-save existing dictation session so nothing is lost, then clear workspace
@@ -880,6 +1013,34 @@ export default function App() {
       };
 
       await saveHistorySession(newSession);
+
+      // Auto-copy to user's clipboard and simulate keyboard entry
+      try {
+        await navigator.clipboard.writeText(polishedResult);
+        setShowInjectedToast(true);
+        setTimeout(() => setShowInjectedToast(false), 4000);
+      } catch (clipboardErr) {
+        console.error("Clipboard copy failed:", clipboardErr);
+      }
+
+      // Automatically add/append text directly where the cursor is blinking in our workspace
+      const activeEl = document.activeElement as HTMLTextAreaElement | HTMLInputElement;
+      if (activeEl && (activeEl.tagName === "TEXTAREA" || activeEl.tagName === "INPUT")) {
+        const start = activeEl.selectionStart || 0;
+        const end = activeEl.selectionEnd || 0;
+        const originalValue = activeEl.value;
+        const updatedValue = originalValue.substring(0, start) + polishedResult + originalValue.substring(end);
+        
+        // If it's our main polished textarea, update state
+        if (activeEl.placeholder && activeEl.placeholder.includes("refined version")) {
+          setPolishedText(updatedValue);
+          handleSaveChanges();
+        } else {
+          activeEl.value = updatedValue;
+          activeEl.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+      }
+
       setStatus("idle");
     } catch (err: any) {
       console.error("Processing flow failed:", err);
@@ -1051,6 +1212,8 @@ export default function App() {
 
   const getStatusText = () => {
     switch (status) {
+      case "initializing":
+        return "Starting microphone...";
       case "recording":
         return "Listening to your voice...";
       case "transcribing":
@@ -2338,6 +2501,20 @@ export default function App() {
               )}
             </button>
 
+            <button
+              id="screen-share-btn"
+              onClick={handleToggleScreenShare}
+              className={`p-2 border rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${
+                screenStream 
+                  ? "bg-purple-950/40 hover:bg-purple-900 border-purple-800 text-purple-200 shadow-[0_0_12px_rgba(147,51,234,0.15)]" 
+                  : "bg-zinc-900/40 hover:bg-zinc-900 border-zinc-850 text-zinc-400 hover:text-white"
+              }`}
+              title={screenStream ? "Stop Screen Sharing" : "Share Chrome screen or tab"}
+            >
+              <Monitor className={`w-3.5 h-3.5 ${screenStream ? "text-purple-400 animate-pulse" : "text-zinc-400"}`} />
+              <span className="hidden sm:inline">{screenStream ? "Screen Shared" : "Share Screen"}</span>
+            </button>
+
             {(rawText || polishedText) && (
               <button
                 id="clear-workspace-btn"
@@ -2364,17 +2541,17 @@ export default function App() {
                   <button
                     id="mic-action-btn"
                     onClick={handleToggleRecord}
-                    disabled={status === "transcribing" || status === "polishing"}
+                    disabled={status === "transcribing" || status === "polishing" || status === "initializing"}
                     className={`w-11 h-11 rounded-full flex items-center justify-center transition-all duration-300 shadow-sm shrink-0 cursor-pointer ${
                       isRecording
                         ? "bg-red-600 hover:bg-red-700 text-white animate-pulse"
-                        : status === "transcribing" || status === "polishing"
-                        ? "bg-zinc-850 text-zinc-600 cursor-not-allowed"
+                        : status === "transcribing" || status === "polishing" || status === "initializing"
+                        ? "bg-zinc-850 text-zinc-500 cursor-not-allowed"
                         : "bg-zinc-800 hover:bg-zinc-750 text-white hover:scale-105"
                     }`}
                     title={isRecording ? "Stop recording" : "Start recording"}
                   >
-                    {status === "transcribing" ? (
+                    {status === "transcribing" || status === "initializing" ? (
                       <Loader2 className="w-5 h-5 animate-spin text-zinc-400" />
                     ) : status === "polishing" ? (
                       <Sparkles className="w-5 h-5 text-yellow-500 animate-pulse" />
@@ -2577,6 +2754,137 @@ export default function App() {
                 </div>
               </form>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Floating circle assistant following cursor */}
+      {page === "workspace" && (isFocusedOnWriting || status !== "idle" || showAltOption) && (
+        <div 
+          className="fixed pointer-events-none z-[9999] transition-all duration-300 ease-out flex flex-col items-center"
+          style={{ 
+            left: `${widgetPos.x}px`, 
+            top: `${widgetPos.y}px`,
+            transform: "translate(-50%, -50%)"
+          }}
+        >
+          {/* Glowing concentric waves during recording/audio animation */}
+          {status === "recording" && (
+            <div className="absolute w-16 h-16 pointer-events-none flex items-center justify-center">
+              <div className="absolute inset-0 rounded-full bg-purple-500/25 animate-ping" style={{ animationDuration: "1.2s" }} />
+              <div className="absolute inset-0 rounded-full bg-purple-500/15 animate-ping" style={{ animationDuration: "1.8s", animationDelay: "0.2s" }} />
+              <div className="absolute inset-0 rounded-full bg-purple-500/5 animate-ping" style={{ animationDuration: "2.4s", animationDelay: "0.4s" }} />
+            </div>
+          )}
+
+          {/* Core circle app logo */}
+          <div className={`relative w-9 h-9 rounded-full bg-black border flex items-center justify-center shadow-[0_4px_20px_rgba(147,51,234,0.3)] transition-all duration-500 ${
+            status === "recording" 
+              ? "border-purple-500/80 scale-110 shadow-[0_0_25px_rgba(147,51,234,0.6)]" 
+              : status === "transcribing" || status === "polishing"
+              ? "border-yellow-500/80 animate-pulse"
+              : "border-zinc-800"
+          }`}>
+            {status === "transcribing" || status === "polishing" ? (
+              <RefreshCw className="w-4 h-4 text-purple-400 animate-spin" />
+            ) : status === "recording" ? (
+              /* High-fidelity bouncing soundwave audio animation bars */
+              <div className="flex items-center gap-0.5 h-3">
+                <div className="w-0.5 bg-purple-400 rounded-full h-2 animate-bounce" style={{ animationDelay: "0.1s", animationDuration: "0.5s" }} />
+                <div className="w-0.5 bg-purple-300 rounded-full h-3 animate-bounce" style={{ animationDelay: "0.2s", animationDuration: "0.4s" }} />
+                <div className="w-0.5 bg-purple-400 rounded-full h-1.5 animate-bounce" style={{ animationDelay: "0.3s", animationDuration: "0.6s" }} />
+                <div className="w-0.5 bg-purple-300 rounded-full h-2.5 animate-bounce" style={{ animationDelay: "0.4s", animationDuration: "0.45s" }} />
+              </div>
+            ) : (
+              <img 
+                src="https://i.ibb.co/Q742H44R/gemini-watermark-removed.png" 
+                alt="Silencly assistant circle logo" 
+                className="w-5.5 h-5.5 object-contain"
+                referrerPolicy="no-referrer" 
+              />
+            )}
+
+            {/* Glowing active small ring border */}
+            <div className={`absolute inset-0 rounded-full border border-purple-500/20 pointer-events-none ${status === "recording" ? "animate-pulse" : ""}`} />
+          </div>
+
+          {/* Status Label Pill */}
+          <div className="mt-1.5 bg-black/90 border border-zinc-800 px-2 py-0.5 rounded-full text-[8px] font-mono uppercase tracking-widest text-zinc-400 shadow-lg pointer-events-none">
+            {status === "recording" 
+              ? "Listening" 
+              : status === "transcribing" 
+              ? "Converting" 
+              : status === "polishing"
+              ? "Polishing"
+              : "Silencly Ready"}
+          </div>
+        </div>
+      )}
+
+      {/* Keyboard Alt option start dictate context menu popover */}
+      {page === "workspace" && showAltOption && (
+        <div 
+          className="fixed z-[10000] bg-zinc-950/95 border border-purple-900/60 shadow-[0_10px_35px_rgba(147,51,234,0.3)] rounded-2xl p-2 flex flex-col gap-1 backdrop-blur-md animate-fade-in"
+          style={{ 
+            left: `${altOptionPos.x}px`, 
+            top: `${altOptionPos.y + 12}px` 
+          }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <button
+            onClick={() => {
+              setShowAltOption(false);
+              // Trigger starting dictation directly!
+              handleToggleRecord();
+            }}
+            className="px-3.5 py-1.5 hover:bg-purple-950/60 rounded-xl text-left text-[11px] font-bold text-purple-200 hover:text-white flex items-center gap-2 transition-all cursor-pointer"
+          >
+            <Mic className="w-3.5 h-3.5 text-purple-400 animate-pulse" />
+            <span>🎙️ Start Dictation</span>
+          </button>
+          <div className="border-t border-zinc-900 my-0.5" />
+          <div className="px-3 text-[8px] text-zinc-500 font-mono">
+            Alt key shortcut active
+          </div>
+        </div>
+      )}
+
+      {/* Screen Share Overlay Picture-in-Picture window */}
+      {page === "workspace" && screenStream && (
+        <div className="fixed bottom-6 right-6 z-[999] bg-zinc-950/90 border border-zinc-800 rounded-2xl p-2.5 shadow-[0_12px_40px_rgba(0,0,0,0.8)] backdrop-blur-md max-w-xs flex flex-col gap-2">
+          <div className="flex items-center justify-between gap-4">
+            <span className="text-[10px] font-mono tracking-wider font-semibold text-purple-300 uppercase flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-purple-500 animate-ping" />
+              Chrome Screen Shared
+            </span>
+            <button
+              onClick={handleToggleScreenShare}
+              className="p-1 hover:bg-zinc-900 rounded-lg text-zinc-400 hover:text-white transition-colors"
+              title="Stop screen sharing"
+            >
+              <X className="w-3 h-3" />
+            </button>
+          </div>
+          <div className="relative rounded-lg overflow-hidden border border-zinc-900 aspect-video bg-black shadow-inner">
+            <video 
+              ref={pipVideoRef}
+              muted
+              playsInline
+              className="w-full h-full object-cover scale-102"
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Auto-typing/clipboard notification slide-in toast */}
+      {showInjectedToast && (
+        <div className="fixed top-6 right-6 z-[10001] bg-purple-950/90 border border-purple-500/40 text-white rounded-2xl p-4 shadow-[0_10px_30px_rgba(147,51,234,0.25)] backdrop-blur-md flex items-center gap-3 animate-slide-in">
+          <div className="w-8 h-8 rounded-full bg-purple-500/20 flex items-center justify-center shrink-0">
+            <Sparkles className="w-4 h-4 text-purple-300 animate-pulse" />
+          </div>
+          <div className="flex flex-col text-left">
+            <span className="text-xs font-bold text-white">Refined Output Copied!</span>
+            <span className="text-[10px] text-zinc-400 mt-0.5">Pasted directly into your focused cursor field</span>
           </div>
         </div>
       )}

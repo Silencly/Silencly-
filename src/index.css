@@ -29,7 +29,7 @@ body {
 /* Custom Cursor for computer users (pointer devices) */
 @media (pointer: fine) {
   html, body, button, a, [role="button"], select, label, input[type="button"], input[type="submit"], iframe {
-    cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='36' height='36' viewBox='0 0 36 36' fill='none'><path d='M4 4L8 26L15 18L26 17Z' fill='white' stroke='black' stroke-width='3' stroke-linejoin='round'/></svg>") 4 4, auto !important;
+    cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 36 36' fill='none'><path d='M4 4L8 26L15 18L26 17Z' fill='white' stroke='black' stroke-width='3' stroke-linejoin='round'/></svg>") 4 4, auto !important;
   }
 }
 
