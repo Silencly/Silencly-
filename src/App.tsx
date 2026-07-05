@@ -297,19 +297,68 @@ export default function App() {
 
   const [isAtTop, setIsAtTop] = useState(true);
 
-  useEffect(() => {
-    if (showManageNameModal && user) {
-      setNewNameInput(user.name || "");
-    }
-  }, [showManageNameModal, user]);
+  const [showAuthBanner, setShowAuthBanner] = useState(true);
+  const [guestUser, setGuestUser] = useState<any | null>(null);
+  const activeUser = user || guestUser;
+
+  const handleTryAsGuest = () => {
+    const guestObj = {
+      id: "guest",
+      name: "Guest User",
+      email: "guest@silencly.com",
+      image: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80",
+      provider: "guest"
+    };
+    setGuestUser(guestObj);
+    setPage("workspace");
+    setShowAuthModal(false);
+  };
+
+  const renderAuthBanner = () => {
+    if (!showAuthBanner) return null;
+    return (
+      <div className="w-full bg-[#1c150c] border-b border-[#3b2b1a] py-2.5 px-4 flex items-center justify-between z-[9999] select-none text-center">
+        <div className="flex-1 flex items-center justify-center gap-2 text-xs sm:text-sm text-[#f59e0b]">
+          <AlertTriangle className="w-4 h-4 shrink-0 text-[#f59e0b] animate-pulse" />
+          <span>
+            We are currently facing an authentication issue. Please follow the{" "}
+            <button
+              onClick={() => {
+                setPage("status");
+                setShowAuthModal(false);
+              }}
+              className="underline hover:text-white font-semibold cursor-pointer"
+            >
+              status page
+            </button>{" "}
+            for updates.
+          </span>
+        </div>
+        <button
+          onClick={() => setShowAuthBanner(false)}
+          className="text-zinc-500 hover:text-zinc-300 cursor-pointer p-1"
+          aria-label="Dismiss banner"
+          title="Dismiss banner"
+        >
+          <X className="w-4 h-4" />
+        </button>
+      </div>
+    );
+  };
 
   useEffect(() => {
-    if (user) {
+    if (showManageNameModal && activeUser) {
+      setNewNameInput(activeUser.name || "");
+    }
+  }, [showManageNameModal, activeUser]);
+
+  useEffect(() => {
+    if (activeUser) {
       setShowAuthModal(false);
       // Only reset page to home if we aren't already on one of the inner routed sections on initial load
       setPage((prev) => (prev === "bud" || prev === "about" || prev === "status" || prev === "workspace" ? prev : "home"));
     }
-  }, [user]);
+  }, [activeUser]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -470,7 +519,7 @@ export default function App() {
   useEffect(() => {
     fetchHistory();
     fetchDictionary();
-  }, [user]);
+  }, [activeUser]);
 
   // Preset demo options for the interactive playground
   const demoPresets = {
@@ -1199,7 +1248,7 @@ export default function App() {
     );
   }
 
-  if (isCheckingAuth && !user) {
+  if (isCheckingAuth && !activeUser) {
     return (
       <div className="min-h-screen bg-black flex flex-col items-center justify-center text-zinc-100 antialiased font-sans">
         <RefreshCw className="w-8 h-8 text-zinc-400 animate-spin mb-3" />
@@ -1208,9 +1257,11 @@ export default function App() {
     );
   }
 
-  if (!user && showAuthModal) {
+  if (!activeUser && showAuthModal) {
     return (
-      <main className="flex min-h-screen w-full bg-black selection:bg-zinc-950/30 p-2 transition-all duration-500 lg:h-screen lg:overflow-hidden lg:p-4 text-white">
+      <>
+        {renderAuthBanner()}
+        <main className="flex min-h-screen w-full bg-black selection:bg-zinc-950/30 p-2 transition-all duration-500 lg:h-screen lg:overflow-hidden lg:p-4 text-white">
           {/* Left Column (Hero) */}
           <div className="hidden lg:flex w-[52%] relative flex-col items-center justify-end pb-32 px-12 rounded-3xl overflow-hidden shadow-2xl h-full">
             <video
@@ -1424,6 +1475,21 @@ export default function App() {
                 </button>
               </form>
 
+              <div className="relative flex py-3 items-center">
+                <div className="flex-grow border-t border-white/5"></div>
+                <span className="flex-shrink mx-4 text-white/20 text-[10px] font-mono font-medium tracking-wider uppercase">Or workaround</span>
+                <div className="flex-grow border-t border-white/5"></div>
+              </div>
+
+              <button
+                type="button"
+                onClick={handleTryAsGuest}
+                className="w-full h-14 bg-[#120f18] hover:bg-[#1a1424] text-[#c084fc] border border-[#a855f7]/25 hover:border-[#a855f7]/40 font-semibold rounded-xl active:scale-[0.98] transition-all cursor-pointer flex items-center justify-center gap-2"
+              >
+                <Sparkles className="w-4 h-4 text-[#a855f7]" />
+                Try Workspace as Guest (No Sign-In)
+              </button>
+
               {/* Footer Switch Link */}
               <div className="text-center mt-6">
                 {authMode === "signup" ? (
@@ -1459,18 +1525,20 @@ export default function App() {
             </motion.div>
           </div>
         </main>
-      );
+      </>
+    );
   }
 
-  if (!user || page !== "workspace") {
+  if (!activeUser || page !== "workspace") {
     return (
       <div className="min-h-screen bg-zinc-950 text-zinc-50 flex flex-col antialiased font-sans selection:bg-zinc-900 relative overflow-hidden">
+        {renderAuthBanner()}
         {/* Soft, beautiful grid overlay in light gray */}
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#1f1f2e05_1px,transparent_1px),linear-gradient(to_bottom,#1f1f2e05_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] pointer-events-none" />
 
         {/* Floating Capsule Navigation Bar */}
         {page !== "bud" && page !== "status" && (
-          <div className="fixed left-0 right-0 z-50 px-4 top-4">
+          <div className={`fixed left-0 right-0 z-50 px-4 transition-all duration-300 ease-out ${showAuthBanner && isAtTop ? "top-[72px] sm:top-[56px]" : "top-4"}`}>
           <nav className="max-w-4xl mx-auto rounded-full border border-white/20 bg-white/10 backdrop-blur-xl shadow-xl shadow-black/50 px-6 py-2.5 flex items-center justify-between">
             {/* Left Brand */}
             <div 
@@ -1489,14 +1557,14 @@ export default function App() {
               <a href="/bud" onClick={(e) => { e.preventDefault(); setPage("bud"); }} className="hover:text-white transition-colors">Bud</a>
               <a href="#pricing" onClick={() => setPage("home")} className="hover:text-white transition-colors">Pricing</a>
               <a href="#faq" onClick={() => setPage("home")} className="hover:text-white transition-colors">FAQ</a>
-              {user && (
+              {activeUser && (
                 <button onClick={handleWorkspaceClick} className="hover:text-white transition-colors cursor-pointer text-sm font-semibold">Workspace</button>
               )}
             </div>
 
             {/* Right Actions */}
             <div className="flex items-center gap-4">
-              {user ? (
+              {activeUser ? (
                 <div className="relative">
                   {/* User Logo / Avatar */}
                   <button
@@ -1504,8 +1572,8 @@ export default function App() {
                     className="flex items-center gap-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full pl-2 pr-3.5 py-1.5 transition-all cursor-pointer focus:outline-none focus:ring-1 focus:ring-white/20 select-none"
                     aria-label="User menu"
                   >
-                    <img src={user.image} className="w-6 h-6 rounded-full border border-white/20" referrerPolicy="no-referrer" />
-                    <span className="text-xs font-semibold text-white hidden sm:inline-block max-w-[120px] truncate">{user.name}</span>
+                    <img src={activeUser.image} className="w-6 h-6 rounded-full border border-white/20" referrerPolicy="no-referrer" />
+                    <span className="text-xs font-semibold text-white hidden sm:inline-block max-w-[120px] truncate">{activeUser.name}</span>
                     <ChevronDown className={`w-3.5 h-3.5 text-white/60 transition-transform ${showProfileDropdown ? "rotate-180" : ""}`} />
                   </button>
 
@@ -1514,10 +1582,10 @@ export default function App() {
                     <div className="absolute right-0 mt-2.5 w-64 rounded-3xl border border-zinc-850 bg-zinc-950/95 p-4 shadow-2xl backdrop-blur-xl z-50 text-left space-y-3.5 animate-in fade-in slide-in-from-top-2 duration-200">
                       {/* User metadata header */}
                       <div className="flex items-center gap-3 border-b border-zinc-900 pb-3">
-                        <img src={user.image} className="w-10 h-10 rounded-full border border-zinc-850" referrerPolicy="no-referrer" />
+                        <img src={activeUser.image} className="w-10 h-10 rounded-full border border-zinc-855" referrerPolicy="no-referrer" />
                         <div className="flex flex-col">
-                          <span className="text-xs font-bold text-zinc-100 truncate max-w-[150px]">{user.name}</span>
-                          <span className="text-[10px] text-zinc-500 truncate max-w-[150px]">{user.email}</span>
+                          <span className="text-xs font-bold text-zinc-100 truncate max-w-[150px]">{activeUser.name}</span>
+                          <span className="text-[10px] text-zinc-500 truncate max-w-[150px]">{activeUser.email}</span>
                         </div>
                       </div>
 
@@ -1546,16 +1614,21 @@ export default function App() {
                         </button>
                       </div>
 
-                      {/* Sign Out Button */}
+                      {/* Sign Out / Exit Guest Button */}
                       <div className="border-t border-zinc-900 pt-2.5">
                         <button
                           onClick={() => {
                             setShowProfileDropdown(false);
-                            handleSignOut();
+                            if (user) {
+                              handleSignOut();
+                            } else {
+                              setGuestUser(null);
+                              setPage("home");
+                            }
                           }}
                           className="flex items-center gap-2.5 text-left text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-xl px-3 py-2 transition-all cursor-pointer w-full font-medium"
                         >
-                          Sign Out
+                          {user ? "Sign Out" : "Exit Guest Mode"}
                         </button>
                       </div>
                     </div>
@@ -1563,6 +1636,13 @@ export default function App() {
                 </div>
               ) : (
                 <>
+                  <button
+                    onClick={handleTryAsGuest}
+                    className="text-xs sm:text-sm font-semibold text-zinc-400 hover:text-[#c084fc] transition-colors cursor-pointer mr-2 flex items-center gap-1.5"
+                  >
+                    <Sparkles className="w-3.5 h-3.5" />
+                    <span>Try Workspace</span>
+                  </button>
                   <button
                     onClick={() => {
                       setAuthMode("signin");
@@ -1643,6 +1723,32 @@ export default function App() {
             >
               Silencly dictates your messy thoughts into clear, formatted text.
             </motion.p>
+
+            {/* Hero CTA Button Group */}
+            <motion.div
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5, duration: 0.6 }}
+              className="flex flex-col sm:flex-row items-center gap-4 justify-center z-10"
+            >
+              <button
+                onClick={handleTryAsGuest}
+                className="w-full sm:w-auto px-8 py-4 bg-[#a855f7] hover:bg-[#9333ea] text-white font-semibold rounded-full transition-all active:scale-[0.98] cursor-pointer shadow-[0_4px_20px_rgba(168,85,247,0.4)] flex items-center justify-center gap-2 text-sm"
+              >
+                <Sparkles className="w-4 h-4 text-white" />
+                <span>Try Workspace without signing in</span>
+              </button>
+              <button
+                onClick={() => {
+                  setAuthMode("signup");
+                  setShowAuthModal(true);
+                }}
+                className="w-full sm:w-auto px-8 py-4 bg-zinc-900 hover:bg-zinc-800 text-zinc-300 font-semibold rounded-full transition-all active:scale-[0.98] cursor-pointer border border-zinc-800 flex items-center justify-center gap-1.5 text-sm"
+              >
+                <ArrowUpRight className="w-4 h-4 text-zinc-400" />
+                <span>Get started free</span>
+              </button>
+            </motion.div>
           </div>
         </section>
 
@@ -2276,7 +2382,11 @@ export default function App() {
                     e.preventDefault();
                     if (!newNameInput.trim()) return;
                     try {
-                      await updateProfileName(newNameInput.trim());
+                      if (user) {
+                        await updateProfileName(newNameInput.trim());
+                      } else {
+                        setGuestUser((prev: any) => ({ ...prev, name: newNameInput.trim() }));
+                      }
                       setShowManageNameModal(false);
                     } catch (err) {
                       console.error(err);
@@ -2300,7 +2410,7 @@ export default function App() {
                     <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Email Address</label>
                     <input 
                       type="text" 
-                      value={user?.email || ""} 
+                      value={activeUser?.email || ""} 
                       disabled
                       className="w-full bg-zinc-900/50 border border-zinc-800/40 rounded-2xl py-3 px-4 text-sm text-zinc-500 cursor-not-allowed select-none"
                     />
@@ -2334,6 +2444,7 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-black text-zinc-100 flex flex-col antialiased font-sans">
+      {renderAuthBanner()}
       {/* Workspace Header Panel */}
       <header className="border-b border-zinc-900 bg-black px-6 py-4">
         <div className="max-w-3xl mx-auto flex items-center justify-between">
@@ -2344,10 +2455,10 @@ export default function App() {
 
           {/* User profile with Sign Out */}
           <div className="flex items-center gap-3 bg-zinc-900/80 border border-zinc-800 rounded-2xl px-3.5 py-1.5 shadow-sm">
-            <img src={user.image} className="w-5.5 h-5.5 rounded-full border border-zinc-800 cursor-pointer" referrerPolicy="no-referrer" onClick={() => setShowManageNameModal(true)} title="Manage Profile" />
+            <img src={activeUser.image} className="w-5.5 h-5.5 rounded-full border border-zinc-800 cursor-pointer" referrerPolicy="no-referrer" onClick={() => setShowManageNameModal(true)} title="Manage Profile" />
             <div className="hidden sm:flex flex-col text-left cursor-pointer" onClick={() => setShowManageNameModal(true)} title="Manage Profile">
-              <span className="text-xs font-bold text-zinc-100 leading-none hover:text-white transition-colors">{user.name}</span>
-              <span className="text-[8px] text-zinc-500 font-mono tracking-wide leading-none uppercase mt-0.5">{user.provider || "email"}</span>
+              <span className="text-xs font-bold text-zinc-100 leading-none hover:text-white transition-colors">{activeUser.name}</span>
+              <span className="text-[8px] text-zinc-500 font-mono tracking-wide leading-none uppercase mt-0.5">{activeUser.provider || "email"}</span>
             </div>
             <button
               onClick={handleBackToHome}
@@ -2356,10 +2467,17 @@ export default function App() {
               ← Back to Home
             </button>
             <button
-              onClick={handleSignOut}
+              onClick={() => {
+                if (user) {
+                  handleSignOut();
+                } else {
+                  setGuestUser(null);
+                  setPage("home");
+                }
+              }}
               className="ml-1 text-zinc-500 hover:text-red-400 text-[9px] font-bold uppercase transition-colors cursor-pointer"
             >
-              Sign Out
+              {user ? "Sign Out" : "Exit Guest"}
             </button>
           </div>
         </div>
@@ -2656,7 +2774,11 @@ export default function App() {
                   e.preventDefault();
                   if (!newNameInput.trim()) return;
                   try {
-                    await updateProfileName(newNameInput.trim());
+                    if (user) {
+                      await updateProfileName(newNameInput.trim());
+                    } else {
+                      setGuestUser((prev: any) => ({ ...prev, name: newNameInput.trim() }));
+                    }
                     setShowManageNameModal(false);
                   } catch (err) {
                     console.error(err);
@@ -2680,7 +2802,7 @@ export default function App() {
                   <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Email Address</label>
                   <input 
                     type="text" 
-                    value={user?.email || ""} 
+                    value={activeUser?.email || ""} 
                     disabled
                     className="w-full bg-zinc-900/50 border border-zinc-800/40 rounded-2xl py-3 px-4 text-sm text-zinc-500 cursor-not-allowed select-none"
                   />

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Check, ArrowLeft, RefreshCw } from "lucide-react";
+import { Check, ArrowLeft, RefreshCw, AlertTriangle } from "lucide-react";
 
 interface StatusPageProps {
   onBack: () => void;
@@ -31,14 +31,21 @@ export default function StatusPage({ onBack }: StatusPageProps) {
     }, 1000);
   };
 
-  // Helper to generate 90 status ticks (all 100% green and operational)
+  // Helper to generate 90 status ticks (with custom red outage tick for Authentication today)
   const renderTicks = (serviceName: string) => {
     return Array.from({ length: 90 }).map((_, idx) => {
-      const colorClass = "bg-[#0e7c53]"; // Default beautiful emerald green in screenshot
-      const statusText = "Operational";
+      let colorClass = "bg-[#0e7c53]"; // Default beautiful emerald green
+      let statusText = "Operational";
+      let isOutage = false;
 
       const daysAgo = 89 - idx;
       const dateStr = daysAgo === 0 ? "Today" : `${daysAgo} days ago`;
+
+      if (serviceName === "Authentication" && daysAgo === 0) {
+        colorClass = "bg-red-600 animate-pulse";
+        statusText = "Major Outage";
+        isOutage = true;
+      }
 
       return (
         <div
@@ -51,7 +58,7 @@ export default function StatusPage({ onBack }: StatusPageProps) {
           {hoveredTick?.service === serviceName && hoveredTick?.index === idx && (
             <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-zinc-900 border border-zinc-850 text-[10px] font-mono rounded text-white whitespace-nowrap z-50 shadow-xl">
               <span className="text-zinc-400">{dateStr}: </span>
-              <span className="text-emerald-400">
+              <span className={isOutage ? "text-red-400 font-bold" : "text-emerald-400"}>
                 {statusText}
               </span>
             </div>
@@ -119,21 +126,21 @@ export default function StatusPage({ onBack }: StatusPageProps) {
         {/* Outer System Card container */}
         <div className="bg-[#040406] border border-[#141417] rounded-2xl p-6 sm:p-10 flex flex-col space-y-12 shadow-[0_0_50px_rgba(0,0,0,0.8)]">
           
-          {/* Header Banner: All systems operational */}
+          {/* Header Banner: Active service disruption */}
           <div className="flex flex-col items-center justify-center py-6 border-b border-zinc-900/60">
             <div className="flex items-center gap-3">
-              {/* Pulsing check circle SVG */}
-              <div className="w-7 h-7 rounded-full bg-[#10b981]/10 border border-[#10b981]/20 flex items-center justify-center text-[#10b981] animate-pulse">
-                <Check className="w-4 h-4" strokeWidth={3} />
+              {/* Pulsing alert warning SVG */}
+              <div className="w-7 h-7 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center text-red-500 animate-pulse">
+                <AlertTriangle className="w-4 h-4" strokeWidth={2.5} />
               </div>
               <h2 className="text-xl sm:text-2xl font-medium tracking-tight text-white select-text">
-                All systems operational
+                Active service disruption (Authentication)
               </h2>
             </div>
             <p className="text-[10px] text-zinc-500 font-mono mt-3 uppercase tracking-wider">{lastChecked}</p>
           </div>
 
-          {/* Active Services - ONLY WEBSITE AND DICTATION */}
+          {/* Active Services - WEBSITE, DICTATION AND AUTHENTICATION */}
           <div className="space-y-10">
             
             {/* Service 1: Website */}
@@ -190,6 +197,33 @@ export default function StatusPage({ onBack }: StatusPageProps) {
               </div>
             </div>
 
+            {/* Service 3: Authentication Service */}
+            <div className="flex flex-col space-y-3">
+              {/* Title & Uptime Percent row */}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 rounded-full bg-red-500/15 flex items-center justify-center text-red-500 animate-pulse">
+                    <span className="w-1.5 h-1.5 rounded-full bg-red-500" />
+                  </div>
+                  <span className="text-sm font-medium text-white tracking-tight">Authentication Service</span>
+                </div>
+                <span className="text-xs font-mono font-medium text-red-500 animate-pulse">
+                  Major Outage Today
+                </span>
+              </div>
+
+              {/* Status Ticks Row */}
+              <div className="flex items-center gap-[2px] w-full bg-zinc-950/40 p-1.5 rounded-lg border border-zinc-900/40">
+                {renderTicks("Authentication")}
+              </div>
+
+              {/* Status Ticks labels */}
+              <div className="flex items-center justify-between text-zinc-600">
+                <span className="text-[9px] font-bold font-mono tracking-widest uppercase">&lt; 90 DAYS AGO</span>
+                <span className="text-[9px] font-bold font-mono tracking-widest uppercase text-red-500 font-bold animate-pulse">TODAY (OUTAGE)</span>
+              </div>
+            </div>
+
           </div>
 
           {/* Recent Notices Section */}
@@ -199,12 +233,26 @@ export default function StatusPage({ onBack }: StatusPageProps) {
             </h3>
             
             <div className="space-y-4">
+              {/* Active Outage Incident */}
+              <div className="p-4 bg-red-950/10 border border-red-900/30 rounded-xl flex items-start gap-3">
+                <div className="w-1.5 h-1.5 rounded-full bg-red-500 mt-1.5 shrink-0 animate-pulse" />
+                <div className="space-y-1">
+                  <p className="text-xs font-semibold text-red-400">Authentication Service Disruption (Major Outage)</p>
+                  <p className="text-[11px] text-zinc-400 leading-relaxed font-light">
+                    We are currently experiencing a critical issue with our core database and auth provider connection. Users are temporarily unable to Sign In, Sign Up, or complete OAuth login. 
+                  </p>
+                  <p className="text-[11px] text-zinc-500 leading-relaxed font-light font-mono mt-2">
+                    <span className="text-zinc-400 font-semibold">WORKAROUND:</span> We have deployed a Guest Mode allowing all users to try and use the complete workspace with all features (local storage caching) without signing in. Click the "Try Guest Workspace" option on the home page or in the auth menu.
+                  </p>
+                </div>
+              </div>
+
               <div className="p-4 bg-zinc-950/30 border border-zinc-900/60 rounded-xl flex items-start gap-3">
                 <div className="w-1.5 h-1.5 rounded-full bg-[#10b981] mt-1.5 shrink-0" />
                 <div className="space-y-0.5">
-                  <p className="text-xs font-semibold text-zinc-300">No active incidents reported</p>
+                  <p className="text-xs font-semibold text-zinc-300">Core Transcription Service Operational</p>
                   <p className="text-[11px] text-zinc-500 leading-relaxed font-light">
-                    All core components, including the transcription system, web frontend, and auth databases, are fully operational. No errors or latency degradation detected.
+                    Transcription nodes, AI polish engine, and local browser-based session memory are completely unaffected and running smoothly.
                   </p>
                 </div>
               </div>
