@@ -176,18 +176,11 @@ export default function App() {
   });
 
   const handleWorkspaceClick = () => {
-    const devUrl = "https://ais-dev-rsvudnxxdget4dbykwppnk-916763961142.europe-west2.run.app";
-    const isDev = typeof window !== "undefined" && window.location.origin.includes("ais-dev");
-    
-    if (!isDev) {
-      window.location.href = `${devUrl}/?page=workspace`;
-    } else {
-      setPage("workspace");
-    }
+    setPage("workspace");
   };
 
   const handleBackToHome = () => {
-    window.location.href = "https://ais-pre-rsvudnxxdget4dbykwppnk-916763961142.europe-west2.run.app";
+    setPage("home");
   };
 
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -259,7 +252,7 @@ export default function App() {
     if (typeof window === "undefined") return;
     const handlePopState = () => {
       if (page === "workspace") {
-        window.location.href = "https://ais-pre-rsvudnxxdget4dbykwppnk-916763961142.europe-west2.run.app";
+        setPage("home");
         return;
       }
 
