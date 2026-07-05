@@ -462,12 +462,12 @@ Output: ""`;
     let polishedText = "";
     console.log("Polishing text using Groq Llama...");
     const apiKey = process.env.GROQ_API_KEY || "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";
-    if (!apiKey) {
-      throw new Error("GROQ_API_KEY environment variable is missing on the server.");
-    }
-
     const model = "llama-3.1-8b-instant";
+
     try {
+      if (!apiKey) {
+        throw new Error("GROQ_API_KEY environment variable is missing on the server.");
+      }
       console.log(`Attempting text polishing with model: ${model}...`);
       const groqResponse = await fetch("https://api.groq.com/openai/v1/chat/completions", {
         method: "POST",
@@ -496,22 +496,24 @@ Output: ""`;
       polishedText = groqData.choices?.[0]?.message?.content || "";
       if (polishedText && polishedText.trim() !== "") {
         console.log(`Groq text polishing successful with model: ${model}!`);
+      } else {
+        throw new Error(`Groq returned empty text for ${model}`);
       }
+
+      addAuditLog(resolveActorName(email), `Polished audio transcript to ${tone} style using Groq Llama ${model}`, "Polishing", `Result length: ${polishedText.length} chars`);
     } catch (err: any) {
-      console.error(`Polishing with model ${model} failed:`, err);
-      throw err;
+      console.error(`Polishing with model ${model} failed. Falling back to raw transcript:`, err);
+      // Fallback directly to raw transcript text as requested!
+      polishedText = text;
+      addAuditLog(resolveActorName(email), `Polishing failed, falling back to raw AssemblyAI transcript`, "Polishing", `Raw text length: ${text.length} chars. Error: ${err.message}`);
     }
-
-    if (!polishedText || polishedText.trim() === "") {
-      throw new Error(`Groq ${model} failed to polish text or returned empty content.`);
-    }
-
-    addAuditLog(resolveActorName(email), `Polished audio transcript to ${tone} style using Groq Llama ${model}`, "Polishing", `Result length: ${polishedText.length} chars`);
 
     res.json({ polishedText });
   } catch (err: any) {
-    console.error("Polishing text failed:", err);
-    res.status(500).json({ error: err.message || "Failed to polish text." });
+    console.error("Critical error in polish endpoint:", err);
+    // Ultimate foolproof safety fallback - always send some text, never crash!
+    const fallbackText = req?.body?.text || "";
+    res.json({ polishedText: fallbackText });
   }
 });
 

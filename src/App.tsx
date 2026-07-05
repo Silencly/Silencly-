@@ -2708,68 +2708,7 @@ export default function App() {
         </div>
       )}
 
-      {/* Floating circle assistant following cursor */}
-      {page === "workspace" && (isFocusedOnWriting || status !== "idle" || showAltOption) && (
-        <div 
-          className="fixed pointer-events-none z-[9999] transition-all duration-300 ease-out flex flex-col items-center"
-          style={{ 
-            left: `${widgetPos.x}px`, 
-            top: `${widgetPos.y}px`,
-            transform: "translate(-50%, -50%)"
-          }}
-        >
-          {/* Glowing concentric waves during recording/audio animation */}
-          {status === "recording" && (
-            <div className="absolute w-16 h-16 pointer-events-none flex items-center justify-center">
-              <div className="absolute inset-0 rounded-full bg-purple-500/25 animate-ping" style={{ animationDuration: "1.2s" }} />
-              <div className="absolute inset-0 rounded-full bg-purple-500/15 animate-ping" style={{ animationDuration: "1.8s", animationDelay: "0.2s" }} />
-              <div className="absolute inset-0 rounded-full bg-purple-500/5 animate-ping" style={{ animationDuration: "2.4s", animationDelay: "0.4s" }} />
-            </div>
-          )}
 
-          {/* Core circle app logo */}
-          <div className={`relative w-9 h-9 rounded-full bg-black border flex items-center justify-center shadow-[0_4px_20px_rgba(147,51,234,0.3)] transition-all duration-500 ${
-            status === "recording" 
-              ? "border-purple-500/80 scale-110 shadow-[0_0_25px_rgba(147,51,234,0.6)]" 
-              : status === "transcribing" || status === "polishing"
-              ? "border-yellow-500/80 animate-pulse"
-              : "border-zinc-800"
-          }`}>
-            {status === "transcribing" || status === "polishing" ? (
-              <RefreshCw className="w-4 h-4 text-purple-400 animate-spin" />
-            ) : status === "recording" ? (
-              /* High-fidelity bouncing soundwave audio animation bars */
-              <div className="flex items-center gap-0.5 h-3">
-                <div className="w-0.5 bg-purple-400 rounded-full h-2 animate-bounce" style={{ animationDelay: "0.1s", animationDuration: "0.5s" }} />
-                <div className="w-0.5 bg-purple-300 rounded-full h-3 animate-bounce" style={{ animationDelay: "0.2s", animationDuration: "0.4s" }} />
-                <div className="w-0.5 bg-purple-400 rounded-full h-1.5 animate-bounce" style={{ animationDelay: "0.3s", animationDuration: "0.6s" }} />
-                <div className="w-0.5 bg-purple-300 rounded-full h-2.5 animate-bounce" style={{ animationDelay: "0.4s", animationDuration: "0.45s" }} />
-              </div>
-            ) : (
-              <img 
-                src="https://i.ibb.co/Q742H44R/gemini-watermark-removed.png" 
-                alt="Silencly assistant circle logo" 
-                className="w-5.5 h-5.5 object-contain"
-                referrerPolicy="no-referrer" 
-              />
-            )}
-
-            {/* Glowing active small ring border */}
-            <div className={`absolute inset-0 rounded-full border border-purple-500/20 pointer-events-none ${status === "recording" ? "animate-pulse" : ""}`} />
-          </div>
-
-          {/* Status Label Pill */}
-          <div className="mt-1.5 bg-black/90 border border-zinc-800 px-2 py-0.5 rounded-full text-[8px] font-mono uppercase tracking-widest text-zinc-400 shadow-lg pointer-events-none">
-            {status === "recording" 
-              ? "Listening" 
-              : status === "transcribing" 
-              ? "Converting" 
-              : status === "polishing"
-              ? "Polishing"
-              : "Silencly Ready"}
-          </div>
-        </div>
-      )}
 
       {/* Keyboard Alt option start dictate context menu popover */}
       {page === "workspace" && showAltOption && (
