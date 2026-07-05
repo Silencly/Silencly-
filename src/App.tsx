@@ -60,8 +60,7 @@ import {
   Instagram,
   Linkedin,
   Sun,
-  Moon,
-  Monitor
+  Moon
 } from "lucide-react";
 import Waveform from "./components/Waveform";
 import HistoryDrawer from "./components/HistoryDrawer";
@@ -332,13 +331,12 @@ export default function App() {
     return () => clearInterval(interval);
   }, []);
 
-  // Floating widget & screen share states
+  // Floating widget states
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [widgetPos, setWidgetPos] = useState({ x: 0, y: 0 });
   const [isFocusedOnWriting, setIsFocusedOnWriting] = useState(false);
   const [showAltOption, setShowAltOption] = useState(false);
   const [altOptionPos, setAltOptionPos] = useState({ x: 0, y: 0 });
-  const [screenStream, setScreenStream] = useState<MediaStream | null>(null);
   const [showInjectedToast, setShowInjectedToast] = useState(false);
 
   // Floating widget & Keyboard insertion effect handlers
@@ -431,27 +429,7 @@ export default function App() {
     };
   }, [page]);
 
-  const handleToggleScreenShare = async () => {
-    if (screenStream) {
-      screenStream.getTracks().forEach((track) => track.stop());
-      setScreenStream(null);
-    } else {
-      try {
-        const stream = await navigator.mediaDevices.getDisplayMedia({
-          video: true,
-          audio: false,
-        });
-        setScreenStream(stream);
-        
-        stream.getVideoTracks()[0].onended = () => {
-          setScreenStream(null);
-        };
-      } catch (err: any) {
-        console.error("Screen sharing failed:", err);
-        setError("Screen share permission declined or not supported in this frame. Check browser settings.");
-      }
-    }
-  };
+
 
   // Core Dictation States
   const [isRecording, setIsRecording] = useState(false);
@@ -486,16 +464,7 @@ export default function App() {
   const recognitionRef = useRef<any>(null);
   const timerIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const initialTextRef = useRef("");
-  const pipVideoRef = useRef<HTMLVideoElement | null>(null);
 
-  useEffect(() => {
-    if (screenStream && pipVideoRef.current) {
-      pipVideoRef.current.srcObject = screenStream;
-      pipVideoRef.current.play().catch((e) => {
-        console.error("Failed to autoplay screen PiP stream:", e);
-      });
-    }
-  }, [screenStream]);
 
   // Fetch history and dictionary from backend on load
   useEffect(() => {
@@ -2494,19 +2463,7 @@ export default function App() {
               )}
             </button>
 
-            <button
-              id="screen-share-btn"
-              onClick={handleToggleScreenShare}
-              className={`p-2 border rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${
-                screenStream 
-                  ? "bg-purple-950/40 hover:bg-purple-900 border-purple-800 text-purple-200 shadow-[0_0_12px_rgba(147,51,234,0.15)]" 
-                  : "bg-zinc-900/40 hover:bg-zinc-900 border-zinc-850 text-zinc-400 hover:text-white"
-              }`}
-              title={screenStream ? "Stop Screen Sharing" : "Share Chrome screen or tab"}
-            >
-              <Monitor className={`w-3.5 h-3.5 ${screenStream ? "text-purple-400 animate-pulse" : "text-zinc-400"}`} />
-              <span className="hidden sm:inline">{screenStream ? "Screen Shared" : "Share Screen"}</span>
-            </button>
+
 
             {(rawText || polishedText) && (
               <button
@@ -2842,32 +2799,7 @@ export default function App() {
         </div>
       )}
 
-      {/* Screen Share Overlay Picture-in-Picture window */}
-      {page === "workspace" && screenStream && (
-        <div className="fixed bottom-6 right-6 z-[999] bg-zinc-950/90 border border-zinc-800 rounded-2xl p-2.5 shadow-[0_12px_40px_rgba(0,0,0,0.8)] backdrop-blur-md max-w-xs flex flex-col gap-2">
-          <div className="flex items-center justify-between gap-4">
-            <span className="text-[10px] font-mono tracking-wider font-semibold text-purple-300 uppercase flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-purple-500 animate-ping" />
-              Chrome Screen Shared
-            </span>
-            <button
-              onClick={handleToggleScreenShare}
-              className="p-1 hover:bg-zinc-900 rounded-lg text-zinc-400 hover:text-white transition-colors"
-              title="Stop screen sharing"
-            >
-              <X className="w-3 h-3" />
-            </button>
-          </div>
-          <div className="relative rounded-lg overflow-hidden border border-zinc-900 aspect-video bg-black shadow-inner">
-            <video 
-              ref={pipVideoRef}
-              muted
-              playsInline
-              className="w-full h-full object-cover scale-102"
-            />
-          </div>
-        </div>
-      )}
+
 
       {/* Auto-typing/clipboard notification slide-in toast */}
       {showInjectedToast && (

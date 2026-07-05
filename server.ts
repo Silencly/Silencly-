@@ -23,8 +23,25 @@ const ai = new GoogleGenAI({
 // JSON body parsing with large limit for base64 audio payload
 app.use(express.json({ limit: "50mb" }));
 
-const HISTORY_FILE = path.join(process.cwd(), "history.json");
-const AUDIT_LOGS_FILE = path.join(process.cwd(), "audit_logs.json");
+const isVercel = process.env.VERCEL === "1" || process.env.NODE_ENV === "production";
+const getFilePath = (fileName: string): string => {
+  const localPath = path.join(process.cwd(), fileName);
+  if (isVercel) {
+    const tmpPath = path.join("/tmp", fileName);
+    if (!fs.existsSync(tmpPath) && fs.existsSync(localPath)) {
+      try {
+        fs.copyFileSync(localPath, tmpPath);
+      } catch (err) {
+        console.error(`Failed to copy ${fileName} to /tmp:`, err);
+      }
+    }
+    return tmpPath;
+  }
+  return localPath;
+};
+
+const HISTORY_FILE = getFilePath("history.json");
+const AUDIT_LOGS_FILE = getFilePath("audit_logs.json");
 
 // Helper to read audit logs safely
 function readAuditLogs(): any[] {
@@ -233,7 +250,7 @@ app.delete("/api/history", (req, res) => {
 });
 
 // Helper and Endpoints for Custom Dictionary
-const DICTIONARY_FILE = path.join(process.cwd(), "dictionary.json");
+const DICTIONARY_FILE = getFilePath("dictionary.json");
 
 function readDictionary(): any[] {
   try {
@@ -443,59 +460,54 @@ Input: "um uh um"
 Output: ""`;
 
     let polishedText = "";
-    console.log("Polishing text directly using Groq Llama...");
+    console.log("Polishing text using Groq Llama...");
     const apiKey = process.env.GROQ_API_KEY || "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";
     if (!apiKey) {
-      throw new Error("GROQ_API_KEY is missing on the server.");
+      throw new Error("GROQ_API_KEY environment variable is missing on the server.");
     }
 
-    // Try multiple models in sequence for maximum speed and robustness
-    const modelsToTry = ["llama-3.3-70b-versatile", "llama-3.1-8b-instant", "llama3-8b-8192"];
-    let lastError = null;
+    const model = "llama-3.1-8b-instant";
+    try {
+      console.log(`Attempting text polishing with model: ${model}...`);
+      const groqResponse = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${apiKey}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          model: model,
+          messages: [
+            { role: "system", content: systemInstruction },
+            { role: "user", content: text }
+          ],
+          temperature: 0.15,
+          max_tokens: 1024,
+          top_p: 1.0
+        })
+      });
 
-    for (const model of modelsToTry) {
-      try {
-        console.log(`Attempting text polishing with model: ${model}...`);
-        const groqResponse = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-          method: "POST",
-          headers: {
-            "Authorization": `Bearer ${apiKey}`,
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            model: model,
-            messages: [
-              { role: "system", content: systemInstruction },
-              { role: "user", content: text }
-            ],
-            temperature: 0.15,
-            max_tokens: 1024,
-            top_p: 1.0
-          })
-        });
-
-        if (!groqResponse.ok) {
-          const errText = await groqResponse.text();
-          throw new Error(`Groq API request for ${model} failed: ${errText}`);
-        }
-
-        const groqData: any = await groqResponse.json();
-        polishedText = groqData.choices?.[0]?.message?.content || "";
-        if (polishedText && polishedText.trim() !== "") {
-          console.log(`Groq text polishing successful with model: ${model}!`);
-          break;
-        }
-      } catch (err: any) {
-        console.error(`Polishing with model ${model} failed, trying next fallback:`, err);
-        lastError = err;
+      if (!groqResponse.ok) {
+        const errText = await groqResponse.text();
+        throw new Error(`Groq API request for ${model} failed: ${errText}`);
       }
+
+      const groqData: any = await groqResponse.json();
+      polishedText = groqData.choices?.[0]?.message?.content || "";
+      if (polishedText && polishedText.trim() !== "") {
+        console.log(`Groq text polishing successful with model: ${model}!`);
+      }
+    } catch (err: any) {
+      console.error(`Polishing with model ${model} failed:`, err);
+      throw err;
     }
 
     if (!polishedText || polishedText.trim() === "") {
-      throw lastError || new Error("All Groq Llama models failed to polish text or returned empty content.");
+      throw new Error(`Groq ${model} failed to polish text or returned empty content.`);
     }
 
-    addAuditLog(resolveActorName(email), `Polished audio transcript to ${tone} style using Groq Llama`, "Polishing", `Result length: ${polishedText.length} chars`);
+    addAuditLog(resolveActorName(email), `Polished audio transcript to ${tone} style using Groq Llama ${model}`, "Polishing", `Result length: ${polishedText.length} chars`);
+
     res.json({ polishedText });
   } catch (err: any) {
     console.error("Polishing text failed:", err);
@@ -632,8 +644,8 @@ app.post("/api/transcribe", async (req, res) => {
 // BETTER AUTH PERSISTENCE AND ROUTING SERVICE
 // ==========================================
 
-const USERS_FILE = path.join(process.cwd(), "users.json");
-const SESSIONS_FILE = path.join(process.cwd(), "sessions.json");
+const USERS_FILE = getFilePath("users.json");
+const SESSIONS_FILE = getFilePath("sessions.json");
 
 function readUsers(): any[] {
   try {
@@ -1276,13 +1288,16 @@ Example:
 </think>
 Yes, I can certainly structure that data set for you!`;
 
-    const groqApiKey = process.env.GROQ_API_KEY || "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";
     let reply = "";
     let success = false;
 
-    // Try calling Groq with Qwen 3.6 model as requested by the user
+    // Query Groq directly using Llama 3.1 8B Instant
     try {
-      console.log("Attempting Bud Chat with Groq qwen/qwen3.6-27b...");
+      console.log("Attempting Bud Chat with Llama-3.1-8b-instant via Groq...");
+      const groqApiKey = process.env.GROQ_API_KEY || "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";
+      if (!groqApiKey) {
+        throw new Error("GROQ_API_KEY environment variable is missing on the server.");
+      }
       const groqHistory = history.map((msg: any) => ({
         role: msg.role === "user" ? "user" : "assistant",
         content: msg.content
@@ -1295,15 +1310,15 @@ Yes, I can certainly structure that data set for you!`;
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
-          model: "qwen/qwen3.6-27b",
+          model: "llama-3.1-8b-instant",
           messages: [
             { role: "system", content: systemInstruction },
             ...groqHistory,
             { role: "user", content: message }
           ],
-          temperature: 0.6,
+          temperature: 0.7,
           max_tokens: 2048,
-          top_p: 0.95
+          top_p: 0.9
         })
       });
 
@@ -1312,126 +1327,18 @@ Yes, I can certainly structure that data set for you!`;
         reply = groqData.choices?.[0]?.message?.content || "";
         if (reply.trim()) {
           success = true;
-          console.log("Groq qwen/qwen3.6-27b call successful!");
+          console.log("Groq Llama 3.1 8b call successful!");
         }
       } else {
         const errorText = await groqResponse.text();
-        console.warn(`Groq qwen/qwen3.6-27b failed, trying qwen-2.5-32b. Error: ${errorText}`);
+        throw new Error(`Groq Llama 3.1 8b failed: ${errorText}`);
       }
-    } catch (err) {
-      console.error("Failed to query Groq with qwen/qwen3.6-27b:", err);
+    } catch (err: any) {
+      console.error("Failed to query Groq with Llama 3.1 8b:", err);
     }
 
-    // Fallback 1: Try qwen-2.5-32b via Groq
-    if (!success) {
-      try {
-        console.log("Attempting Bud Chat with Groq qwen-2.5-32b fallback...");
-        const groqHistory = history.map((msg: any) => ({
-          role: msg.role === "user" ? "user" : "assistant",
-          content: msg.content
-        }));
-
-        const groqResponse = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-          method: "POST",
-          headers: {
-            "Authorization": `Bearer ${groqApiKey}`,
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            model: "qwen-2.5-32b",
-            messages: [
-              { role: "system", content: systemInstruction },
-              ...groqHistory,
-              { role: "user", content: message }
-            ],
-            temperature: 0.6,
-            max_tokens: 2048,
-            top_p: 0.95
-          })
-        });
-
-        if (groqResponse.ok) {
-          const groqData: any = await groqResponse.json();
-          reply = groqData.choices?.[0]?.message?.content || "";
-          if (reply.trim()) {
-            success = true;
-            console.log("Groq qwen-2.5-32b call successful!");
-          }
-        } else {
-          const errorText = await groqResponse.text();
-          console.warn(`Groq qwen-2.5-32b failed. Error: ${errorText}`);
-        }
-      } catch (err) {
-        console.error("Failed to query Groq with qwen-2.5-32b:", err);
-      }
-    }
-
-    // Fallback 2: Try Llama 3.3 70b via Groq
-    if (!success) {
-      try {
-        console.log("Attempting Bud Chat with Llama-3.3-70b-versatile via Groq...");
-        const groqHistory = history.map((msg: any) => ({
-          role: msg.role === "user" ? "user" : "assistant",
-          content: msg.content
-        }));
-
-        const groqResponse = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-          method: "POST",
-          headers: {
-            "Authorization": `Bearer ${groqApiKey}`,
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            model: "llama-3.3-70b-versatile",
-            messages: [
-              { role: "system", content: systemInstruction },
-              ...groqHistory,
-              { role: "user", content: message }
-            ],
-            temperature: 0.7,
-            max_tokens: 2048,
-            top_p: 0.9
-          })
-        });
-
-        if (groqResponse.ok) {
-          const groqData: any = await groqResponse.json();
-          reply = groqData.choices?.[0]?.message?.content || "";
-          if (reply.trim()) {
-            success = true;
-            console.log("Groq Llama 3.3 70b call successful!");
-          }
-        }
-      } catch (err) {
-        console.error("Failed to query Groq with Llama 3.3:", err);
-      }
-    }
-
-    // Fallback 3: Try Gemini 3.5 Flash
-    if (!success) {
-      console.log("Attempting Bud Chat with Gemini 3.5 Flash fallback...");
-      const contents = history.map((msg: any) => ({
-        role: msg.role === "user" ? "user" : "model",
-        parts: [{ text: msg.content }]
-      }));
-
-      contents.push({
-        role: "user",
-        parts: [{ text: message }]
-      });
-
-      const response = await ai.models.generateContent({
-        model: "gemini-3.5-flash",
-        contents,
-        config: {
-          systemInstruction,
-          temperature: 0.7,
-          maxOutputTokens: 1024,
-        }
-      });
-
-      reply = response.text || "I am online and ready to assist you.";
-      console.log("Gemini fallback successful!");
+    if (!success || !reply.trim()) {
+      reply = "I am online and ready to assist you.";
     }
 
     addAuditLog(resolveActorName(email), `Bud AI answered conversation: "${message.substring(0, 45)}..."`, "Chatbot", `Reply length: ${reply.length} chars`);
