@@ -73,7 +73,6 @@ import DictionaryDrawer, { DictionaryItem } from "./components/DictionaryDrawer"
 import PricingSection from "./components/ui/pricing-section-4";
 import { Testimonials } from "./components/ui/twitter-testimonial-cards";
 import { DictationSession, ToneOption, TONE_OPTIONS } from "./types";
-import StatusPage from "./components/StatusPage";
 
 const marqueeLogos = [
   { name: "Procure", url: "https://svgl.app/library/preact.svg", gradient: "linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)" },
@@ -204,13 +203,12 @@ export default function App() {
     updateProfileName,
   } = useAppAuth();
 
-  const [page, setPage] = useState<"home" | "about" | "workspace" | "status" | "bud">(() => {
+  const [page, setPage] = useState<"home" | "about" | "workspace" | "bud">(() => {
     if (typeof window === "undefined") return "home";
     const params = new URLSearchParams(window.location.search);
     if (params.get("page") === "workspace" || window.location.pathname === "/workspace") {
       return "workspace";
     }
-    if (window.location.pathname === "/status") return "status";
     if (window.location.pathname === "/about") return "about";
     if (window.location.pathname === "/bud" || window.location.pathname === "/dsbuddy") return "bud";
     return "home";
@@ -270,10 +268,6 @@ export default function App() {
       if (window.location.pathname !== "/about") {
         window.history.pushState({ page: "about" }, "", "/about");
       }
-    } else if (page === "status") {
-      if (window.location.pathname !== "/status") {
-        window.history.pushState({ page: "status" }, "", "/status");
-      }
     } else if (page === "bud") {
       if (window.location.pathname !== "/bud") {
         window.history.pushState({ page: "bud" }, "", "/bud");
@@ -299,8 +293,6 @@ export default function App() {
 
       if (window.location.pathname === "/about") {
         setPage("about");
-      } else if (window.location.pathname === "/status") {
-        setPage("status");
       } else if (window.location.pathname === "/bud" || window.location.pathname === "/dsbuddy") {
         setPage("bud");
       } else {
@@ -339,7 +331,6 @@ export default function App() {
 
   const [isAtTop, setIsAtTop] = useState(true);
 
-  const [showAuthBanner, setShowAuthBanner] = useState(true);
   const [guestUser, setGuestUser] = useState<any | null>(null);
   const activeUser = user || guestUser;
 
@@ -356,38 +347,6 @@ export default function App() {
     setShowAuthModal(false);
   };
 
-  const renderAuthBanner = () => {
-    if (!showAuthBanner) return null;
-    return (
-      <div className="w-full bg-[#1c150c] border-b border-[#3b2b1a] py-2.5 px-4 flex items-center justify-between z-[9999] select-none text-center">
-        <div className="flex-1 flex items-center justify-center gap-2 text-xs sm:text-sm text-[#f59e0b]">
-          <AlertTriangle className="w-4 h-4 shrink-0 text-[#f59e0b] animate-pulse" />
-          <span>
-            We are currently facing an authentication issue. Please follow the{" "}
-            <button
-              onClick={() => {
-                setPage("status");
-                setShowAuthModal(false);
-              }}
-              className="underline hover:text-white font-semibold cursor-pointer"
-            >
-              status page
-            </button>{" "}
-            for updates.
-          </span>
-        </div>
-        <button
-          onClick={() => setShowAuthBanner(false)}
-          className="text-zinc-500 hover:text-zinc-300 cursor-pointer p-1"
-          aria-label="Dismiss banner"
-          title="Dismiss banner"
-        >
-          <X className="w-4 h-4" />
-        </button>
-      </div>
-    );
-  };
-
   useEffect(() => {
     if (showManageNameModal && activeUser) {
       setNewNameInput(activeUser.name || "");
@@ -398,7 +357,7 @@ export default function App() {
     if (activeUser) {
       setShowAuthModal(false);
       // Only reset page to home if we aren't already on one of the inner routed sections on initial load
-      setPage((prev) => (prev === "bud" || prev === "about" || prev === "status" || prev === "workspace" ? prev : "home"));
+      setPage((prev) => (prev === "bud" || prev === "about" || prev === "workspace" ? prev : "home"));
     }
   }, [activeUser]);
 
@@ -1384,7 +1343,6 @@ export default function App() {
   if (!activeUser && showAuthModal) {
     return (
       <>
-        {renderAuthBanner()}
         <main className="flex min-h-screen w-full bg-black selection:bg-zinc-950/30 p-2 transition-all duration-500 lg:h-screen lg:overflow-hidden lg:p-4 text-white">
           {/* Left Column (Hero) */}
           <div className="hidden lg:flex w-[52%] relative flex-col items-center justify-end pb-32 px-12 rounded-3xl overflow-hidden shadow-2xl h-full">
@@ -1599,20 +1557,7 @@ export default function App() {
                 </button>
               </form>
 
-              <div className="relative flex py-3 items-center">
-                <div className="flex-grow border-t border-white/5"></div>
-                <span className="flex-shrink mx-4 text-white/20 text-[10px] font-mono font-medium tracking-wider uppercase">Or workaround</span>
-                <div className="flex-grow border-t border-white/5"></div>
-              </div>
 
-              <button
-                type="button"
-                onClick={handleTryAsGuest}
-                className="w-full h-14 bg-[#120f18] hover:bg-[#1a1424] text-[#c084fc] border border-[#a855f7]/25 hover:border-[#a855f7]/40 font-semibold rounded-xl active:scale-[0.98] transition-all cursor-pointer flex items-center justify-center gap-2"
-              >
-                <Sparkles className="w-4 h-4 text-[#a855f7]" />
-                Try Workspace as Guest (No Sign-In)
-              </button>
 
               {/* Footer Switch Link */}
               <div className="text-center mt-6">
@@ -1656,13 +1601,12 @@ export default function App() {
   if (!activeUser || page !== "workspace") {
     return (
       <div className="min-h-screen bg-zinc-950 text-zinc-50 flex flex-col antialiased font-sans selection:bg-zinc-900 relative overflow-hidden">
-        {renderAuthBanner()}
         {/* Soft, beautiful grid overlay in light gray */}
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#1f1f2e05_1px,transparent_1px),linear-gradient(to_bottom,#1f1f2e05_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] pointer-events-none" />
 
         {/* Floating Capsule Navigation Bar */}
-        {page !== "bud" && page !== "status" && (
-          <div className={`fixed left-0 right-0 z-50 px-4 transition-all duration-300 ease-out ${showAuthBanner && isAtTop ? "top-[72px] sm:top-[56px]" : "top-4"}`}>
+        {page !== "bud" && (
+          <div className="fixed left-0 right-0 z-50 px-4 top-4">
           <nav className="max-w-4xl mx-auto rounded-full border border-white/20 bg-white/10 backdrop-blur-xl shadow-xl shadow-black/50 px-3 py-1.5 sm:px-6 sm:py-2.5 flex items-center justify-between">
             {/* Left Brand */}
             <div 
@@ -1768,14 +1712,7 @@ export default function App() {
                 </div>
               ) : (
                 <>
-                  <button
-                    onClick={handleTryAsGuest}
-                    className="text-[10px] sm:text-xs font-semibold text-zinc-400 hover:text-[#c084fc] transition-colors cursor-pointer flex items-center gap-1"
-                    title="Try Workspace without signing in"
-                  >
-                    <Sparkles className="w-3 h-3 text-purple-400" />
-                    <span className="hidden min-[480px]:inline-block">Try Workspace</span>
-                  </button>
+
                   <button
                     onClick={() => {
                       setAuthMode("signin");
@@ -1865,21 +1802,23 @@ export default function App() {
               className="flex flex-col sm:flex-row items-center gap-4 justify-center z-10"
             >
               <button
-                onClick={handleTryAsGuest}
-                className="w-full sm:w-auto px-8 py-4 bg-[#a855f7] hover:bg-[#9333ea] text-white font-semibold rounded-full transition-all active:scale-[0.98] cursor-pointer shadow-[0_4px_20px_rgba(168,85,247,0.4)] flex items-center justify-center gap-2 text-sm"
-              >
-                <Sparkles className="w-4 h-4 text-white" />
-                <span>Try Workspace without signing in</span>
-              </button>
-              <button
                 onClick={() => {
                   setAuthMode("signup");
                   setShowAuthModal(true);
                 }}
+                className="w-full sm:w-auto px-8 py-4 bg-[#a855f7] hover:bg-[#9333ea] text-white font-semibold rounded-full transition-all active:scale-[0.98] cursor-pointer shadow-[0_4px_20px_rgba(168,85,247,0.4)] flex items-center justify-center gap-1.5 text-sm"
+              >
+                <Sparkles className="w-4 h-4 text-white" />
+                <span>Get started free</span>
+              </button>
+              <button
+                onClick={() => {
+                  setAuthMode("signin");
+                  setShowAuthModal(true);
+                }}
                 className="w-full sm:w-auto px-8 py-4 bg-zinc-900 hover:bg-zinc-800 text-zinc-300 font-semibold rounded-full transition-all active:scale-[0.98] cursor-pointer border border-zinc-800 flex items-center justify-center gap-1.5 text-sm"
               >
-                <ArrowUpRight className="w-4 h-4 text-zinc-400" />
-                <span>Get started free</span>
+                <span>Sign In</span>
               </button>
             </motion.div>
           </div>
@@ -2346,18 +2285,13 @@ export default function App() {
           </section>
         )}
 
-        {/* Conditional Status Content */}
-        {page === "status" && (
-          <StatusPage onBack={() => setPage("home")} />
-        )}
-
         {/* Bud AI Worker Dashboard */}
         {page === "bud" && (
           <BudPage onBack={() => setPage("home")} user={user} onAuthClick={() => { setAuthMode("signin"); setShowAuthModal(true); }} />
         )}
 
         {/* Public Footer */}
-        {page !== "status" && page !== "bud" && (
+        {page !== "bud" && (
           <footer className="bg-[#0a0a0a] border-t border-zinc-900 pt-16 pb-8">
           <div className="max-w-7xl mx-auto px-6">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
@@ -2400,7 +2334,6 @@ export default function App() {
                 <ul className="space-y-4">
                   <li><button onClick={() => { window.scrollTo(0, 0); setPage("home"); }} className="text-zinc-400 hover:text-zinc-50 transition-colors text-sm cursor-pointer">Home</button></li>
                   <li><button onClick={() => setPage("about")} className="text-zinc-400 hover:text-zinc-50 transition-colors text-sm cursor-pointer">About Us</button></li>
-                  <li><button onClick={() => setPage("status")} className="text-zinc-400 hover:text-zinc-50 transition-colors text-sm cursor-pointer">System Status</button></li>
                   <li><a href="/bud" onClick={(e) => { e.preventDefault(); setPage("bud"); }} className="text-zinc-400 hover:text-zinc-50 transition-colors text-sm cursor-pointer">Bud</a></li>
                   <li><a href="#pricing" onClick={() => setPage("home")} className="text-zinc-400 hover:text-zinc-50 transition-colors text-sm cursor-pointer">Pricing</a></li>
                   <li><a href="#faq" onClick={() => setPage("home")} className="text-zinc-400 hover:text-zinc-50 transition-colors text-sm cursor-pointer">FAQ</a></li>
@@ -2585,7 +2518,6 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-[#07070a] text-zinc-100 flex flex-col md:flex-row antialiased font-sans select-none">
-      {renderAuthBanner()}
 
       {/* MOBILE HEADER NAVIGATION */}
       <header className="md:hidden flex items-center justify-between border-b border-zinc-900 bg-[#0c0c10] px-5 py-3.5 w-full z-40 shrink-0">
@@ -2877,10 +2809,10 @@ export default function App() {
                   </div>
                 </div>
 
-                {/* Visual row - Chart & Mini Info */}
-                <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+                {/* Visual row - Chart */}
+                <div className="w-full">
                   {/* Left Chart column */}
-                  <div className="lg:col-span-3 p-6 bg-zinc-950/40 border border-zinc-900 rounded-3xl flex flex-col">
+                  <div className="p-6 bg-zinc-950/40 border border-zinc-900 rounded-3xl flex flex-col">
                     <div className="flex items-center justify-between mb-6">
                       <div>
                         <h3 className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Weekly Output Activity</h3>
@@ -2915,28 +2847,6 @@ export default function App() {
                         </div>
                       ))}
                     </div>
-                  </div>
-
-                  {/* Right Instruction banner Column */}
-                  <div className="lg:col-span-2 p-6 bg-purple-950/10 border border-purple-900/20 rounded-3xl flex flex-col justify-between relative overflow-hidden">
-                    <div className="absolute top-0 right-0 w-36 h-36 bg-purple-500/10 rounded-full filter blur-3xl" />
-                    <div className="space-y-3">
-                      <div className="w-8 h-8 rounded-lg bg-purple-900/20 flex items-center justify-center border border-purple-800/30">
-                        <Zap className="w-4 h-4 text-purple-400 animate-pulse-slow" />
-                      </div>
-                      <h4 className="text-sm font-bold text-white">Advanced Hold-to-Talk Hotkey</h4>
-                      <p className="text-xs text-purple-200/70 leading-relaxed">
-                        Hold down <code className="bg-purple-950 border border-purple-800/50 px-1.5 py-0.5 rounded text-purple-300 font-mono text-[10px] font-bold">{selectedShortcut}</code> globally in this app to record. The raw dictation is processed, polished via Groq API, copied automatically, and is ready to type!
-                      </p>
-                    </div>
-
-                    <button
-                      onClick={() => setWorkspaceTab("settings")}
-                      className="mt-4 w-full py-2 bg-purple-900/30 hover:bg-purple-900/50 text-purple-200 border border-purple-850 rounded-xl text-xs font-semibold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
-                    >
-                      <span>Configure Hotkey</span>
-                      <ArrowRight className="w-3.5 h-3.5" />
-                    </button>
                   </div>
                 </div>
 

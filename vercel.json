@@ -7,7 +7,6 @@
   "rewrites": [
     { "source": "/api/(.*)", "destination": "/api/index.ts" },
     { "source": "/about", "destination": "/index.html" },
-    { "source": "/status", "destination": "/index.html" },
     { "source": "/dsbuddy", "destination": "/index.html" },
     { "source": "/bud", "destination": "/index.html" },
     { "source": "/(.*)", "destination": "/index.html" }

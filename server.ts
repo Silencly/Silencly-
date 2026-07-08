@@ -8,7 +8,7 @@ import { GoogleGenAI } from "@google/genai";
 import { Composio } from "@composio/core";
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
 
 // Initialize Gemini client using automatically injected key for robust AI operations
 const ai = new GoogleGenAI({
