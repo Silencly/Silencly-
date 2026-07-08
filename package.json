@@ -8,7 +8,8 @@
     "build": "vite build && esbuild server.ts --bundle --platform=node --format=cjs --packages=external --sourcemap --outfile=dist/server.cjs",
     "start": "node dist/server.cjs",
     "clean": "rm -rf dist server.js",
-    "lint": "tsc --noEmit"
+    "lint": "tsc --noEmit",
+    "tauri": "tauri"
   },
   "dependencies": {
     "@better-auth/infra": "^0.3.4",
@@ -19,6 +20,7 @@
     "@radix-ui/react-slot": "^1.3.0",
     "@supabase/supabase-js": "^2.108.2",
     "@tailwindcss/vite": "^4.1.14",
+    "@tauri-apps/api": "^2.11.1",
     "@tsparticles/react": "^3.0.0",
     "@tsparticles/slim": "^3.9.1",
     "@vitejs/plugin-react": "^5.0.4",
@@ -39,6 +41,7 @@
     "vite": "^6.2.3"
   },
   "devDependencies": {
+    "@tauri-apps/cli": "^2.11.4",
     "@types/better-sqlite3": "^7.6.13",
     "@types/express": "^4.17.21",
     "@types/node": "^22.14.0",

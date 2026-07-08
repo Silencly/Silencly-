@@ -1,0 +1,100 @@
+{
+  "build": {
+    "beforeDevCommand": "npm run dev",
+    "beforeBuildCommand": "npm run build",
+    "devPath": "http://localhost:3000",
+    "distDir": "../dist"
+  },
+  "package": {
+    "productName": "Silencly",
+    "version": "1.2.0"
+  },
+  "tauri": {
+    "allowlist": {
+      "all": true,
+      "clipboard": {
+        "all": true,
+        "writeText": true,
+        "readText": true
+      },
+      "globalShortcut": {
+        "all": true
+      },
+      "window": {
+        "all": true,
+        "create": true,
+        "close": true,
+        "show": true,
+        "hide": true,
+        "setPosition": true,
+        "setAlwaysOnTop": true
+      },
+      "shell": {
+        "all": true,
+        "open": true
+      }
+    },
+    "bundle": {
+      "active": true,
+      "category": "DeveloperTool",
+      "copyright": "Copyright © 2026 Impersio",
+      "deb": {
+        "depends": []
+      },
+      "externalBin": [],
+      "icon": [
+        "icons/32x32.png",
+        "icons/128x128.png",
+        "icons/128x128@2x.png",
+        "icons/icon.icns",
+        "icons/icon.ico"
+      ],
+      "identifier": "me.impersio.silencly",
+      "longDescription": "Silencly is a real-time voice-to-text dictation application that converts speech into polished text across any application.",
+      "macOS": {
+        "entitlements": null,
+        "exceptionDomain": "",
+        "frameworks": [],
+        "providerBundleIdentifier": null,
+        "signingIdentity": null
+      },
+      "resources": [],
+      "shortDescription": "Sleek, transparent voice dictation overlay",
+      "targets": "all",
+      "windows": {
+        "certificateThumbprint": null,
+        "digestAlgorithm": null,
+        "timestampUrl": ""
+      }
+    },
+    "security": {
+      "csp": null
+    },
+    "updater": {
+      "active": false
+    },
+    "windows": [
+      {
+        "fullscreen": false,
+        "height": 720,
+        "resizable": true,
+        "title": "Silencly - Smart AI Dictation",
+        "width": 1080,
+        "visible": true
+      },
+      {
+        "label": "overlay",
+        "title": "Silencly Overlay",
+        "width": 380,
+        "height": 190,
+        "resizable": false,
+        "fullscreen": false,
+        "alwaysOnTop": true,
+        "decorations": false,
+        "transparent": true,
+        "visible": false,
+        "skipTaskbar": true
+      }
+    ]
+  }
+}

@@ -1,6 +1,7 @@
 import { supabase, isSupabaseConfigured } from "./supabase-client";
 import { DictationSession } from "../types";
 import { DictionaryItem } from "../components/DictionaryDrawer";
+import { safeStorage } from "./safe-storage";
 
 // Fetch history
 export async function dbFetchHistory(userId: string): Promise<DictationSession[]> {
@@ -27,13 +28,13 @@ export async function dbFetchHistory(userId: string): Promise<DictationSession[]
         const sorted = (data || []) as DictationSession[];
         sorted.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
         // Synchronize local cache
-        localStorage.setItem("ai_dictation_history", JSON.stringify(sorted));
+        safeStorage.setItem("ai_dictation_history", JSON.stringify(sorted));
         return sorted;
       }
     } catch (err) {
       console.error("Server fetchHistory error, fallback to local storage:", err);
     }
-    const cached = localStorage.getItem("ai_dictation_history");
+    const cached = safeStorage.getItem("ai_dictation_history");
     return cached ? JSON.parse(cached) : [];
   }
 }
@@ -56,13 +57,13 @@ export async function dbFetchDictionary(userId: string): Promise<DictionaryItem[
       const res = await fetch(`/api/dictionary?userId=${encodeURIComponent(userId)}`);
       if (res.ok) {
         const data = await res.json();
-        localStorage.setItem("ai_dictation_dictionary", JSON.stringify(data));
+        safeStorage.setItem("ai_dictation_dictionary", JSON.stringify(data));
         return data;
       }
     } catch (err) {
       console.error("Server fetchDictionary error, fallback to local storage:", err);
     }
-    const cached = localStorage.getItem("ai_dictation_dictionary");
+    const cached = safeStorage.getItem("ai_dictation_dictionary");
     return cached ? JSON.parse(cached) : [];
   }
 }

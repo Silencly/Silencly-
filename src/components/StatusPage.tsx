@@ -86,10 +86,13 @@ export default function StatusPage({ onBack }: StatusPageProps) {
               className="group cursor-pointer flex items-center justify-center p-1 rounded-xl hover:bg-zinc-950/50 transition-colors"
             >
               <img 
-                src="https://i.ibb.co/Q742H44R/gemini-watermark-removed.png" 
+                src="/logo-dark.svg" 
                 alt="Silencly Logo" 
-                className="w-10 h-10 object-contain"
+                className="w-10 h-10 object-contain select-none pointer-events-none" 
                 referrerPolicy="no-referrer"
+                onContextMenu={(e) => e.preventDefault()}
+                onDragStart={(e) => e.preventDefault()}
+                style={{ WebkitTouchCallout: "none", WebkitUserDrag: "none" }}
               />
             </div>
             

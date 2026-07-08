@@ -4,8 +4,8 @@
   "description": "Dictate 100X faster. Convert messy thoughts and voice brain dumps into perfectly formatted documents instantly.",
   "icons": [
     {
-      "src": "https://i.ibb.co/Q742H44R/gemini-watermark-removed.png",
-      "type": "image/png",
+      "src": "/favicon.svg",
+      "type": "image/svg+xml",
       "sizes": "512x512",
       "purpose": "any maskable"
     }

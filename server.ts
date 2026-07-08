@@ -397,7 +397,7 @@ app.post("/api/audit-logs", (req, res) => {
 // AI Text Polishing Endpoint using Gemini 3.5 Flash with fallback to Groq Llama 3.1
 app.post("/api/polish", async (req, res) => {
   try {
-    const { text, tone = "polished", email } = req.body;
+    const { text, tone = "polished", email, customPrompt } = req.body;
     if (!text || text.trim() === "") {
       return res.json({ polishedText: "" });
     }
@@ -411,6 +411,10 @@ app.post("/api/polish", async (req, res) => {
       toneGuidance = "Summarize the text completely into a polished bullet-point outline. Highlight action items, key concepts, and summaries in a clean, readable layout.";
     } else if (tone === "email") {
       toneGuidance = "Draft a beautifully formatted email out of the text. Include a catchy subject line, clear spacing, formal greeting, friendly sign-off, and a logical body layout.";
+    }
+
+    if (customPrompt && customPrompt.trim() !== "") {
+      toneGuidance += `\nAdditional user instructions: ${customPrompt}`;
     }
 
     const dict = readDictionary();

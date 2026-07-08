@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { supabase, isSupabaseConfigured } from "./supabase-client";
+import { safeStorage } from "./safe-storage";
 
 export interface UserProfile {
   id: string;
@@ -73,7 +74,7 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
       };
     } else {
       // 2. MOCK LOCAL AUTH LISTENERS (when Supabase is not configured yet)
-      const cached = localStorage.getItem("mock_current_user");
+      const cached = safeStorage.getItem("mock_current_user");
       if (cached) {
         try {
           setUser(JSON.parse(cached));
@@ -101,7 +102,7 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
       }
     } else {
       // Mock flow
-      const mockUsers = JSON.parse(localStorage.getItem("mock_users") || "[]");
+      const mockUsers = JSON.parse(safeStorage.getItem("mock_users") || "[]");
       const matched = mockUsers.find((u: any) => u.email === email && u.password === password);
       if (!matched) {
         const err = new Error("Invalid email or password");
@@ -115,7 +116,7 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
         image: `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(matched.name)}`,
         provider: "email",
       };
-      localStorage.setItem("mock_current_user", JSON.stringify(profile));
+      safeStorage.setItem("mock_current_user", JSON.stringify(profile));
       setUser(profile);
     }
   };
@@ -141,7 +142,7 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
       }
     } else {
       // Mock flow
-      const mockUsers = JSON.parse(localStorage.getItem("mock_users") || "[]");
+      const mockUsers = JSON.parse(safeStorage.getItem("mock_users") || "[]");
       if (mockUsers.some((u: any) => u.email === email)) {
         const err = new Error("User with this email already exists");
         setError(err.message);
@@ -150,7 +151,7 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
       const newId = Math.random().toString(36).substr(2, 9);
       const newUser = { id: newId, email, password, name };
       mockUsers.push(newUser);
-      localStorage.setItem("mock_users", JSON.stringify(mockUsers));
+      safeStorage.setItem("mock_users", JSON.stringify(mockUsers));
 
       const profile: UserProfile = {
         id: newId,
@@ -159,7 +160,7 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
         image: `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(name)}`,
         provider: "email",
       };
-      localStorage.setItem("mock_current_user", JSON.stringify(profile));
+      safeStorage.setItem("mock_current_user", JSON.stringify(profile));
       setUser(profile);
     }
   };
@@ -172,7 +173,7 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
         setError(sbError.message);
       }
     } else {
-      localStorage.removeItem("mock_current_user");
+      safeStorage.removeItem("mock_current_user");
     }
     setUser(null);
     window.location.reload();
@@ -201,7 +202,7 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
         image: `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(name)}`,
         provider: providerName,
       };
-      localStorage.setItem("mock_current_user", JSON.stringify(profile));
+      safeStorage.setItem("mock_current_user", JSON.stringify(profile));
       setUser(profile);
     }
   };
@@ -222,15 +223,15 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
     } else {
       if (!user) return;
       const updated = { ...user, name: newName, image: `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(newName)}` };
-      localStorage.setItem("mock_current_user", JSON.stringify(updated));
+      safeStorage.setItem("mock_current_user", JSON.stringify(updated));
       setUser(updated);
 
       // Update in registered mock users as well
-      const mockUsers = JSON.parse(localStorage.getItem("mock_users") || "[]");
+      const mockUsers = JSON.parse(safeStorage.getItem("mock_users") || "[]");
       const idx = mockUsers.findIndex((u: any) => u.id === user.id);
       if (idx !== -1) {
         mockUsers[idx].name = newName;
-        localStorage.setItem("mock_users", JSON.stringify(mockUsers));
+        safeStorage.setItem("mock_users", JSON.stringify(mockUsers));
       }
     }
   };

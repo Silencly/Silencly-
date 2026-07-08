@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { ChatInput, ChatInputTextArea, ChatInputSubmit } from "@/components/ui/chat-input";
 import { useAppAuth } from "../lib/supabase-service";
+import { safeStorage } from "../lib/safe-storage";
 import {
   Plus,
   MessageSquare,
@@ -465,7 +466,7 @@ export default function BudPage({ onBack, user, onAuthClick }: BudPageProps) {
 
   const handleFinishOnboarding = () => {
     const email = activeUser?.email || "anonymous";
-    localStorage.setItem(`bud_onboarding_done_${email}`, "true");
+    safeStorage.setItem(`bud_onboarding_done_${email}`, "true");
     setOnboardingCompleted(true);
   };
 
@@ -557,10 +558,13 @@ export default function BudPage({ onBack, user, onAuthClick }: BudPageProps) {
               onClick={onBack}
             >
               <img 
-                src="https://i.ibb.co/bcLbWxk/Gemini-Generated-Image-52v33o52v33o52v3.png" 
+                src="/logo-dark.svg" 
                 alt="Bud Logo" 
-                className="w-8 h-8 rounded-lg object-cover shadow-sm border border-zinc-200/50"
+                className="w-8 h-8 rounded-lg object-cover shadow-sm border border-zinc-200/50 select-none pointer-events-none" 
                 referrerPolicy="no-referrer"
+                onContextMenu={(e) => e.preventDefault()}
+                onDragStart={(e) => e.preventDefault()}
+                style={{ WebkitTouchCallout: "none", WebkitUserDrag: "none" }}
               />
               <div className="flex flex-col">
                 <span className="text-sm font-bold tracking-tight text-zinc-950 font-display">Bud</span>
@@ -674,10 +678,13 @@ export default function BudPage({ onBack, user, onAuthClick }: BudPageProps) {
             <div className="flex items-start gap-3">
               <div className="w-7.5 h-7.5 rounded-lg bg-zinc-100 border border-zinc-200 overflow-hidden flex items-center justify-center shrink-0">
                 <img 
-                  src="https://i.ibb.co/bcLbWxk/Gemini-Generated-Image-52v33o52v33o52v3.png" 
+                  src="/logo-dark.svg" 
                   alt="Bud 101 logo" 
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover select-none pointer-events-none" 
                   referrerPolicy="no-referrer"
+                  onContextMenu={(e) => e.preventDefault()}
+                  onDragStart={(e) => e.preventDefault()}
+                  style={{ WebkitTouchCallout: "none", WebkitUserDrag: "none" }}
                 />
               </div>
               <div className="flex flex-col gap-0.5">
@@ -1020,10 +1027,13 @@ export default function BudPage({ onBack, user, onAuthClick }: BudPageProps) {
                   
                   <div className="w-16 h-16 relative z-10 overflow-hidden">
                     <img 
-                      src="https://i.ibb.co/bcLbWxk/Gemini-Generated-Image-52v33o52v33o52v3.png" 
+                      src="/logo-dark.svg" 
                       alt="Bud Mascot Logo" 
-                      className="w-full h-full object-cover rounded-2xl"
+                      className="w-full h-full object-cover rounded-2xl select-none pointer-events-none" 
                       referrerPolicy="no-referrer"
+                      onContextMenu={(e) => e.preventDefault()}
+                      onDragStart={(e) => e.preventDefault()}
+                      style={{ WebkitTouchCallout: "none", WebkitUserDrag: "none" }}
                     />
                   </div>
                 </div>
