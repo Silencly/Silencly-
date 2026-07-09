@@ -2056,6 +2056,114 @@ export default function App() {
             </div>
           </div>
         </section>
+
+        {/* Still Not Sure Section */}
+        <section className="py-16 md:py-24 bg-black w-full px-5 md:px-10 flex flex-col items-center justify-center font-sans border-t border-zinc-900/60">
+          <div className="w-full max-w-[1400px] mx-auto">
+            <div className="relative w-full rounded-[48px] bg-zinc-950 border border-zinc-900 p-8 md:p-14 overflow-hidden flex flex-col lg:flex-row items-center justify-between gap-10">
+              
+              {/* Background gradient blur */}
+              <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-purple-500/5 rounded-full blur-[120px] pointer-events-none -z-10" />
+              <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-orange-500/5 rounded-full blur-[100px] pointer-events-none -z-10" />
+
+              {/* Text Content */}
+              <div className="flex-1 text-center lg:text-left z-10 flex flex-col items-center lg:items-start">
+                <h2 className="font-display text-2xl sm:text-3xl md:text-[38px] font-bold tracking-tight text-white leading-tight uppercase mb-4">
+                  STILL NOT SURE THAT SILENCLY IS RIGHT FOR YOU?
+                </h2>
+                <p className="font-sans text-sm md:text-base text-zinc-400 max-w-xl leading-relaxed mb-8">
+                  Let ChatGPT, Claude, or Perplexity do the thinking for you. Click a button and see what your favorite AI says about Silencly.
+                </p>
+
+                {/* AI Redirect Buttons */}
+                <div className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">
+                  {/* ChatGPT */}
+                  <a
+                    href="https://chatgpt.com/?prompt=tell+me+why+silencly+from+Impersio.me+is+a+great+choice+for+me"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full sm:w-auto h-12 px-6 bg-zinc-900 hover:bg-zinc-850 border border-zinc-800 text-zinc-100 hover:text-white rounded-full flex items-center justify-center gap-3 transition-all font-semibold text-xs sm:text-sm cursor-pointer shadow-md"
+                  >
+                    <img
+                      src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQROq6TUn52DjU4SyVdDFLvgvCEvPHdrDyh3eOw7guNzw&s"
+                      alt="ChatGPT"
+                      className="w-5 h-5 rounded-md object-contain shrink-0"
+                      referrerPolicy="no-referrer"
+                    />
+                    <span>Ask ChatGPT</span>
+                  </a>
+
+                  {/* Claude */}
+                  <a
+                    href="https://claude.ai/new?q=tell+me+why+silencly+from+impersio.me+is+a+great+choice+for+me"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full sm:w-auto h-12 px-6 bg-zinc-900 hover:bg-zinc-850 border border-zinc-800 text-zinc-100 hover:text-white rounded-full flex items-center justify-center gap-3 transition-all font-semibold text-xs sm:text-sm cursor-pointer shadow-md"
+                  >
+                    <img
+                      src="https://avatars.slack-edge.com/2025-05-14/8891273522918_30c38bf627ac73075db6_512.png"
+                      alt="Claude"
+                      className="w-5 h-5 rounded-md object-contain shrink-0"
+                      referrerPolicy="no-referrer"
+                    />
+                    <span>Ask Claude</span>
+                  </a>
+
+                  {/* Perplexity */}
+                  <a
+                    href="https://www.perplexity.ai/search/new?q=tell+me+why+silencly+from+impersio.me+is+a+great+choice+for+me"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full sm:w-auto h-12 px-6 bg-zinc-900 hover:bg-zinc-850 border border-zinc-800 text-zinc-100 hover:text-white rounded-full flex items-center justify-center gap-3 transition-all font-semibold text-xs sm:text-sm cursor-pointer shadow-md"
+                  >
+                    <img
+                      src="https://framerusercontent.com/images/gcMkPKyj2RX8EOEja8A1GWvCb7E.jpg?width=2000&height=2000"
+                      alt="Perplexity"
+                      className="w-5 h-5 rounded-md object-contain shrink-0"
+                      referrerPolicy="no-referrer"
+                    />
+                    <span>Ask Perplexity</span>
+                  </a>
+                </div>
+              </div>
+
+              {/* Character Illustration */}
+              <div className="hidden lg:block w-72 h-64 shrink-0 relative z-10 select-none">
+                <svg viewBox="0 0 300 250" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+                  {/* Styled body representation matching the character */}
+                  {/* Curly Hair / head */}
+                  <path d="M210 180c5 0 25-10 25-25s-10-25-25-25-25 10-25 25 10 25 25 25z" fill="#18181b" />
+                  <path d="M225 175c8 0 18-5 18-15s-5-15-18-15-18 5-18 15 5 15 18 15z" fill="#18181b" />
+                  <path d="M200 160c5 0 15-5 15-15s-5-15-15-15-15 5-15 15 5 15 15 15z" fill="#18181b" />
+                  
+                  {/* Face */}
+                  <path d="M215 175c5 0 12-4 12-10s-5-10-12-10-12 4-12 10 5 10 12 10z" fill="#f4f4f5" stroke="#18181b" strokeWidth="3" />
+                  <path d="M225 165c5 0 8 3 8 8" stroke="#18181b" strokeWidth="3" strokeLinecap="round" />
+                  
+                  {/* Eyes / Smile */}
+                  <circle cx="218" cy="162" r="2" fill="#18181b" />
+                  <path d="M212 169c2 2 5 2 7 0" stroke="#18181b" strokeWidth="2" strokeLinecap="round" />
+
+                  {/* Arm pointing up (colored coral/orange #ff6b4a) */}
+                  <path d="M250 250c0-10-5-35-25-50s-45-30-55-40-15-20-10-25 15-5 25 10 40 45 50 65 15 30 15 40z" fill="#ff6b4a" stroke="#18181b" strokeWidth="4.5" strokeLinecap="round" strokeLinejoin="round" />
+
+                  {/* Hand holding magnifier */}
+                  <path d="M162 138c2-2 5-2 7 0s2 5 0 7c-2 2-5 2-7 0s-2-5 0-7z" fill="#f4f4f5" stroke="#18181b" strokeWidth="3" />
+
+                  {/* Magnifying Glass handle */}
+                  <path d="M165 140l-25-25" stroke="#18181b" strokeWidth="6" strokeLinecap="round" />
+                  <path d="M165 140l-25-25" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" />
+
+                  {/* Magnifying Glass Lens */}
+                  <circle cx="132" cy="107" r="18" fill="#18181b" stroke="#18181b" strokeWidth="4.5" />
+                  <circle cx="132" cy="107" r="14" fill="#a855f7" fillOpacity="0.2" stroke="#ffffff" strokeWidth="1.5" />
+                  <path d="M125 102c2-2 6-2 8 0" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" opacity="0.6" />
+                </svg>
+              </div>
+
+            </div>
+          </div>
+        </section>
           </>
         )}
 
