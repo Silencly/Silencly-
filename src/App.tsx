@@ -71,7 +71,7 @@ import Waveform from "./components/Waveform";
 import HistoryDrawer from "./components/HistoryDrawer";
 import DictionaryDrawer, { DictionaryItem } from "./components/DictionaryDrawer";
 import PricingSection from "./components/ui/pricing-section-4";
-import { Testimonials } from "./components/ui/twitter-testimonial-cards";
+import { TestimonialsSection } from "./components/blocks/testimonials-with-marquee";
 import { DictationSession, ToneOption, TONE_OPTIONS } from "./types";
 
 const marqueeLogos = [
@@ -83,6 +83,33 @@ const marqueeLogos = [
   { name: "Lottielab", url: "https://svgl.app/library/lottielab.svg", gradient: "linear-gradient(135deg, #eab308 0%, #22c55e 100%)" },
   { name: "Mobile App", url: "https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/object/public/bilal-assets/Mobile%20image.png", gradient: "linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%)" },
   { name: "Bing", url: "https://svgl.app/library/bing.svg", gradient: "linear-gradient(135deg, #14b8a6 0%, #0d9488 100%)" }
+];
+
+const testimonialsData = [
+  {
+    author: {
+      name: "Johan Jovin Cheeran",
+      handle: "@johancheeran",
+      avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=JC",
+    },
+    text: "Silencly completely replaced my scratchpad. I can blurt out highly unorganized thoughts about code design, and it formats them into clear JIRA tasks instantly. It's easily 10x faster.",
+  },
+  {
+    author: {
+      name: "Sarah Miller",
+      handle: "@sarahmiller",
+      avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=SM",
+    },
+    text: "I use Silencly to dictate UX feedback while reviewing mockups. What used to take 20 minutes of tedious keyboard typing now takes a 2-minute voice braindump.",
+  },
+  {
+    author: {
+      name: "Anubhav Sapkota",
+      handle: "@anubhavsapkota",
+      avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=AS",
+    },
+    text: "The custom vocabulary is a game changer. It actually spells our company acronyms and specific API endpoints correctly. I couldn't go back to standard voice tools.",
+  },
 ];
 
 const faqData = {
@@ -331,21 +358,7 @@ export default function App() {
 
   const [isAtTop, setIsAtTop] = useState(true);
 
-  const [guestUser, setGuestUser] = useState<any | null>(null);
-  const activeUser = user || guestUser;
-
-  const handleTryAsGuest = () => {
-    const guestObj = {
-      id: "guest",
-      name: "Guest User",
-      email: "guest@silencly.com",
-      image: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80",
-      provider: "guest"
-    };
-    setGuestUser(guestObj);
-    setPage("workspace");
-    setShowAuthModal(false);
-  };
+  const activeUser = user;
 
   useEffect(() => {
     if (showManageNameModal && activeUser) {
@@ -497,11 +510,21 @@ export default function App() {
   const initialTextRef = useRef("");
 
 
-  // Fetch history and dictionary from backend on load or when user state transitions
   useEffect(() => {
     fetchHistory();
     fetchDictionary();
   }, [activeUser]);
+
+  // Keyboard Shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Alt' || e.key === 'Control') {
+        handleToggleRecord();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isRecording]);
 
   // Preset demo options for the interactive playground
   const demoPresets = {
@@ -1698,7 +1721,6 @@ export default function App() {
                             if (user) {
                               handleSignOut();
                             } else {
-                              setGuestUser(null);
                               setPage("home");
                             }
                           }}
@@ -1941,23 +1963,11 @@ export default function App() {
         }} />
 
         {/* User Reviews / Testimonials */}
-        <section id="reviews" className="py-20 md:py-28 border-t border-zinc-900 max-w-7xl mx-auto px-6 w-full overflow-hidden">
-          <div className="text-center max-w-xl mx-auto mb-16">
-            <span className="text-[10px] font-bold font-mono tracking-wider text-zinc-50 uppercase bg-black border border-zinc-800 px-3 py-1 rounded-full">
-              Social Proof
-            </span>
-            <h2 className="text-3xl sm:text-4xl font-extrabold font-display text-zinc-50 tracking-tight mt-4">
-              Loved by Fast Builders
-            </h2>
-            <p className="text-sm text-gray-650 mt-3 font-light leading-relaxed">
-              See how developers, managers, and creators supercharge their workflow using Silencly.
-            </p>
-          </div>
-
-          <div className="max-w-5xl mx-auto font-sans flex justify-center">
-            <Testimonials />
-          </div>
-        </section>
+        <TestimonialsSection
+          title="Loved by Fast Builders"
+          description="See how developers, managers, and creators supercharge their workflow using Silencly."
+          testimonials={testimonialsData}
+        />
 
         {/* FAQ Section */}
         <section id="faq" className="py-20 md:py-28 max-w-6xl mx-auto px-6 w-full">
@@ -2458,8 +2468,6 @@ export default function App() {
                     try {
                       if (user) {
                         await updateProfileName(newNameInput.trim());
-                      } else {
-                        setGuestUser((prev: any) => ({ ...prev, name: newNameInput.trim() }));
                       }
                       setShowManageNameModal(false);
                     } catch (err) {
@@ -2601,7 +2609,7 @@ export default function App() {
               <img src={activeUser.image} className="w-8 h-8 rounded-full border border-zinc-800" />
               <div className="text-left">
                 <p className="text-xs font-bold text-zinc-200 leading-none">{activeUser.name}</p>
-                <p className="text-[9px] text-zinc-500 font-mono mt-0.5">{activeUser.provider || "guest"}</p>
+                <p className="text-[9px] text-zinc-500 font-mono mt-0.5">{activeUser.provider}</p>
               </div>
             </div>
             <button
@@ -2610,7 +2618,6 @@ export default function App() {
                 if (user) {
                   handleSignOut();
                 } else {
-                  setGuestUser(null);
                   setPage("home");
                 }
               }}
@@ -2622,77 +2629,10 @@ export default function App() {
         </div>
       )}
 
-      {/* DESKTOP SIDEBAR */}
-      <aside className="hidden md:flex flex-col w-[260px] bg-[#0c0c10] border-r border-zinc-900/80 p-6 shrink-0 z-30 select-none">
-        {/* Brand Header */}
-        <div className="flex items-center gap-2.5 mb-8 px-2 cursor-pointer" onClick={() => setWorkspaceTab("dashboard")}>
-          <div className="w-9 h-9 rounded-xl bg-zinc-900 flex items-center justify-center border border-zinc-800 shadow-inner">
-            <Mic className="w-5 h-5 text-purple-400 animate-pulse-slow" />
-          </div>
-          <span className="text-lg font-bold tracking-tight text-white font-display">Silencly</span>
-        </div>
-
-        {/* Navigation Sidebar List */}
-        <nav className="flex flex-col gap-1.5 flex-1">
-          {[
-            { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
-            { id: "transcribe", label: "Transcribe Audio", icon: Mic },
-            { id: "history", label: "History & Sessions", icon: History },
-            { id: "stats", label: "Statistics", icon: BarChart3 },
-            { id: "models", label: "AI Models", icon: Cpu },
-            { id: "settings", label: "Settings", icon: Settings },
-          ].map((tab) => {
-            const Icon = tab.icon;
-            const isActive = workspaceTab === tab.id;
-            return (
-              <button
-                key={tab.id}
-                onClick={() => setWorkspaceTab(tab.id as any)}
-                className={`flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-semibold text-left transition-all cursor-pointer ${
-                  isActive
-                    ? "bg-purple-900/15 text-purple-200 border border-purple-900/30 shadow-xs"
-                    : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/30 border border-transparent"
-                }`}
-              >
-                <Icon className={`w-4 h-4 shrink-0 ${isActive ? "text-purple-400" : "text-zinc-500"}`} />
-                <span className="flex-1">{tab.label}</span>
-                {tab.id === "history" && sessions.length > 0 && (
-                  <span className="bg-zinc-850 text-zinc-400 text-[9px] font-bold px-1.5 py-0.2 rounded-full border border-zinc-800">
-                    {sessions.length}
-                  </span>
-                )}
-              </button>
-            );
-          })}
-        </nav>
-
-        {/* Sidebar Footer */}
-        <div className="pt-4 border-t border-zinc-900/80 flex flex-col gap-4 mt-auto">
-          <button
-            onClick={() => setShowFloatingOverlay((prev) => !prev)}
-            className={`w-full py-2 px-3 rounded-xl border text-[10px] font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
-              showFloatingOverlay
-                ? "bg-purple-950/40 text-purple-400 border-purple-800 shadow-[0_0_12px_rgba(168,85,247,0.15)] animate-pulse"
-                : "bg-zinc-900/60 text-zinc-400 border-zinc-850 hover:border-zinc-700"
-            }`}
-          >
-            <Sparkles className="w-3.5 h-3.5 text-purple-400" />
-            <span>{showFloatingOverlay ? "Overlay Mode Active" : "Enable Overlay Widget"}</span>
-          </button>
-
-          <div className="flex items-center justify-between">
-            <span className="text-[10px] text-zinc-600 font-mono tracking-widest uppercase font-semibold">
-              IMPERSIO LABS
-            </span>
-            <span className="text-[9px] text-zinc-700 font-mono">v1.2.0</span>
-          </div>
-        </div>
-      </aside>
-
       {/* RIGHT MAIN CONTAINER */}
-      <main className="flex-1 flex flex-col bg-[#050508] relative overflow-y-auto no-scrollbar">
+      <main className="flex-1 flex flex-col bg-black relative overflow-y-auto no-scrollbar">
         {/* Content Top Bar Header */}
-        <header className="border-b border-zinc-900/60 bg-[#050508] px-8 py-4 shrink-0 flex items-center justify-between">
+        <header className="border-b border-zinc-900/60 bg-black px-8 py-4 shrink-0 flex items-center justify-between">
           <div className="text-left">
             <h1 className="text-lg font-bold text-white capitalize flex items-center gap-2">
               {workspaceTab === "stats" ? "Statistics & Analytics" : workspaceTab === "models" ? "AI Formatter Models" : workspaceTab === "transcribe" ? "Transcribe Audio" : `${workspaceTab}`}
@@ -2713,7 +2653,7 @@ export default function App() {
             />
             <div className="hidden sm:flex flex-col text-left cursor-pointer" onClick={() => setShowManageNameModal(true)}>
               <span className="text-xs font-bold text-zinc-200 leading-none">{activeUser.name}</span>
-              <span className="text-[8px] text-zinc-500 font-mono tracking-wide leading-none uppercase mt-0.5">{activeUser.provider || "guest"}</span>
+              <span className="text-[8px] text-zinc-500 font-mono tracking-wide leading-none uppercase mt-0.5">{activeUser.provider}</span>
             </div>
             <button
               onClick={handleBackToHome}
@@ -2726,7 +2666,6 @@ export default function App() {
                 if (user) {
                   handleSignOut();
                 } else {
-                  setGuestUser(null);
                   setPage("home");
                 }
               }}
@@ -2973,218 +2912,61 @@ export default function App() {
 
           {/* TAB 2: TRANSCRIBE AREA (CORE MIC) */}
           {workspaceTab === "transcribe" && (
-            <div className="space-y-5 fade-in">
-              <div className="flex items-center justify-between border-b border-zinc-900 pb-3">
-                <div className="flex items-center gap-2 flex-1">
-                  {isEditingTitle ? (
-                    <div className="flex items-center gap-2 w-full max-w-md">
-                      <input
-                        type="text"
-                        value={title}
-                        onChange={(e) => setTitle(e.target.value)}
-                        onBlur={() => {
-                          setIsEditingTitle(false);
-                          handleSaveChanges();
-                        }}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") {
-                            setIsEditingTitle(false);
-                            handleSaveChanges();
-                          }
-                        }}
-                        autoFocus
-                        className="bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-1 text-xs font-display font-bold text-white w-full focus:outline-hidden"
-                      />
-                      <button
-                        onClick={() => {
-                          setIsEditingTitle(false);
-                          handleSaveChanges();
-                        }}
-                        className="p-1.5 hover:bg-zinc-900 rounded text-zinc-300 cursor-pointer"
-                      >
-                        <Check className="w-4 h-4" />
-                      </button>
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-2 group max-w-full">
-                      <h2 className="text-base font-display text-white font-bold line-clamp-1">
-                        {title}
-                      </h2>
-                      <button
-                        onClick={() => setIsEditingTitle(true)}
-                        className="p-1 hover:bg-zinc-900 rounded text-zinc-500 hover:text-zinc-300 transition-colors cursor-pointer"
-                        title="Rename session"
-                      >
-                        <Edit2 className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-                  )}
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <button
-                    id="view-dictionary-btn"
-                    onClick={() => setIsDictionaryOpen(true)}
-                    className="p-1.5 bg-zinc-900/40 hover:bg-zinc-900 border border-zinc-850 rounded-xl text-zinc-400 hover:text-white text-[11px] font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
-                    title="Open custom dictionary"
-                  >
-                    <BookOpen className="w-3.5 h-3.5 text-zinc-400" />
-                    <span>Vocabulary</span>
-                  </button>
-
-                  <button
-                    id="view-history-btn"
-                    onClick={() => setIsHistoryOpen(true)}
-                    className="p-1.5 bg-zinc-900/40 hover:bg-zinc-900 border border-zinc-850 rounded-xl text-zinc-400 hover:text-white text-[11px] font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
-                    title="Open history panel"
-                  >
-                    <History className="w-3.5 h-3.5 text-zinc-400" />
-                    <span>History</span>
-                  </button>
-
-                  {(rawText || polishedText) && (
-                    <button
-                      id="clear-workspace-btn"
-                      onClick={handleClearWorkspace}
-                      className="p-1.5 bg-zinc-900/40 hover:bg-zinc-900 border border-zinc-850 rounded-xl text-zinc-400 hover:text-red-400 text-[11px] font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
-                      title="Reset workspace"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                      <span>Clear</span>
-                    </button>
-                  )}
-                </div>
-              </div>
-
-              {/* Advanced Unified Polishing Dashboard Card */}
-              <div className="bg-[#0b0b0f] border border-zinc-900 rounded-3xl overflow-hidden flex flex-col min-h-[440px] shadow-xl">
-                {/* Panel Header */}
-                <div className="px-6 py-4 border-b border-zinc-900 bg-[#0d0d12] flex flex-col gap-4">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                    {/* Recording Action, Timer, & Status text */}
-                    <div className="flex items-center gap-3">
-                      <button
-                        id="mic-action-btn"
-                        onClick={handleToggleRecord}
-                        disabled={status === "transcribing" || status === "polishing" || status === "initializing"}
-                        className={`w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 shadow-md shrink-0 cursor-pointer ${
-                          isRecording
-                            ? "bg-red-600 hover:bg-red-700 text-white animate-pulse"
-                            : status === "transcribing" || status === "polishing" || status === "initializing"
-                            ? "bg-zinc-850 text-zinc-500 cursor-not-allowed"
-                            : "bg-purple-900 hover:bg-purple-800 text-white hover:scale-105"
-                        }`}
-                        title={isRecording ? "Stop recording" : "Start recording"}
-                      >
-                        {status === "transcribing" || status === "initializing" ? (
-                          <Loader2 className="w-5 h-5 animate-spin text-zinc-400" />
-                        ) : status === "polishing" ? (
-                          <Sparkles className="w-5 h-5 text-purple-300 animate-pulse" />
-                        ) : isRecording ? (
-                          <Square className="w-4 h-4 fill-white stroke-[2.5]" />
-                        ) : (
-                          <Mic className="w-5 h-5 stroke-[2.5]" />
-                        )}
-                      </button>
-                      
-                      <div className="text-left">
-                        <h3 className="text-sm font-bold text-white flex items-center gap-2">
-                          <span>AI Polished Draft</span>
-                          <span className={`font-mono text-xs font-bold tracking-wider ${isRecording ? "text-red-400 animate-pulse" : "text-zinc-500"}`}>
-                            {formatTime(duration)}
-                          </span>
-                        </h3>
-                        <p className={`text-[11px] font-medium ${isRecording ? "text-red-400 animate-pulse" : "text-zinc-500"}`}>
-                          {status === "idle" ? "Microphone ready" : status === "recording" ? "Listening to your voice..." : status === "transcribing" ? "Transcribing using AssemblyAI..." : "Polishing using Llama 3.1..."}
-                        </p>
-                      </div>
-                    </div>
-
-                    {polishedText && (
-                      <div className="flex items-center gap-1.5 self-end sm:self-auto">
-                        <button
-                          onClick={() => handleCopyToClipboard(polishedText, "polished")}
-                          className="p-1.5 hover:bg-zinc-800 rounded-lg text-zinc-400 hover:text-white transition-colors relative cursor-pointer"
-                          title="Copy refined text"
-                        >
-                          {copiedPolished ? (
-                            <CheckCheck className="w-4 h-4 text-emerald-400 animate-scale-up" />
-                          ) : (
-                            <Copy className="w-4 h-4" />
-                          )}
-                        </button>
-                        <button
-                          onClick={() => handleExportTxt(polishedText, `${title}_Polished`)}
-                          className="p-1.5 hover:bg-zinc-800 rounded-lg text-zinc-400 hover:text-white transition-colors cursor-pointer"
-                          title="Export refined as .txt"
-                        >
-                          <Download className="w-4 h-4" />
-                        </button>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Waveform Realtime Visualizer Container */}
-                  {isRecording && (
-                    <div className="h-12 bg-black/40 border border-zinc-900 rounded-2xl flex items-center justify-center p-3">
-                      <Waveform isRecording={isRecording} analyser={analyserRef.current} />
-                    </div>
-                  )}
-
-                  {/* Tone Option Pills Selection */}
-                  <div className="flex items-center gap-1 overflow-x-auto pb-1 -mx-2 px-2 no-scrollbar">
-                    {TONE_OPTIONS.map((opt) => {
-                      const isActive = selectedTone === opt.id;
-                      return (
-                        <button
-                          key={opt.id}
-                          onClick={() => handleToneChange(opt.id)}
-                          disabled={!rawText || status === "polishing"}
-                          className={`px-3 py-1.5 rounded-full text-[11px] font-semibold whitespace-nowrap transition-all duration-200 cursor-pointer ${
-                            isActive
-                              ? "bg-white text-black font-bold shadow-md"
-                              : !rawText
-                              ? "bg-zinc-900/10 text-zinc-700 border border-transparent cursor-not-allowed"
-                              : "bg-zinc-950 border border-zinc-850 text-zinc-400 hover:text-zinc-200 hover:border-zinc-700"
-                          }`}
-                          title={opt.description}
-                        >
-                          <span className="mr-1">{opt.emoji}</span>
-                          {opt.label}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                {/* Panel Editor Textarea */}
-                <div className="flex-1 p-6 flex flex-col relative bg-transparent">
-                  <textarea
-                    value={polishedText}
-                    onChange={(e) => {
-                      setPolishedText(e.target.value);
-                      handleSaveChanges();
-                    }}
-                    disabled={status === "polishing"}
-                    placeholder="The AI refined version will output here in your chosen format style with stutters, filler words, and repeating phrases removed automatically..."
-                    className="flex-1 w-full h-full min-h-[220px] bg-transparent text-sm text-zinc-100 leading-relaxed resize-none focus:outline-hidden disabled:text-zinc-600 placeholder:text-zinc-700 font-sans"
+            <div className="w-full h-full">
+              <div className="flex-1 flex flex-col items-center justify-center p-8 bg-black text-white fade-in min-h-[400px]">
+                <h1 className="text-4xl font-serif font-medium text-center">Try writing a detailed AI prompt.</h1>
+                <p className="text-zinc-400 mt-2 text-center">Flow makes it easy to give detailed prompts to ChatGPT, Cursor, or other AI tools.</p>
+                
+                <div className="mt-8 w-full max-w-2xl">
+                  <textarea 
+                    className="w-full h-64 bg-zinc-900/20 border border-zinc-700 rounded-3xl p-6 text-white" 
+                    placeholder="Hello..." 
+                    value={rawText}
+                    onChange={(e) => setRawText(e.target.value)}
                   />
-
-                  {/* Loader indicator overlay */}
-                  {status === "polishing" && (
-                    <div className="absolute inset-0 bg-zinc-950/95 backdrop-blur-xs flex flex-col items-center justify-center text-center p-6 transition-all duration-300">
-                      <RefreshCw className="w-8 h-8 text-purple-400 animate-spin mb-2" />
-                      <p className="text-xs font-semibold text-white">Refining raw transcript...</p>
-                      <p className="text-[10px] text-zinc-500 mt-1">Applying style: '{TONE_OPTIONS.find(t => t.id === selectedTone)?.label}' tone presets</p>
-                    </div>
-                  )}
-
-                  {polishedText && status !== "polishing" && (
-                    <div className="absolute bottom-4 right-4 text-[10px] text-zinc-600 font-mono italic select-none">
-                      Editable field • Changes auto-saved
-                    </div>
-                  )}
                 </div>
+
+                <div className="mt-4 flex gap-4">
+                  <button 
+                    onClick={handleToggleRecord}
+                    className={`px-6 py-3 rounded-full text-sm font-semibold transition-all ${isRecording ? 'bg-red-900 text-white' : 'bg-zinc-800 text-white'}`}
+                  >
+                    {isRecording ? "Stop dictating" : "Start dictating"}
+                  </button>
+                  <button className="px-6 py-3 bg-purple-900/40 text-purple-200 rounded-full text-sm font-semibold">Download for Windows</button>
+                </div>
+                
+                <p className="mt-6 text-zinc-500">Or press and hold the <kbd className="bg-zinc-800 px-1 rounded text-zinc-300">Ctrl</kbd> key and start speaking</p>
+                <p className="mt-2 text-zinc-600 text-sm">Please press alt to dictate.</p>
+              </div>
+              
+              {/* Panel Editor Textarea */}
+              <div className="flex-1 p-6 flex flex-col relative bg-transparent">
+                <textarea
+                  value={polishedText}
+                  onChange={(e) => {
+                    setPolishedText(e.target.value);
+                    handleSaveChanges();
+                  }}
+                  disabled={status === "polishing"}
+                  placeholder="The AI refined version will output here in your chosen format style with stutters, filler words, and repeating phrases removed automatically..."
+                  className="flex-1 w-full h-full min-h-[220px] bg-transparent text-sm text-zinc-100 leading-relaxed resize-none focus:outline-hidden disabled:text-zinc-600 placeholder:text-zinc-700 font-sans"
+                />
+
+                {/* Loader indicator overlay */}
+                {status === "polishing" && (
+                  <div className="absolute inset-0 bg-zinc-950/95 backdrop-blur-xs flex flex-col items-center justify-center text-center p-6 transition-all duration-300">
+                    <RefreshCw className="w-8 h-8 text-purple-400 animate-spin mb-2" />
+                    <p className="text-xs font-semibold text-white">Refining raw transcript...</p>
+                    <p className="text-[10px] text-zinc-500 mt-1">Applying style: '{TONE_OPTIONS.find(t => t.id === selectedTone)?.label}' tone presets</p>
+                  </div>
+                )}
+
+                {polishedText && status !== "polishing" && (
+                  <div className="absolute bottom-4 right-4 text-[10px] text-zinc-600 font-mono italic select-none">
+                    Editable field • Changes auto-saved
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -3575,8 +3357,6 @@ export default function App() {
                   try {
                     if (user) {
                       await updateProfileName(newNameInput.trim());
-                    } else {
-                      setGuestUser((prev: any) => ({ ...prev, name: newNameInput.trim() }));
                     }
                     setShowManageNameModal(false);
                   } catch (err) {

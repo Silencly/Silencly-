@@ -21,6 +21,12 @@ export interface DictationSession {
   durationSeconds: number;
 }
 
+export interface TestimonialAuthor {
+  name: string;
+  handle: string;
+  avatar: string;
+}
+
 export type ToneOption = 'polished' | 'academic' | 'bulletpoints' | 'email';
 
 export interface ToneDefinition {
