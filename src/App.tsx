@@ -1902,8 +1902,8 @@ export default function App() {
                   className="flex items-center bg-zinc-950/90 backdrop-blur-2xl px-1.5 py-1.5 rounded-full shadow-[0_12px_40px_rgba(0,0,0,0.08)] border border-zinc-800/40"
                 >
                   {/* Small circular logo placeholder */}
-                  <div className="w-9 h-9 bg-zinc-950 border border-zinc-900 shadow-sm flex items-center justify-center rounded-full text-slate-500 font-semibold select-none mr-2">
-                    ✦
+                  <div className="w-9 h-9 bg-zinc-950 border border-zinc-900 shadow-sm flex items-center justify-center rounded-full text-slate-500 font-semibold select-none mr-2 overflow-hidden p-1.5">
+                    <img src="/logo-dark.svg" alt="Logo" className="w-full h-full object-contain pointer-events-none" />
                   </div>
 
                   {/* Two standard text buttons */}
