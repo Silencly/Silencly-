@@ -230,7 +230,7 @@ export default function App() {
     updateProfileName,
   } = useAppAuth();
 
-  const [page, setPage] = useState<"home" | "about" | "workspace" | "bud">(() => {
+  const [page, setPage] = useState<"home" | "about" | "workspace" | "bud" | "features" | "use-cases" | "pricing" | "careers">(() => {
     if (typeof window === "undefined") return "home";
     const params = new URLSearchParams(window.location.search);
     if (params.get("page") === "workspace" || window.location.pathname === "/workspace") {
@@ -246,7 +246,7 @@ export default function App() {
   };
 
   const handleBackToHome = () => {
-    setPage("home");
+    window.location.href = "https://impersio.me";
   };
 
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -1405,7 +1405,7 @@ export default function App() {
                 }}
                 className="flex items-center gap-2"
               >
-                <img src="/favicon.png" alt="Silencly Logo" className="w-5 h-5 object-contain" />
+                <img src="/logo.png" alt="Silencly Logo" className="w-5 h-5 object-contain" />
                 <span className="text-xl font-semibold tracking-tight">Silencly</span>
               </motion.div>
 
@@ -1640,7 +1640,7 @@ export default function App() {
               }}
             >
               <img 
-                src="/favicon.png" 
+                src="/logo.png" 
                 alt="Silencly Logo" 
                 className="w-4.5 h-4.5 sm:w-5.5 sm:h-5.5 object-contain rounded-sm select-none pointer-events-none" 
                 referrerPolicy="no-referrer"
@@ -1653,10 +1653,9 @@ export default function App() {
 
             {/* Center Navigation Links */}
             <div className="hidden md:flex items-center gap-6 text-sm font-semibold text-white/80">
-              <a href="#features" onClick={() => setPage("home")} className="hover:text-white transition-colors">Features</a>
-              <a href="#pricing" onClick={() => setPage("home")} className="hover:text-white transition-colors">Pricing</a>
               <a href="/workspace" onClick={(e) => { e.preventDefault(); handleWorkspaceClick(); }} className="hover:text-white transition-colors">Web Demo</a>
-              <a href="/bud" onClick={(e) => { e.preventDefault(); setPage("bud"); }} className="hover:text-white transition-colors">Bud</a>
+              <a href="#features" onClick={(e) => { e.preventDefault(); setPage("features"); }} className="hover:text-white transition-colors">Features</a>
+              <a href="#pricing" onClick={(e) => { e.preventDefault(); setPage("pricing"); }} className="hover:text-white transition-colors">Pricing</a>
             </div>
 
             {/* Right Actions */}
@@ -1760,9 +1759,10 @@ export default function App() {
         )}
 
         {/* Homepage Content */}
-        {page === "home" && (
+        {["home", "features", "use-cases", "pricing", "careers"].includes(page) && (
           <>
             {/* Hero Section */}
+            {page === "home" && (
             <section className="relative px-6 pt-44 pb-24 md:pt-52 md:pb-32 min-h-screen flex flex-col justify-center items-center overflow-hidden bg-black text-white w-full">
           {/* Background Video Layer */}
           <video
@@ -1843,8 +1843,10 @@ export default function App() {
             </motion.div>
           </div>
         </section>
+        )}
 
         {/* Modern Landing Page Section */}
+        {(page === "home" || page === "features") && (
         <section id="features" className="py-20 md:py-28 bg-black w-full px-5 md:px-10 flex flex-col items-center justify-center font-sans border-t border-zinc-900">
           <div className="w-full max-w-[1400px] mx-auto text-center flex flex-col items-center">
             
@@ -1901,7 +1903,7 @@ export default function App() {
                 >
                   {/* Small circular logo placeholder */}
                   <div className="w-9 h-9 bg-zinc-950 border border-zinc-900 shadow-sm flex items-center justify-center rounded-full text-slate-500 font-semibold select-none mr-2 overflow-hidden p-1.5">
-                    <img src="/favicon.png" alt="Logo" className="w-full h-full object-contain pointer-events-none" />
+                    <img src="/logo.png" alt="Logo" className="w-full h-full object-contain pointer-events-none" />
                   </div>
 
                   {/* Two standard text buttons */}
@@ -1953,16 +1955,20 @@ export default function App() {
 
           </div>
         </section>
+        )}
 
         {/* Pricing Section */}
+        {(page === "home" || page === "pricing") && (
         <div id="pricing">
           <PricingSection onAuthClick={() => {
             setAuthMode("signup");
             setShowAuthModal(true);
           }} />
         </div>
+        )}
 
         {/* User Reviews / Testimonials */}
+        {(page === "home" || page === "use-cases") && (
         <div id="usecases">
           <TestimonialsSection
             title="Loved by Fast Builders"
@@ -1970,8 +1976,10 @@ export default function App() {
             testimonials={testimonialsData}
           />
         </div>
+        )}
 
         {/* Careers Section */}
+        {(page === "home" || page === "careers") && (
         <section id="careers" className="py-20 bg-black border-t border-zinc-900/60 w-full px-6 flex flex-col items-center justify-center text-center">
           <div className="max-w-2xl mx-auto">
             <span className="inline-flex items-center gap-1.5 text-xs font-medium bg-zinc-900 border border-zinc-800 text-zinc-300 px-3 py-1 rounded-full mb-6">
@@ -1989,8 +1997,10 @@ export default function App() {
             </a>
           </div>
         </section>
+        )}
 
         {/* FAQ Section */}
+        {page === "home" && (
         <section id="faq" className="py-20 md:py-28 max-w-6xl mx-auto px-6 w-full">
           <div className="flex flex-col md:flex-row gap-16">
             {/* Left Column */}
@@ -2077,8 +2087,10 @@ export default function App() {
             </div>
           </div>
         </section>
+        )}
 
         {/* Still Not Sure Section */}
+        {page === "home" && (
         <section className="py-16 md:py-24 bg-black w-full px-5 md:px-10 flex flex-col items-center justify-center font-sans border-t border-zinc-900/60">
           <div className="w-full max-w-[1400px] mx-auto">
             <div className="relative w-full rounded-[48px] bg-zinc-950 border border-zinc-900 p-8 md:p-14 overflow-hidden flex flex-col lg:flex-row items-center justify-between gap-10">
@@ -2185,6 +2197,7 @@ export default function App() {
             </div>
           </div>
         </section>
+        )}
           </>
         )}
 
@@ -2438,7 +2451,7 @@ export default function App() {
               <div className="col-span-1 md:col-span-1">
                 <div className="flex items-center gap-3 mb-4">
                   <img 
-                    src="/favicon.png" 
+                    src="/logo.png" 
                     alt="Silencly Logo" 
                     className="w-8 h-8 object-contain rounded-md select-none pointer-events-none" 
                     referrerPolicy="no-referrer"
@@ -2473,10 +2486,10 @@ export default function App() {
                 <ul className="space-y-4">
                   <li><button onClick={() => { window.scrollTo(0, 0); setPage("home"); }} className="text-zinc-400 hover:text-zinc-50 transition-colors text-sm cursor-pointer">Home</button></li>
                   <li><a href="/workspace" onClick={(e) => { e.preventDefault(); handleWorkspaceClick(); }} className="text-zinc-400 hover:text-zinc-50 transition-colors text-sm cursor-pointer">Web Demo</a></li>
-                  <li><a href="#features" onClick={() => setPage("home")} className="text-zinc-400 hover:text-zinc-50 transition-colors text-sm cursor-pointer">Features</a></li>
-                  <li><a href="#usecases" onClick={() => setPage("home")} className="text-zinc-400 hover:text-zinc-50 transition-colors text-sm cursor-pointer">Use Cases</a></li>
-                  <li><a href="#pricing" onClick={() => setPage("home")} className="text-zinc-400 hover:text-zinc-50 transition-colors text-sm cursor-pointer">Pricing</a></li>
-                  <li><a href="#careers" onClick={() => setPage("home")} className="text-zinc-400 hover:text-zinc-50 transition-colors text-sm cursor-pointer">Careers</a></li>
+                  <li><a href="#features" onClick={(e) => { e.preventDefault(); setPage("features"); window.scrollTo(0, 0); }} className="text-zinc-400 hover:text-zinc-50 transition-colors text-sm cursor-pointer">Features</a></li>
+                  <li><a href="#usecases" onClick={(e) => { e.preventDefault(); setPage("use-cases"); window.scrollTo(0, 0); }} className="text-zinc-400 hover:text-zinc-50 transition-colors text-sm cursor-pointer">Use Cases</a></li>
+                  <li><a href="#pricing" onClick={(e) => { e.preventDefault(); setPage("pricing"); window.scrollTo(0, 0); }} className="text-zinc-400 hover:text-zinc-50 transition-colors text-sm cursor-pointer">Pricing</a></li>
+                  <li><a href="#careers" onClick={(e) => { e.preventDefault(); setPage("careers"); window.scrollTo(0, 0); }} className="text-zinc-400 hover:text-zinc-50 transition-colors text-sm cursor-pointer">Careers</a></li>
                   <li><button onClick={() => setPage("about")} className="text-zinc-400 hover:text-zinc-50 transition-colors text-sm cursor-pointer">About Us</button></li>
                   <li><a href="/bud" onClick={(e) => { e.preventDefault(); setPage("bud"); }} className="text-zinc-400 hover:text-zinc-50 transition-colors text-sm cursor-pointer">Bud</a></li>
                 </ul>

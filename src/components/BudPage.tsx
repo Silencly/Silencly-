@@ -558,7 +558,7 @@ export default function BudPage({ onBack, user, onAuthClick }: BudPageProps) {
               onClick={onBack}
             >
               <img 
-                src="/logo-dark.svg" 
+                src="/logo.png" 
                 alt="Bud Logo" 
                 className="w-8 h-8 rounded-lg object-cover shadow-sm border border-zinc-200/50 select-none pointer-events-none" 
                 referrerPolicy="no-referrer"
@@ -678,7 +678,7 @@ export default function BudPage({ onBack, user, onAuthClick }: BudPageProps) {
             <div className="flex items-start gap-3">
               <div className="w-7.5 h-7.5 rounded-lg bg-zinc-100 border border-zinc-200 overflow-hidden flex items-center justify-center shrink-0">
                 <img 
-                  src="/logo-dark.svg" 
+                  src="/logo.png" 
                   alt="Bud 101 logo" 
                   className="w-full h-full object-cover select-none pointer-events-none" 
                   referrerPolicy="no-referrer"
@@ -1027,7 +1027,7 @@ export default function BudPage({ onBack, user, onAuthClick }: BudPageProps) {
                   
                   <div className="w-16 h-16 relative z-10 overflow-hidden">
                     <img 
-                      src="/logo-dark.svg" 
+                      src="/logo.png" 
                       alt="Bud Mascot Logo" 
                       className="w-full h-full object-cover rounded-2xl select-none pointer-events-none" 
                       referrerPolicy="no-referrer"
