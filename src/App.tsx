@@ -120,7 +120,7 @@ const faqData = {
     },
     {
       q: "What is Bud?",
-      a: "Bud is an intelligent AI knowledge companion app under the Impersio brand, integrating seamlessly with Silencly to help you store, categorize, and recall your polished dictations as an interactive personal knowledge base."
+      a: "Bud is an intelligent AI knowledge companion app under the Silencly brand, integrating seamlessly with Silencly to help you store, categorize, and recall your polished dictations as an interactive personal knowledge base."
     },
     {
       q: "Who is this for?",
@@ -1405,7 +1405,7 @@ export default function App() {
                 }}
                 className="flex items-center gap-2"
               >
-                <Circle className="w-5 h-5 fill-white text-white" />
+                <img src="/favicon.png" alt="Silencly Logo" className="w-5 h-5 object-contain" />
                 <span className="text-xl font-semibold tracking-tight">Silencly</span>
               </motion.div>
 
@@ -1640,7 +1640,7 @@ export default function App() {
               }}
             >
               <img 
-                src="/logo-dark.svg" 
+                src="/favicon.png" 
                 alt="Silencly Logo" 
                 className="w-4.5 h-4.5 sm:w-5.5 sm:h-5.5 object-contain rounded-sm select-none pointer-events-none" 
                 referrerPolicy="no-referrer"
@@ -1652,13 +1652,11 @@ export default function App() {
             </div>
 
             {/* Center Navigation Links */}
-            <div className="hidden md:flex items-center gap-8 text-sm font-semibold text-white/80">
-              <a href="/bud" onClick={(e) => { e.preventDefault(); setPage("bud"); }} className="hover:text-white transition-colors">Bud</a>
+            <div className="hidden md:flex items-center gap-6 text-sm font-semibold text-white/80">
+              <a href="#features" onClick={() => setPage("home")} className="hover:text-white transition-colors">Features</a>
               <a href="#pricing" onClick={() => setPage("home")} className="hover:text-white transition-colors">Pricing</a>
-              <a href="#faq" onClick={() => setPage("home")} className="hover:text-white transition-colors">FAQ</a>
-              {activeUser && (
-                <button onClick={handleWorkspaceClick} className="hover:text-white transition-colors cursor-pointer text-sm font-semibold">Workspace</button>
-              )}
+              <a href="/workspace" onClick={(e) => { e.preventDefault(); handleWorkspaceClick(); }} className="hover:text-white transition-colors">Web Demo</a>
+              <a href="/bud" onClick={(e) => { e.preventDefault(); setPage("bud"); }} className="hover:text-white transition-colors">Bud</a>
             </div>
 
             {/* Right Actions */}
@@ -1847,7 +1845,7 @@ export default function App() {
         </section>
 
         {/* Modern Landing Page Section */}
-        <section id="epoch" className="py-20 md:py-28 bg-black w-full px-5 md:px-10 flex flex-col items-center justify-center font-sans border-t border-zinc-900">
+        <section id="features" className="py-20 md:py-28 bg-black w-full px-5 md:px-10 flex flex-col items-center justify-center font-sans border-t border-zinc-900">
           <div className="w-full max-w-[1400px] mx-auto text-center flex flex-col items-center">
             
             {/* Main Hero Container */}
@@ -1903,7 +1901,7 @@ export default function App() {
                 >
                   {/* Small circular logo placeholder */}
                   <div className="w-9 h-9 bg-zinc-950 border border-zinc-900 shadow-sm flex items-center justify-center rounded-full text-slate-500 font-semibold select-none mr-2 overflow-hidden p-1.5">
-                    <img src="/logo-dark.svg" alt="Logo" className="w-full h-full object-contain pointer-events-none" />
+                    <img src="/favicon.png" alt="Logo" className="w-full h-full object-contain pointer-events-none" />
                   </div>
 
                   {/* Two standard text buttons */}
@@ -1957,17 +1955,40 @@ export default function App() {
         </section>
 
         {/* Pricing Section */}
-        <PricingSection onAuthClick={() => {
-          setAuthMode("signup");
-          setShowAuthModal(true);
-        }} />
+        <div id="pricing">
+          <PricingSection onAuthClick={() => {
+            setAuthMode("signup");
+            setShowAuthModal(true);
+          }} />
+        </div>
 
         {/* User Reviews / Testimonials */}
-        <TestimonialsSection
-          title="Loved by Fast Builders"
-          description="See how developers, managers, and creators supercharge their workflow using Silencly."
-          testimonials={testimonialsData}
-        />
+        <div id="usecases">
+          <TestimonialsSection
+            title="Loved by Fast Builders"
+            description="See how developers, managers, and creators supercharge their workflow using Silencly."
+            testimonials={testimonialsData}
+          />
+        </div>
+
+        {/* Careers Section */}
+        <section id="careers" className="py-20 bg-black border-t border-zinc-900/60 w-full px-6 flex flex-col items-center justify-center text-center">
+          <div className="max-w-2xl mx-auto">
+            <span className="inline-flex items-center gap-1.5 text-xs font-medium bg-zinc-900 border border-zinc-800 text-zinc-300 px-3 py-1 rounded-full mb-6">
+              <div className="w-1 h-1 rounded-full bg-purple-500"></div>
+              Hiring
+            </span>
+            <h2 className="text-3xl md:text-4xl font-semibold text-zinc-50 tracking-tight leading-tight mb-4">
+              Join the Silencly Team
+            </h2>
+            <p className="text-zinc-400 mb-8 leading-relaxed">
+              We're a small, fast-moving team building the future of AI-powered dictation. We're currently looking for talented engineers and designers to help shape the next generation of voice-to-text tools.
+            </p>
+            <a href="mailto:hello@silencly.com" className="inline-flex items-center justify-center gap-2 bg-white text-black font-semibold px-6 py-3 rounded-full hover:bg-zinc-200 transition-colors text-sm">
+              View Open Roles
+            </a>
+          </div>
+        </section>
 
         {/* FAQ Section */}
         <section id="faq" className="py-20 md:py-28 max-w-6xl mx-auto px-6 w-full">
@@ -2079,7 +2100,7 @@ export default function App() {
                 <div className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">
                   {/* ChatGPT */}
                   <a
-                    href="https://chatgpt.com/?prompt=tell+me+why+silencly+from+Impersio.me+is+a+great+choice+for+me"
+                    href="https://chatgpt.com/?prompt=tell+me+why+silencly+from+Silencly.me+is+a+great+choice+for+me"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="w-full sm:w-auto h-12 px-6 bg-zinc-900 hover:bg-zinc-850 border border-zinc-800 text-zinc-100 hover:text-white rounded-full flex items-center justify-center gap-3 transition-all font-semibold text-xs sm:text-sm cursor-pointer shadow-md"
@@ -2095,7 +2116,7 @@ export default function App() {
 
                   {/* Claude */}
                   <a
-                    href="https://claude.ai/new?q=tell+me+why+silencly+from+impersio.me+is+a+great+choice+for+me"
+                    href="https://claude.ai/new?q=tell+me+why+silencly+from+silencly.com+is+a+great+choice+for+me"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="w-full sm:w-auto h-12 px-6 bg-zinc-900 hover:bg-zinc-850 border border-zinc-800 text-zinc-100 hover:text-white rounded-full flex items-center justify-center gap-3 transition-all font-semibold text-xs sm:text-sm cursor-pointer shadow-md"
@@ -2111,7 +2132,7 @@ export default function App() {
 
                   {/* Perplexity */}
                   <a
-                    href="https://www.perplexity.ai/search/new?q=tell+me+why+silencly+from+impersio.me+is+a+great+choice+for+me"
+                    href="https://www.perplexity.ai/search/new?q=tell+me+why+silencly+from+silencly.com+is+a+great+choice+for+me"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="w-full sm:w-auto h-12 px-6 bg-zinc-900 hover:bg-zinc-850 border border-zinc-800 text-zinc-100 hover:text-white rounded-full flex items-center justify-center gap-3 transition-all font-semibold text-xs sm:text-sm cursor-pointer shadow-md"
@@ -2188,7 +2209,7 @@ export default function App() {
                 <p className="text-base sm:text-lg text-zinc-400 max-w-2xl mx-auto font-sans leading-relaxed">
                   Silencly is a free AI dictation app designed to help users effortlessly convert speech into text, converting messy thoughts and voice brain dumps into perfectly formatted documents instantly.
                 </p>
-                <p className="text-xs text-zinc-500 font-mono">Published by Impersio</p>
+                <p className="text-xs text-zinc-500 font-mono">Published by Silencly</p>
               </div>
 
               {/* Creators & Vision Section */}
@@ -2209,7 +2230,7 @@ export default function App() {
                   </span>
                   <h3 className="text-xl font-semibold text-zinc-100">Our Team</h3>
                   <p className="text-sm sm:text-base text-zinc-400 leading-relaxed font-light font-sans">
-                    Silencly was created, designed, and engineered entirely by the Impersio team, led by **Anubhav Sapkota**, **Daksh shetty**, and **Johan Jovin Cheeran**. We remain dedicated to updating and supporting the product with ongoing performance updates and security audits.
+                    Silencly was created, designed, and engineered entirely by the Silencly team, led by **Anubhav Sapkota**, **Daksh shetty**, and **Johan Jovin Cheeran**. We remain dedicated to updating and supporting the product with ongoing performance updates and security audits.
                   </p>
                 </div>
               </div>
@@ -2224,7 +2245,7 @@ export default function App() {
                     Silencly is a free AI dictation app designed to help users effortlessly convert speech into text.
                   </p>
                   <p className="text-sm sm:text-base text-zinc-400 leading-relaxed font-light">
-                    All content, design, code, and materials on this website and associated platforms are the intellectual property of Impersio and are protected by copyright law. No part of this website (including text, images, logos, or code) may be copied, reproduced, distributed, or modified without prior written permission. Any unauthorized use, reproduction, or distribution will result in legal action.
+                    All content, design, code, and materials on this website and associated platforms are the intellectual property of Silencly and are protected by copyright law. No part of this website (including text, images, logos, or code) may be copied, reproduced, distributed, or modified without prior written permission. Any unauthorized use, reproduction, or distribution will result in legal action.
                   </p>
                   <p className="text-xs text-zinc-500 leading-relaxed font-light font-sans italic">
                     Official communications regarding copyright, permissions, or support will only come from our verified email address. Any claim or notice not originating from this official channel should be considered invalid.
@@ -2236,7 +2257,7 @@ export default function App() {
                     <h4 className="text-sm font-semibold text-zinc-200 font-mono uppercase tracking-wider">Official Contact Information</h4>
                     <ul className="space-y-2 text-sm text-zinc-400 font-light">
                       <li className="flex items-center gap-2">
-                        <span className="text-zinc-500">●</span> Support Email: <a href="mailto:s.impersio@gmail.com" className="text-zinc-200 hover:text-white underline transition-colors">s.impersio@gmail.com</a>
+                        <span className="text-zinc-500">●</span> Support Email: <a href="mailto:hello@silencly.com" className="text-zinc-200 hover:text-white underline transition-colors">hello@silencly.com</a>
                       </li>
                       <li className="flex items-center gap-2">
                         <span className="text-zinc-500">●</span> Discord: <a href="https://discord.com/users/Agnet47-assasinator" target="_blank" rel="noopener noreferrer" className="text-zinc-200 hover:text-white underline transition-colors">discord.com/users/Agnet47-assasinator</a>
@@ -2255,13 +2276,13 @@ export default function App() {
 
                   <div className="space-y-3">
                     <h4 className="text-sm font-semibold text-zinc-200 font-mono uppercase tracking-wider">Owned Domains</h4>
-                    <p className="text-xs text-zinc-500 font-light mb-2">Impersio owns and operates the following domains and websites:</p>
+                    <p className="text-xs text-zinc-500 font-light mb-2">Silencly owns and operates the following domains and websites:</p>
                     <ul className="space-y-2 text-sm text-zinc-400 font-light font-mono">
                       <li className="flex items-center gap-2">
                         <span className="text-green-400">✔</span> <a href="https://thinkwispr.netlify.app" target="_blank" rel="noopener noreferrer" className="text-zinc-300 hover:text-white underline transition-colors">thinkwispr.netlify.app</a>
                       </li>
                       <li className="flex items-center gap-2">
-                        <span className="text-green-400">✔</span> <a href="https://impersio.me" target="_blank" rel="noopener noreferrer" className="text-zinc-300 hover:text-white underline transition-colors">impersio.me</a>
+                        <span className="text-green-400">✔</span> <a href="https://silencly.com" target="_blank" rel="noopener noreferrer" className="text-zinc-300 hover:text-white underline transition-colors">silencly.com</a>
                       </li>
                       <li className="flex items-center gap-2">
                         <span className="text-green-400">✔</span> <a href="https://thinkwispr.dev" target="_blank" rel="noopener noreferrer" className="text-zinc-300 hover:text-white underline transition-colors">thinkwispr.dev</a>
@@ -2284,7 +2305,7 @@ export default function App() {
                     Stay Safe & Secure
                   </h2>
                   <p className="text-sm text-zinc-400 font-sans">
-                    Simple steps to ensure you are interacting with authentic Impersio applications.
+                    Simple steps to ensure you are interacting with authentic Silencly applications.
                   </p>
                 </div>
 
@@ -2296,7 +2317,7 @@ export default function App() {
                       <h5 className="font-semibold text-zinc-100 text-sm sm:text-base">Check the URL</h5>
                     </div>
                     <p className="text-xs sm:text-sm text-zinc-400 font-light leading-relaxed">
-                      Our official platform operates at <span className="text-zinc-200">impersio.me</span>. Always double-check your address bar to ensure safe and genuine product access.
+                      Our official platform operates at <span className="text-zinc-200">silencly.com</span>. Always double-check your address bar to ensure safe and genuine product access.
                     </p>
                   </div>
 
@@ -2316,7 +2337,7 @@ export default function App() {
                       <h5 className="font-semibold text-zinc-100 text-sm sm:text-base">Verify Verified Domains</h5>
                     </div>
                     <p className="text-xs sm:text-sm text-zinc-400 font-light leading-relaxed">
-                      Impersio verified mirrors include <span className="text-zinc-200">thinkwispr.netlify.app</span>, <span className="text-zinc-200">thinkwispr.dev</span>, <span className="text-zinc-200">thinkwispr.me</span>, and <span className="text-zinc-200">silencly1.vercel.app</span>.
+                      Silencly verified mirrors include <span className="text-zinc-200">thinkwispr.netlify.app</span>, <span className="text-zinc-200">thinkwispr.dev</span>, <span className="text-zinc-200">thinkwispr.me</span>, and <span className="text-zinc-200">silencly1.vercel.app</span>.
                     </p>
                   </div>
 
@@ -2347,7 +2368,7 @@ export default function App() {
                   {[
                     {
                       q: "Who created the original Silencly?",
-                      a: "The genuine Silencly AI dictation tool was created and developed entirely by the Impersio team — Anubhav Sapkota, Daksh shetty, and Johan Jovin Cheeran."
+                      a: "The genuine Silencly AI dictation tool was created and developed entirely by the Silencly team — Anubhav Sapkota, Daksh shetty, and Johan Jovin Cheeran."
                     },
                     {
                       q: "Is Silencly free to use?",
@@ -2355,7 +2376,7 @@ export default function App() {
                     },
                     {
                       q: "How can I contact support?",
-                      a: "For all support inquiries, copyright permissions, or partnership requests, you can email us directly at our verified support address: s.impersio@gmail.com."
+                      a: "For all support inquiries, copyright permissions, or partnership requests, you can email us directly at our verified support address: hello@silencly.com."
                     },
                     {
                       q: "Where does my data go?",
@@ -2417,7 +2438,7 @@ export default function App() {
               <div className="col-span-1 md:col-span-1">
                 <div className="flex items-center gap-3 mb-4">
                   <img 
-                    src="/logo-dark.svg" 
+                    src="/favicon.png" 
                     alt="Silencly Logo" 
                     className="w-8 h-8 object-contain rounded-md select-none pointer-events-none" 
                     referrerPolicy="no-referrer"
@@ -2451,10 +2472,13 @@ export default function App() {
                 <h3 className="text-zinc-50 font-semibold mb-6">Quick Links</h3>
                 <ul className="space-y-4">
                   <li><button onClick={() => { window.scrollTo(0, 0); setPage("home"); }} className="text-zinc-400 hover:text-zinc-50 transition-colors text-sm cursor-pointer">Home</button></li>
+                  <li><a href="/workspace" onClick={(e) => { e.preventDefault(); handleWorkspaceClick(); }} className="text-zinc-400 hover:text-zinc-50 transition-colors text-sm cursor-pointer">Web Demo</a></li>
+                  <li><a href="#features" onClick={() => setPage("home")} className="text-zinc-400 hover:text-zinc-50 transition-colors text-sm cursor-pointer">Features</a></li>
+                  <li><a href="#usecases" onClick={() => setPage("home")} className="text-zinc-400 hover:text-zinc-50 transition-colors text-sm cursor-pointer">Use Cases</a></li>
+                  <li><a href="#pricing" onClick={() => setPage("home")} className="text-zinc-400 hover:text-zinc-50 transition-colors text-sm cursor-pointer">Pricing</a></li>
+                  <li><a href="#careers" onClick={() => setPage("home")} className="text-zinc-400 hover:text-zinc-50 transition-colors text-sm cursor-pointer">Careers</a></li>
                   <li><button onClick={() => setPage("about")} className="text-zinc-400 hover:text-zinc-50 transition-colors text-sm cursor-pointer">About Us</button></li>
                   <li><a href="/bud" onClick={(e) => { e.preventDefault(); setPage("bud"); }} className="text-zinc-400 hover:text-zinc-50 transition-colors text-sm cursor-pointer">Bud</a></li>
-                  <li><a href="#pricing" onClick={() => setPage("home")} className="text-zinc-400 hover:text-zinc-50 transition-colors text-sm cursor-pointer">Pricing</a></li>
-                  <li><a href="#faq" onClick={() => setPage("home")} className="text-zinc-400 hover:text-zinc-50 transition-colors text-sm cursor-pointer">FAQ</a></li>
                 </ul>
               </div>
 
@@ -2463,7 +2487,7 @@ export default function App() {
                 <h3 className="text-zinc-50 font-semibold mb-6">Contact Us</h3>
                 <ul className="space-y-4 text-sm text-zinc-400">
                   <li>UAE, Fujairah</li>
-                  <li>Support: s.impersio@gmail.com</li>
+                  <li>Support: hello@silencly.com</li>
                   <li>Email: hello@silencly.com</li>
                 </ul>
               </div>
