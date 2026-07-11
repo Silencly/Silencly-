@@ -1442,7 +1442,7 @@ export default function App() {
                 }}
                 className="flex items-center gap-2"
               >
-                <img src="/logo.png" alt="Silencly Logo" className="w-5 h-5 object-contain" />
+                <img src="/logo.png" alt="Silencly Logo" className="w-5 h-5 object-contain select-none pointer-events-none" draggable={false} onContextMenu={(e) => e.preventDefault()} />
                 <span className="text-xl font-semibold tracking-tight">Silencly</span>
               </motion.div>
 
@@ -1716,7 +1716,7 @@ export default function App() {
                     className="flex items-center gap-1.5 sm:gap-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full pl-1.5 pr-2.5 py-1 sm:pl-2 sm:pr-3.5 sm:py-1.5 transition-all cursor-pointer focus:outline-none focus:ring-1 focus:ring-white/20 select-none"
                     aria-label="User menu"
                   >
-                    <img src={activeUser.image} className="w-5 h-5 sm:w-6 sm:h-6 rounded-full border border-white/20" referrerPolicy="no-referrer" />
+                    <img src={activeUser.image} className="w-5 h-5 sm:w-6 sm:h-6 rounded-full border border-white/20 select-none pointer-events-none" draggable={false} onContextMenu={(e) => e.preventDefault()} style={{ WebkitTouchCallout: "none", WebkitUserDrag: "none" }} referrerPolicy="no-referrer" />
                     <span className="text-xs font-semibold text-white hidden sm:inline-block max-w-[120px] truncate">{activeUser.name}</span>
                     <ChevronDown className={`w-3 h-3 sm:w-3.5 sm:h-3.5 text-white/60 transition-transform ${showProfileDropdown ? "rotate-180" : ""}`} />
                   </button>
@@ -1726,7 +1726,7 @@ export default function App() {
                     <div className="absolute right-0 mt-2.5 w-64 rounded-3xl border border-zinc-850 bg-zinc-950/95 p-4 shadow-2xl backdrop-blur-xl z-50 text-left space-y-3.5 animate-in fade-in slide-in-from-top-2 duration-200">
                       {/* User metadata header */}
                       <div className="flex items-center gap-3 border-b border-zinc-900 pb-3">
-                        <img src={activeUser.image} className="w-10 h-10 rounded-full border border-zinc-855" referrerPolicy="no-referrer" />
+                        <img src={activeUser.image} className="w-10 h-10 rounded-full border border-zinc-855 select-none pointer-events-none" draggable={false} onContextMenu={(e) => e.preventDefault()} style={{ WebkitTouchCallout: "none", WebkitUserDrag: "none" }} referrerPolicy="no-referrer" />
                         <div className="flex flex-col">
                           <span className="text-xs font-bold text-zinc-100 truncate max-w-[150px]">{activeUser.name}</span>
                           <span className="text-[10px] text-zinc-500 truncate max-w-[150px]">{activeUser.email}</span>
@@ -1955,7 +1955,7 @@ export default function App() {
                 >
                   {/* Small circular logo placeholder */}
                   <div className="w-9 h-9 bg-zinc-950 border border-zinc-900 shadow-sm flex items-center justify-center rounded-full text-slate-500 font-semibold select-none mr-2 overflow-hidden p-1.5">
-                    <img src="/logo.png" alt="Logo" className="w-full h-full object-contain pointer-events-none" />
+                    <img src="/logo.png" alt="Logo" className="w-full h-full object-contain pointer-events-none select-none" draggable={false} onContextMenu={(e) => e.preventDefault()} />
                   </div>
 
                   {/* Two standard text buttons */}
@@ -1997,7 +1997,10 @@ export default function App() {
                     <img
                       src={logo.url}
                       alt={logo.name}
-                      className="w-12 h-12 object-contain transition-all duration-300 z-10 group-hover:brightness-0 group-hover:invert"
+                      className="w-12 h-12 object-contain transition-all duration-300 z-10 group-hover:brightness-0 group-hover:invert select-none pointer-events-none"
+                      draggable={false}
+                      onContextMenu={(e) => e.preventDefault()}
+                      style={{ WebkitTouchCallout: "none", WebkitUserDrag: "none" }}
                       referrerPolicy="no-referrer"
                     />
                   </div>
@@ -2177,7 +2180,10 @@ export default function App() {
                     <img
                       src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQROq6TUn52DjU4SyVdDFLvgvCEvPHdrDyh3eOw7guNzw&s"
                       alt="ChatGPT"
-                      className="w-5 h-5 rounded-md object-contain shrink-0"
+                      className="w-5 h-5 rounded-md object-contain shrink-0 select-none pointer-events-none"
+                      draggable={false}
+                      onContextMenu={(e) => e.preventDefault()}
+                      style={{ WebkitTouchCallout: "none", WebkitUserDrag: "none" }}
                       referrerPolicy="no-referrer"
                     />
                     <span>Ask ChatGPT</span>
@@ -2193,7 +2199,10 @@ export default function App() {
                     <img
                       src="https://avatars.slack-edge.com/2025-05-14/8891273522918_30c38bf627ac73075db6_512.png"
                       alt="Claude"
-                      className="w-5 h-5 rounded-md object-contain shrink-0"
+                      className="w-5 h-5 rounded-md object-contain shrink-0 select-none pointer-events-none"
+                      draggable={false}
+                      onContextMenu={(e) => e.preventDefault()}
+                      style={{ WebkitTouchCallout: "none", WebkitUserDrag: "none" }}
                       referrerPolicy="no-referrer"
                     />
                     <span>Ask Claude</span>
@@ -2209,7 +2218,10 @@ export default function App() {
                     <img
                       src="https://framerusercontent.com/images/gcMkPKyj2RX8EOEja8A1GWvCb7E.jpg?width=2000&height=2000"
                       alt="Perplexity"
-                      className="w-5 h-5 rounded-md object-contain shrink-0"
+                      className="w-5 h-5 rounded-md object-contain shrink-0 select-none pointer-events-none"
+                      draggable={false}
+                      onContextMenu={(e) => e.preventDefault()}
+                      style={{ WebkitTouchCallout: "none", WebkitUserDrag: "none" }}
                       referrerPolicy="no-referrer"
                     />
                     <span>Ask Perplexity</span>
@@ -2277,10 +2289,10 @@ export default function App() {
                 {/* Logos */}
                 <div className="flex flex-col sm:flex-row items-center justify-center gap-6 py-6">
                   <div className="bg-zinc-900/40 p-4 rounded-3xl border border-zinc-800/50 shadow-xl">
-                    <img src="/silencly-logo-normal.png" alt="Silencly Normal Logo" className="w-32 h-32 sm:w-40 sm:h-40 object-contain rounded-2xl" />
+                    <img src="/silencly-logo-normal.png" alt="Silencly Normal Logo" className="w-32 h-32 sm:w-40 sm:h-40 object-contain rounded-2xl select-none pointer-events-none" draggable={false} onContextMenu={(e) => e.preventDefault()} />
                   </div>
                   <div className="bg-zinc-900/40 p-4 rounded-3xl border border-zinc-800/50 shadow-xl">
-                    <img src="/silencly-logo-transparent.png" alt="Silencly Transparent Logo" className="w-32 h-32 sm:w-40 sm:h-40 object-contain" />
+                    <img src="/silencly-logo-transparent.png" alt="Silencly Transparent Logo" className="w-32 h-32 sm:w-40 sm:h-40 object-contain select-none pointer-events-none" draggable={false} onContextMenu={(e) => e.preventDefault()} />
                   </div>
                 </div>
 
@@ -2826,7 +2838,7 @@ export default function App() {
 
           <div className="mt-auto pt-6 border-t border-zinc-900 flex flex-col gap-4">
             <div className="flex items-center gap-3 px-2">
-              <img src={activeUser.image} className="w-8 h-8 rounded-full border border-zinc-800" />
+              <img src={activeUser.image} className="w-8 h-8 rounded-full border border-zinc-800 select-none pointer-events-none" draggable={false} onContextMenu={(e) => e.preventDefault()} style={{ WebkitTouchCallout: "none", WebkitUserDrag: "none" }} />
               <div className="text-left">
                 <p className="text-xs font-bold text-zinc-200 leading-none">{activeUser.name}</p>
                 <p className="text-[9px] text-zinc-500 font-mono mt-0.5">{activeUser.provider}</p>
@@ -2879,7 +2891,10 @@ export default function App() {
             <div className="flex items-center gap-3 bg-zinc-900/40 border border-zinc-900 rounded-2xl px-3.5 py-1.5 shadow-xs select-none">
             <img
               src={activeUser.image}
-              className="w-6 h-6 rounded-full border border-zinc-800 cursor-pointer"
+              className="w-6 h-6 rounded-full border border-zinc-800 cursor-pointer select-none pointer-events-none"
+              draggable={false}
+              onContextMenu={(e) => e.preventDefault()}
+              style={{ WebkitTouchCallout: "none", WebkitUserDrag: "none" }}
               referrerPolicy="no-referrer"
               onClick={() => setShowManageNameModal(true)}
               title="Manage Profile"

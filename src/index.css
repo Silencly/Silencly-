@@ -223,5 +223,13 @@ body {
   -webkit-mask-image: linear-gradient(to right, transparent, white 15%, white 85%, transparent);
 }
 
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
 
 

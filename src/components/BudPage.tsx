@@ -730,7 +730,7 @@ export default function BudPage({ onBack, user, onAuthClick }: BudPageProps) {
             <div className="flex items-center gap-4">
               {user ? (
                 <div className="flex items-center gap-2.5 bg-zinc-50 border border-zinc-200 rounded-full px-3 py-1.5">
-                  <img src={user.image} className="w-5 h-5 rounded-full border border-zinc-200" referrerPolicy="no-referrer" />
+                  <img src={user.image} className="w-5 h-5 rounded-full border border-zinc-200 select-none pointer-events-none" draggable={false} onContextMenu={(e) => e.preventDefault()} style={{ WebkitTouchCallout: "none", WebkitUserDrag: "none" }} referrerPolicy="no-referrer" />
                   <span className="text-xs font-semibold text-zinc-800">{user.name}</span>
                 </div>
               ) : (

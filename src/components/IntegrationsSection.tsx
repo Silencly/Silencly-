@@ -24,6 +24,61 @@ const DOCK_APPS = [
     icon: 'https://svgl.app/library/discord.svg' 
   },
   { 
+    id: 'whatsapp', 
+    name: 'WhatsApp', 
+    icon: 'https://svgl.app/library/whatsapp-icon.svg' 
+  },
+  { 
+    id: 'linear', 
+    name: 'Linear', 
+    icon: 'https://svgl.app/library/linear.svg' 
+  },
+  { 
+    id: 'asana', 
+    name: 'Asana', 
+    icon: 'https://svgl.app/library/asana-logo.svg' 
+  },
+  { 
+    id: 'jira', 
+    name: 'Jira', 
+    icon: 'https://cdn.worldvectorlogo.com/logos/jira-1.svg' 
+  },
+  { 
+    id: 'figma', 
+    name: 'Figma', 
+    icon: 'https://svgl.app/library/figma.svg' 
+  },
+  { 
+    id: 'zoom', 
+    name: 'Zoom', 
+    icon: 'https://svgl.app/library/zoom.svg' 
+  },
+  { 
+    id: 'github', 
+    name: 'GitHub', 
+    icon: 'https://svgl.app/library/github_light.svg' 
+  },
+  { 
+    id: 'vercel', 
+    name: 'Vercel', 
+    icon: 'https://svgl.app/library/vercel.svg' 
+  },
+  { 
+    id: 'vscode', 
+    name: 'VS Code', 
+    icon: 'https://svgl.app/library/vscode.svg' 
+  },
+  { 
+    id: 'trello', 
+    name: 'Trello', 
+    icon: 'https://svgl.app/library/trello.svg' 
+  },
+  { 
+    id: 'gmail', 
+    name: 'Gmail', 
+    icon: 'https://svgl.app/library/gmail.svg' 
+  },
+  { 
     id: 'perplexity', 
     name: 'Perplexity', 
     icon: 'https://svgl.app/library/perplexity.svg' 
@@ -69,7 +124,7 @@ export function IntegrationsSection() {
             Work at the speed you think in every app you use. Email, messages, docs or code—Flow works in any text box.
           </p>
           
-          <div className="w-full flex justify-center items-center relative z-10 pt-8 pb-12">
+          <div className="w-full flex justify-center items-center relative z-10 pt-8 pb-12 overflow-x-auto hide-scrollbar">
             <MacOSDock
               apps={DOCK_APPS}
               onAppClick={handleAppClick}

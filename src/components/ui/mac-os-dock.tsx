@@ -74,7 +74,7 @@ const MacOSDock: React.FC<MacOSDockProps> = ({
   const [config, setConfig] = useState(getResponsiveConfig);
   const { baseIconSize, maxScale, effectWidth } = config;
   const minScale = 1.0;
-  const baseSpacing = Math.max(4, baseIconSize * 0.08);
+  const baseSpacing = Math.max(16, baseIconSize * 0.25);
 
   // Update config on window resize
   useEffect(() => {
@@ -290,10 +290,15 @@ const MacOSDock: React.FC<MacOSDockProps> = ({
                 alt={app.name}
                 width={scaledSize}
                 height={scaledSize}
-                className="object-contain"
+                className="object-contain select-none pointer-events-none"
+                draggable={false}
+                onContextMenu={(e) => e.preventDefault()}
                 style={{
-                  filter: `drop-shadow(0 ${scale > 1.2 ? Math.max(2, baseIconSize * 0.05) : Math.max(1, baseIconSize * 0.03)}px ${scale > 1.2 ? Math.max(4, baseIconSize * 0.1) : Math.max(2, baseIconSize * 0.06)}px rgba(0,0,0,${0.2 + (scale - 1) * 0.15}))`
+                  filter: `drop-shadow(0 ${scale > 1.2 ? Math.max(2, baseIconSize * 0.05) : Math.max(1, baseIconSize * 0.03)}px ${scale > 1.2 ? Math.max(4, baseIconSize * 0.1) : Math.max(2, baseIconSize * 0.06)}px rgba(0,0,0,${0.2 + (scale - 1) * 0.15}))`,
+                  WebkitTouchCallout: "none",
+                  WebkitUserDrag: "none"
                 }}
+                referrerPolicy="no-referrer"
               />
               
               {/* App Indicator Dot */}
