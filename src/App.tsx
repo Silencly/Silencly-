@@ -36,6 +36,7 @@ import {
   Eye,
   EyeOff,
   Settings,
+  Search,
   X,
   Database,
   Star,
@@ -70,8 +71,11 @@ import {
 import Waveform from "./components/Waveform";
 import HistoryDrawer from "./components/HistoryDrawer";
 import DictionaryDrawer, { DictionaryItem } from "./components/DictionaryDrawer";
+import SpotlightSearch from "./components/SpotlightSearch";
 import PricingSection from "./components/ui/pricing-section-4";
 import { TestimonialsSection } from "./components/blocks/testimonials-with-marquee";
+import { UseCasesPage } from "./components/UseCasesPage";
+import { IntegrationsSection } from "./components/IntegrationsSection";
 import { DictationSession, ToneOption, TONE_OPTIONS } from "./types";
 
 const marqueeLogos = [
@@ -230,13 +234,16 @@ export default function App() {
     updateProfileName,
   } = useAppAuth();
 
-  const [page, setPage] = useState<"home" | "about" | "workspace" | "bud" | "features" | "use-cases" | "pricing" | "careers">(() => {
+  const [page, setPage] = useState<"home" | "about" | "workspace" | "bud" | "features" | "use-cases" | "pricing" | "careers" | "privacy" | "terms" | "demo">(() => {
     if (typeof window === "undefined") return "home";
     const params = new URLSearchParams(window.location.search);
     if (params.get("page") === "workspace" || window.location.pathname === "/workspace") {
       return "workspace";
     }
     if (window.location.pathname === "/about") return "about";
+    if (window.location.pathname === "/privacy") return "privacy";
+    if (window.location.pathname === "/terms") return "terms";
+    if (window.location.pathname === "/demo") return "demo";
     if (window.location.pathname === "/bud" || window.location.pathname === "/dsbuddy") return "bud";
     return "home";
   });
@@ -295,6 +302,18 @@ export default function App() {
       if (window.location.pathname !== "/about") {
         window.history.pushState({ page: "about" }, "", "/about");
       }
+    } else if (page === "privacy") {
+      if (window.location.pathname !== "/privacy") {
+        window.history.pushState({ page: "privacy" }, "", "/privacy");
+      }
+    } else if (page === "terms") {
+      if (window.location.pathname !== "/terms") {
+        window.history.pushState({ page: "terms" }, "", "/terms");
+      }
+    } else if (page === "demo") {
+      if (window.location.pathname !== "/demo") {
+        window.history.pushState({ page: "demo" }, "", "/demo");
+      }
     } else if (page === "bud") {
       if (window.location.pathname !== "/bud") {
         window.history.pushState({ page: "bud" }, "", "/bud");
@@ -320,6 +339,12 @@ export default function App() {
 
       if (window.location.pathname === "/about") {
         setPage("about");
+      } else if (window.location.pathname === "/privacy") {
+        setPage("privacy");
+      } else if (window.location.pathname === "/terms") {
+        setPage("terms");
+      } else if (window.location.pathname === "/demo") {
+        setPage("demo");
       } else if (window.location.pathname === "/bud" || window.location.pathname === "/dsbuddy") {
         setPage("bud");
       } else {
@@ -395,6 +420,7 @@ export default function App() {
   }, []);
 
   // Floating widget states
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [widgetPos, setWidgetPos] = useState({ x: 0, y: 0 });
   const [isFocusedOnWriting, setIsFocusedOnWriting] = useState(false);
@@ -525,6 +551,17 @@ export default function App() {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isRecording]);
+
+  useEffect(() => {
+    const handleSearchKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+        e.preventDefault();
+        setIsSearchOpen((prev) => !prev);
+      }
+    };
+    window.addEventListener("keydown", handleSearchKeyDown);
+    return () => window.removeEventListener("keydown", handleSearchKeyDown);
+  }, []);
 
   // Preset demo options for the interactive playground
   const demoPresets = {
@@ -1660,6 +1697,17 @@ export default function App() {
 
             {/* Right Actions */}
             <div className="flex items-center gap-1.5 sm:gap-4">
+              <button 
+                onClick={() => setIsSearchOpen(true)}
+                className="p-1.5 sm:px-2.5 sm:py-1.5 rounded-full border border-white/10 bg-white/5 hover:bg-white/10 text-white/80 hover:text-white transition-all cursor-pointer flex items-center gap-1"
+                title="Search commands (⌘K)"
+              >
+                <Search className="w-3.5 h-3.5 text-white/60" />
+                <span className="hidden sm:inline text-xs font-semibold">Search</span>
+                <kbd className="hidden md:inline-flex items-center gap-0.5 text-[9px] font-mono bg-white/5 border border-white/10 px-1.5 py-0.5 rounded text-white/40">
+                  <span>⌘K</span>
+                </kbd>
+              </button>
               {activeUser ? (
                 <div className="relative">
                   {/* User Logo / Avatar */}
@@ -1845,6 +1893,10 @@ export default function App() {
         </section>
         )}
 
+        {page === "home" && (
+          <IntegrationsSection />
+        )}
+
         {/* Modern Landing Page Section */}
         {(page === "home" || page === "features") && (
         <section id="features" className="py-20 md:py-28 bg-black w-full px-5 md:px-10 flex flex-col items-center justify-center font-sans border-t border-zinc-900">
@@ -1968,7 +2020,7 @@ export default function App() {
         )}
 
         {/* User Reviews / Testimonials */}
-        {(page === "home" || page === "use-cases") && (
+        {page === "home" && (
         <div id="usecases">
           <TestimonialsSection
             title="Loved by Fast Builders"
@@ -1976,6 +2028,11 @@ export default function App() {
             testimonials={testimonialsData}
           />
         </div>
+        )}
+
+        {/* Use Cases Page */}
+        {page === "use-cases" && (
+          <UseCasesPage />
         )}
 
         {/* Careers Section */}
@@ -2216,6 +2273,17 @@ export default function App() {
                   <span className="w-1.5 h-1.5 rounded-full bg-zinc-400 animate-pulse"></span>
                   Official Information
                 </span>
+
+                {/* Logos */}
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-6 py-6">
+                  <div className="bg-zinc-900/40 p-4 rounded-3xl border border-zinc-800/50 shadow-xl">
+                    <img src="/silencly-logo-normal.png" alt="Silencly Normal Logo" className="w-32 h-32 sm:w-40 sm:h-40 object-contain rounded-2xl" />
+                  </div>
+                  <div className="bg-zinc-900/40 p-4 rounded-3xl border border-zinc-800/50 shadow-xl">
+                    <img src="/silencly-logo-transparent.png" alt="Silencly Transparent Logo" className="w-32 h-32 sm:w-40 sm:h-40 object-contain" />
+                  </div>
+                </div>
+
                 <h1 className="text-4xl sm:text-6xl font-display font-semibold tracking-tight bg-gradient-to-b from-white to-zinc-400 bg-clip-text text-transparent">
                   About Silencly
                 </h1>
@@ -2665,6 +2733,13 @@ export default function App() {
           </div>
         )}
 
+        <SpotlightSearch
+          isOpen={isSearchOpen}
+          onClose={() => setIsSearchOpen(false)}
+          setPage={setPage}
+          handleWorkspaceClick={handleWorkspaceClick}
+        />
+
       </div>
     );
   }
@@ -2787,8 +2862,21 @@ export default function App() {
             </p>
           </div>
 
-          {/* User profile with dropdown */}
-          <div className="flex items-center gap-3 bg-zinc-900/40 border border-zinc-900 rounded-2xl px-3.5 py-1.5 shadow-xs select-none">
+          <div className="flex items-center gap-3">
+            <button 
+              onClick={() => setIsSearchOpen(true)}
+              className="px-3 py-1.5 rounded-xl border border-zinc-800 bg-zinc-900/50 hover:bg-zinc-900 text-zinc-400 hover:text-zinc-200 transition-all cursor-pointer flex items-center gap-2 text-xs font-semibold"
+              title="Search commands (⌘K)"
+            >
+              <Search className="w-3.5 h-3.5 text-zinc-500" />
+              <span className="hidden sm:inline">Search commands...</span>
+              <kbd className="hidden md:inline-flex items-center gap-0.5 text-[9px] font-mono bg-zinc-950 border border-zinc-800 px-1.5 py-0.5 rounded text-zinc-600">
+                <span>⌘K</span>
+              </kbd>
+            </button>
+
+            {/* User profile with dropdown */}
+            <div className="flex items-center gap-3 bg-zinc-900/40 border border-zinc-900 rounded-2xl px-3.5 py-1.5 shadow-xs select-none">
             <img
               src={activeUser.image}
               className="w-6 h-6 rounded-full border border-zinc-800 cursor-pointer"
@@ -2818,6 +2906,7 @@ export default function App() {
             >
               Exit
             </button>
+          </div>
           </div>
         </header>
 
