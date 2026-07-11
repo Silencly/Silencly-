@@ -9,7 +9,7 @@ export async function dbFetchHistory(userId: string): Promise<DictationSession[]
     const { data, error } = await supabase
       .from("history")
       .select("*")
-      .eq("userId", userId);
+      .eq("user_id", userId);
       
     if (error) {
       console.error("Supabase fetchHistory error, fallback to local storage:", error);
@@ -45,7 +45,7 @@ export async function dbFetchDictionary(userId: string): Promise<DictionaryItem[
     const { data, error } = await supabase
       .from("dictionary")
       .select("*")
-      .eq("userId", userId);
+      .eq("user_id", userId);
       
     if (error) {
       console.error("Supabase fetchDictionary error, fallback to local storage:", error);
@@ -73,7 +73,7 @@ export async function dbSaveDictionaryItem(userId: string, item: DictionaryItem)
   if (isSupabaseConfigured) {
     const { error } = await supabase
       .from("dictionary")
-      .upsert({ ...item, userId });
+      .upsert({ ...item, user_id: userId });
       
     if (error) {
       console.error("Supabase saveDictionaryItem error:", error);
@@ -104,7 +104,7 @@ export async function dbDeleteDictionaryItem(userId: string, itemId: string): Pr
       .from("dictionary")
       .delete()
       .eq("id", itemId)
-      .eq("userId", userId);
+      .eq("user_id", userId);
       
     if (error) {
       console.error("Supabase deleteDictionaryItem error:", error);
@@ -129,7 +129,7 @@ export async function dbSaveHistoryItem(userId: string, item: DictationSession):
   if (isSupabaseConfigured) {
     const { error } = await supabase
       .from("history")
-      .upsert({ ...item, userId });
+      .upsert({ ...item, user_id: userId });
       
     if (error) {
       console.error("Supabase saveHistoryItem error:", error);
@@ -160,7 +160,7 @@ export async function dbDeleteHistoryItem(userId: string, itemId: string): Promi
       .from("history")
       .delete()
       .eq("id", itemId)
-      .eq("userId", userId);
+      .eq("user_id", userId);
       
     if (error) {
       console.error("Supabase deleteHistoryItem error:", error);
@@ -186,7 +186,7 @@ export async function dbClearHistory(userId: string): Promise<void> {
     const { error } = await supabase
       .from("history")
       .delete()
-      .eq("userId", userId);
+      .eq("user_id", userId);
       
     if (error) {
       console.error("Supabase clearHistory error:", error);
