@@ -26,214 +26,30 @@ import {
   Coins
 } from "lucide-react";
 
+export const MODEL_ID = "qwen/qwen3.6-27b";
+export const PROVIDER = "Groq";
+
 export interface ModelInfo {
   id: string;
   name: string;
-  provider: 'AssemblyAI' | 'Mistral' | 'Groq' | 'OpenAI' | 'Alibaba' | 'Meta' | 'Canopy Labs';
-  category: 'Speech to Text' | 'Text Generation' | 'Text to Speech';
+  provider: string;
   description: string;
   maxTokens: number;
+  category: string;
   latency: string;
   costPer1k: string;
 }
 
-export const MODELS_LIST: ModelInfo[] = [
-  // Speech to Text
-  {
-    id: "silencly-mythos-3",
-    name: "Silencly Mythos 3 (Universal 3 Pro)",
-    provider: "AssemblyAI",
-    category: "Speech to Text",
-    description: "AssemblyAI's flagship gold-standard speech recognition model. Offers industry-leading accuracy with near-zero word error rates and native voice-formatting capabilities.",
-    maxTokens: 2048,
-    latency: "800ms",
-    costPer1k: "$0.0012"
-  },
-  {
-    id: "silencly-2-flash",
-    name: "Silencly 2.0 Flash",
-    provider: "AssemblyAI",
-    category: "Speech to Text",
-    description: "AssemblyAI's ultra-low latency model engineered for real-time dictation, fast formatting, and instant transcript streams.",
-    maxTokens: 1024,
-    latency: "200ms",
-    costPer1k: "$0.0006"
-  },
-  {
-    id: "whisper-v3-turbo",
-    name: "Whisper v3 Turbo",
-    provider: "Groq",
-    category: "Speech to Text",
-    description: "OpenAI's latest state-of-the-art open-weights speech model, accelerated on Groq LPU hardware for blazing-fast transcription speeds.",
-    maxTokens: 1024,
-    latency: "150ms",
-    costPer1k: "$0.0001"
-  },
-  {
-    id: "whisper-c3-base",
-    name: "Whisper C3 Base",
-    provider: "Groq",
-    category: "Speech to Text",
-    description: "A compact, highly resource-efficient version of Whisper, tailored for ultra-fast, cost-effective standard dictations.",
-    maxTokens: 512,
-    latency: "100ms",
-    costPer1k: "$0.00005"
-  },
-
-  // Text Generation
-  {
-    id: "mistral-large-3",
-    name: "Mistral Large 3",
-    provider: "Mistral",
-    category: "Text Generation",
-    description: "Flagship frontier language model from Mistral AI, delivering world-class reasoning, structured outputs, and complex multilingual processing.",
-    maxTokens: 8192,
-    latency: "400ms",
-    costPer1k: "$0.0025"
-  },
-  {
-    id: "mistral-medium",
-    name: "Mistral Medium 3.5",
-    provider: "Mistral",
-    category: "Text Generation",
-    description: "Perfect blend of speed and reasoning, optimized for code completion, structured analysis, and agentic workflows.",
-    maxTokens: 4096,
-    latency: "300ms",
-    costPer1k: "$0.0015"
-  },
-  {
-    id: "codestral-2501",
-    name: "Codestral 2501",
-    provider: "Mistral",
-    category: "Text Generation",
-    description: "State-of-the-art specialized model built for software developers, supporting code generation, debugging, and multi-language synthesis.",
-    maxTokens: 4096,
-    latency: "250ms",
-    costPer1k: "$0.0010"
-  },
-  {
-    id: "mistral-small-3",
-    name: "Mistral Small 3",
-    provider: "Mistral",
-    category: "Text Generation",
-    description: "An efficient, high-performance compact model engineered for high-volume text editing, low-latency API tasks, and rapid summaries.",
-    maxTokens: 2048,
-    latency: "180ms",
-    costPer1k: "$0.0005"
-  },
-  {
-    id: "gpt-oss-20b",
-    name: "GPT OSS 20B",
-    provider: "OpenAI",
-    category: "Text Generation",
-    description: "A specialized open-weight general-purpose instruct model fine-tuned for high-adherence structured responses.",
-    maxTokens: 2048,
-    latency: "220ms",
-    costPer1k: "$0.0002"
-  },
-  {
-    id: "gpt-oss-120b",
-    name: "GPT OSS 120B",
-    provider: "OpenAI",
-    category: "Text Generation",
-    description: "A highly deep-reasoning, heavy cognitive transformer designed to tackle complex multi-step logical problems.",
-    maxTokens: 4096,
-    latency: "550ms",
-    costPer1k: "$0.0018"
-  },
-  {
-    id: "qwen-3-32b",
-    name: "Qwen 3 (32B)",
-    provider: "Alibaba",
-    category: "Text Generation",
-    description: "Alibaba's advanced multilingual model with world-class mathematical and software engineering capabilities.",
-    maxTokens: 4096,
-    latency: "280ms",
-    costPer1k: "$0.0004"
-  },
-  {
-    id: "qwen-3-6-27b",
-    name: "Qwen 3.6 (27B)",
-    provider: "Alibaba",
-    category: "Text Generation",
-    description: "The next-generation medium-scale transformer balancing elite accuracy, native multilingual understanding, and speed.",
-    maxTokens: 4096,
-    latency: "240ms",
-    costPer1k: "$0.0003"
-  },
-  {
-    id: "llama-4-scout",
-    name: "Llama 4 Scout",
-    provider: "Meta",
-    category: "Text Generation",
-    description: "Meta's lightweight agentic model optimized for fast processing, data extraction, lookups, and lightning-fast action calls.",
-    maxTokens: 2048,
-    latency: "120ms",
-    costPer1k: "$0.0001"
-  },
-  {
-    id: "llama-4-maverick",
-    name: "Llama 4 Maverick",
-    provider: "Meta",
-    category: "Text Generation",
-    description: "Meta's flagship high-intelligence frontier model designed for deep logical reasoning and complex structural tasks.",
-    maxTokens: 8192,
-    latency: "450ms",
-    costPer1k: "$0.0015"
-  },
-  {
-    id: "llama-3-3-70b",
-    name: "Llama 3.3 (70B)",
-    provider: "Meta",
-    category: "Text Generation",
-    description: "Versatile, highly capable open model offering exceptional balance of conversation flow, safety, and deep context processing.",
-    maxTokens: 4096,
-    latency: "350ms",
-    costPer1k: "$0.0008"
-  },
-  {
-    id: "safety-gpt-oss-20b",
-    name: "Safety GPT OSS 20B",
-    provider: "OpenAI",
-    category: "Text Generation",
-    description: "Enterprise aligned instruction model loaded with state-of-the-art guardrails, red-teaming checks, and bias reduction.",
-    maxTokens: 2048,
-    latency: "230ms",
-    costPer1k: "$0.0002"
-  },
-  {
-    id: "llama-3-1-instant",
-    name: "Llama 3.1 Instant",
-    provider: "Meta",
-    category: "Text Generation",
-    description: "Ultra-high speed 8B parameters text model optimized on Groq LPU architecture for responsive, instantaneous text streams.",
-    maxTokens: 1024,
-    latency: "90ms",
-    costPer1k: "$0.00008"
-  },
-
-  // Text to Speech
-  {
-    id: "canopy-arabic-saudi",
-    name: "Canopy Orpheus (Arabic Saudi)",
-    provider: "Canopy Labs",
-    category: "Text to Speech",
-    description: "High-fidelity Saudi dialect Arabic voice synthesis engine. Captures nuanced inflections, native regional pauses, and cultural cadence.",
-    maxTokens: 512,
-    latency: "600ms",
-    costPer1k: "$0.0040"
-  },
-  {
-    id: "canopy-v1-english",
-    name: "Canopy V1 English (Natural Narration)",
-    provider: "Canopy Labs",
-    category: "Text to Speech",
-    description: "Elite English vocal generation designed for clear, expressive audios, presentations, documentation recordings, and narrations.",
-    maxTokens: 512,
-    latency: "500ms",
-    costPer1k: "$0.0030"
-  }
-];
+export const SELECTED_MODEL: ModelInfo = {
+  id: MODEL_ID,
+  name: "Qwen 3.6 (27B)",
+  provider: PROVIDER,
+  description: "Qwen 3.6 (27B) via Groq - fast and efficient text generation.",
+  maxTokens: 4096,
+  category: "Text Generation",
+  latency: "150ms",
+  costPer1k: "$0.10",
+};
 
 interface ApiConsolePageProps {
   onBack: () => void;
@@ -241,9 +57,7 @@ interface ApiConsolePageProps {
 }
 
 export default function ApiConsolePage({ onBack, user }: ApiConsolePageProps) {
-  const [selectedCategory, setSelectedCategory] = useState<'all' | 'Speech to Text' | 'Text Generation' | 'Text to Speech'>('all');
-  const [selectedModel, setSelectedModel] = useState<ModelInfo>(MODELS_LIST[0]);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedModel] = useState<ModelInfo>(SELECTED_MODEL);
   const [codeLanguage, setCodeLanguage] = useState<'curl' | 'js' | 'python'>('curl');
 
   // Parameters
@@ -353,13 +167,7 @@ export default function ApiConsolePage({ onBack, user }: ApiConsolePageProps) {
     setTimeout(() => setCopiedCode(false), 2000);
   };
 
-  const filteredModels = MODELS_LIST.filter(model => {
-    const matchesCategory = selectedCategory === 'all' || model.category === selectedCategory;
-    const matchesSearch = model.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                          model.provider.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          model.id.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesCategory && matchesSearch;
-  });
+  const filteredModels = [selectedModel];
 
   // Dynamic code snippet generator
   const getCodeSnippet = () => {
@@ -684,85 +492,27 @@ print(response.choices[0].message.content)`;
         
         {/* PANEL 1: MODELS SIDEBAR SELECTOR */}
         <div className="w-full md:w-80 shrink-0 border-r border-zinc-900 flex flex-col bg-[#08080c]/60 backdrop-blur-xl max-h-[400px] md:max-h-none md:h-full overflow-hidden">
-          {/* Category Tabs */}
-          <div className="p-4 border-b border-zinc-900 space-y-3 shrink-0">
-            <div className="relative">
-              <Search className="w-4 h-4 text-zinc-500 absolute left-3 top-2.5" />
-              <input 
-                type="text" 
-                placeholder="Search models..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-zinc-950 border border-zinc-900 rounded-xl py-2 pl-9 pr-4 text-xs text-zinc-200 focus:outline-none focus:border-purple-800/40 focus:ring-1 focus:ring-purple-800/20"
-              />
-            </div>
-            
-            {/* Category Select Buttons */}
-            <div className="grid grid-cols-2 gap-1 bg-zinc-950 p-1 rounded-xl border border-zinc-900">
-              <button 
-                onClick={() => setSelectedCategory('all')}
-                className={`py-1.5 px-2.5 text-[10px] font-semibold rounded-lg transition-all cursor-pointer ${selectedCategory === 'all' ? 'bg-zinc-900 text-white shadow-inner' : 'text-zinc-500 hover:text-zinc-300'}`}
-              >
-                All Models
-              </button>
-              <button 
-                onClick={() => setSelectedCategory('Speech to Text')}
-                className={`py-1.5 px-2.5 text-[10px] font-semibold rounded-lg transition-all cursor-pointer truncate ${selectedCategory === 'Speech to Text' ? 'bg-zinc-900 text-white shadow-inner' : 'text-zinc-500 hover:text-zinc-300'}`}
-              >
-                Speech-to-Text
-              </button>
-              <button 
-                onClick={() => setSelectedCategory('Text Generation')}
-                className={`py-1.5 px-2.5 text-[10px] font-semibold rounded-lg transition-all cursor-pointer truncate ${selectedCategory === 'Text Generation' ? 'bg-zinc-900 text-white shadow-inner' : 'text-zinc-500 hover:text-zinc-300'}`}
-              >
-                Text Gen
-              </button>
-              <button 
-                onClick={() => setSelectedCategory('Text to Speech')}
-                className={`py-1.5 px-2.5 text-[10px] font-semibold rounded-lg transition-all cursor-pointer truncate ${selectedCategory === 'Text to Speech' ? 'bg-zinc-900 text-white shadow-inner' : 'text-zinc-500 hover:text-zinc-300'}`}
-              >
-                Text-to-Speech
-              </button>
-            </div>
-          </div>
-
           {/* Model selection list */}
           <div className="flex-1 overflow-y-auto p-2.5 space-y-1.5 scrollbar-thin scrollbar-thumb-zinc-900">
-            {filteredModels.length === 0 ? (
-              <div className="py-8 text-center text-zinc-600 text-xs">
-                No models match your search.
-              </div>
-            ) : (
-              filteredModels.map((model) => (
-                <div 
-                  key={model.id}
-                  onClick={() => setSelectedModel(model)}
-                  className={`w-full p-3 rounded-2xl text-left border cursor-pointer transition-all flex gap-3 ${selectedModel.id === model.id ? 'bg-[#0e0c15] border-purple-900/40 shadow-lg shadow-black/30' : 'bg-transparent border-transparent hover:bg-zinc-950/65'}`}
-                >
-                  {renderProviderLogo(model.provider, 'sm')}
-                  
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between gap-1.5">
-                      <h3 className="text-xs font-bold text-white truncate">{model.name}</h3>
-                      {selectedModel.id === model.id && (
-                        <div className="w-1.5 h-1.5 rounded-full bg-purple-500 shrink-0" />
-                      )}
-                    </div>
-                    
-                    <div className="flex items-center gap-1.5 mt-1">
-                      <span className="text-[9px] text-zinc-500 font-mono">{model.provider}</span>
-                      <span className="text-[9px] text-zinc-700 font-mono">•</span>
-                      <span className="text-[9px] text-purple-400 font-mono truncate">{model.category}</span>
-                    </div>
-
-                    <div className="flex justify-between items-center mt-2 pt-2 border-t border-zinc-900/20 text-[9px] text-zinc-500 font-mono">
-                      <span className="flex items-center gap-0.5"><Clock className="w-2.5 h-2.5 text-zinc-600" /> {model.latency}</span>
-                      <span className="flex items-center gap-0.5"><Coins className="w-2.5 h-2.5 text-zinc-600" /> {model.costPer1k}</span>
-                    </div>
-                  </div>
+            <div 
+              onClick={() => {}}
+              className="w-full p-3 rounded-2xl text-left border cursor-pointer transition-all flex gap-3 bg-[#0e0c15] border-purple-900/40 shadow-lg shadow-black/30"
+            >
+              {renderProviderLogo(selectedModel.provider, 'sm')}
+              
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center justify-between gap-1.5">
+                  <h3 className="text-xs font-bold text-white truncate">{selectedModel.name}</h3>
+                  <div className="w-1.5 h-1.5 rounded-full bg-purple-500 shrink-0" />
                 </div>
-              ))
-            )}
+                
+                <div className="flex items-center gap-1.5 mt-1">
+                  <span className="text-[9px] text-zinc-500 font-mono">{selectedModel.provider}</span>
+                  <span className="text-[9px] text-zinc-700 font-mono">•</span>
+                  <span className="text-[9px] text-purple-400 font-mono truncate">{selectedModel.category}</span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
