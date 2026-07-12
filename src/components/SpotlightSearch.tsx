@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Search, FileText, ArrowRight, Shield, Info, HelpCircle, Sparkles, Mic, Briefcase, DollarSign, X } from "lucide-react";
+import { Search, FileText, ArrowRight, Shield, Info, HelpCircle, Sparkles, Mic, Briefcase, DollarSign, X, Command } from "lucide-react";
 
 interface SpotlightSearchProps {
   isOpen: boolean;
   onClose: () => void;
-  setPage: (page: "home" | "about" | "workspace" | "bud" | "features" | "use-cases" | "pricing" | "careers" | "privacy" | "terms" | "demo") => void;
+  setPage: (page: "home" | "about" | "workspace" | "bud" | "features" | "use-cases" | "pricing" | "careers" | "privacy" | "terms" | "demo" | "api-console") => void;
   handleWorkspaceClick: () => void;
 }
 
@@ -162,6 +162,17 @@ export default function SpotlightSearch({ isOpen, onClose, setPage, handleWorksp
       icon: Briefcase,
       action: () => {
         setPage("careers");
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+    },
+    {
+      id: "api-console",
+      title: "API Console",
+      description: "Manage your Silencly developer API keys and usage.",
+      category: "Pages",
+      icon: Command,
+      action: () => {
+        setPage("api-console");
         window.scrollTo({ top: 0, behavior: "smooth" });
       }
     },

@@ -76,6 +76,8 @@ import PricingSection from "./components/ui/pricing-section-4";
 import { TestimonialsSection } from "./components/blocks/testimonials-with-marquee";
 import { UseCasesPage } from "./components/UseCasesPage";
 import { IntegrationsSection } from "./components/IntegrationsSection";
+import DemoPage from "./components/DemoPage";
+import ApiConsolePage from "./components/ApiConsolePage";
 import { DictationSession, ToneOption, TONE_OPTIONS } from "./types";
 
 const marqueeLogos = [
@@ -234,7 +236,7 @@ export default function App() {
     updateProfileName,
   } = useAppAuth();
 
-  const [page, setPage] = useState<"home" | "about" | "workspace" | "bud" | "features" | "use-cases" | "pricing" | "careers" | "privacy" | "terms" | "demo">(() => {
+  const [page, setPage] = useState<"home" | "about" | "workspace" | "bud" | "features" | "use-cases" | "pricing" | "careers" | "privacy" | "terms" | "demo" | "api-console">(() => {
     if (typeof window === "undefined") return "home";
     const params = new URLSearchParams(window.location.search);
     if (params.get("page") === "workspace" || window.location.pathname === "/workspace") {
@@ -244,6 +246,7 @@ export default function App() {
     if (window.location.pathname === "/privacy") return "privacy";
     if (window.location.pathname === "/terms") return "terms";
     if (window.location.pathname === "/demo") return "demo";
+    if (window.location.pathname === "/api-console") return "api-console";
     if (window.location.pathname === "/bud" || window.location.pathname === "/dsbuddy") return "bud";
     return "home";
   });
@@ -314,6 +317,10 @@ export default function App() {
       if (window.location.pathname !== "/demo") {
         window.history.pushState({ page: "demo" }, "", "/demo");
       }
+    } else if (page === "api-console") {
+      if (window.location.pathname !== "/api-console") {
+        window.history.pushState({ page: "api-console" }, "", "/api-console");
+      }
     } else if (page === "bud") {
       if (window.location.pathname !== "/bud") {
         window.history.pushState({ page: "bud" }, "", "/bud");
@@ -345,6 +352,8 @@ export default function App() {
         setPage("terms");
       } else if (window.location.pathname === "/demo") {
         setPage("demo");
+      } else if (window.location.pathname === "/api-console") {
+        setPage("api-console");
       } else if (window.location.pathname === "/bud" || window.location.pathname === "/dsbuddy") {
         setPage("bud");
       } else {
@@ -1690,7 +1699,6 @@ export default function App() {
 
             {/* Center Navigation Links */}
             <div className="hidden md:flex items-center gap-6 text-sm font-semibold text-white/80">
-              <a href="/workspace" onClick={(e) => { e.preventDefault(); handleWorkspaceClick(); }} className="hover:text-white transition-colors">Web Demo</a>
               <a href="#features" onClick={(e) => { e.preventDefault(); setPage("features"); }} className="hover:text-white transition-colors">Features</a>
               <a href="#pricing" onClick={(e) => { e.preventDefault(); setPage("pricing"); }} className="hover:text-white transition-colors">Pricing</a>
             </div>
@@ -2521,9 +2529,36 @@ export default function App() {
         {page === "bud" && (
           <BudPage onBack={() => setPage("home")} user={user} onAuthClick={() => { setAuthMode("signin"); setShowAuthModal(true); }} />
         )}
+        
+        {/* Workspace Login Prompt */}
+        {page === "workspace" && !activeUser && (
+          <div className="flex flex-col items-center justify-center min-h-[60vh] text-center px-4">
+            <h2 className="text-2xl md:text-3xl font-bold text-white mb-4">Sign in to access Web Demo</h2>
+            <p className="text-zinc-400 mb-8 max-w-md">You need to be signed in to access the Silencly workspace and try the Web Demo.</p>
+            <button
+              onClick={() => {
+                setAuthMode("signin");
+                setShowAuthModal(true);
+              }}
+              className="bg-white hover:bg-zinc-200 text-black px-8 py-3 rounded-full font-semibold transition-colors"
+            >
+              Sign In
+            </button>
+          </div>
+        )}
+        
+        {/* Demo Page */}
+        {page === "demo" && (
+          <DemoPage onBack={() => setPage("home")} onLaunchWorkspace={handleWorkspaceClick} />
+        )}
+        
+        {/* API Console Page */}
+        {page === "api-console" && (
+          <ApiConsolePage onBack={() => setPage("home")} user={user} />
+        )}
 
         {/* Public Footer */}
-        {page !== "bud" && (
+        {page !== "bud" && page !== "api-console" && page !== "demo" && (
           <footer className="bg-[#0a0a0a] border-t border-zinc-900 pt-16 pb-8">
           <div className="max-w-7xl mx-auto px-6">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
@@ -2565,7 +2600,9 @@ export default function App() {
                 <h3 className="text-zinc-50 font-semibold mb-6">Quick Links</h3>
                 <ul className="space-y-4">
                   <li><button onClick={() => { window.scrollTo(0, 0); setPage("home"); }} className="text-zinc-400 hover:text-zinc-50 transition-colors text-sm cursor-pointer">Home</button></li>
-                  <li><a href="/workspace" onClick={(e) => { e.preventDefault(); handleWorkspaceClick(); }} className="text-zinc-400 hover:text-zinc-50 transition-colors text-sm cursor-pointer">Web Demo</a></li>
+                  <li><a href="/demo" onClick={(e) => { e.preventDefault(); setPage("demo"); window.scrollTo(0, 0); }} className="text-zinc-400 hover:text-zinc-50 transition-colors text-sm cursor-pointer">Public Demo</a></li>
+                  <li><a href="/workspace" onClick={(e) => { e.preventDefault(); handleWorkspaceClick(); }} className="text-zinc-400 hover:text-zinc-50 transition-colors text-sm cursor-pointer">Workspace</a></li>
+                  <li><a href="/api-console" onClick={(e) => { e.preventDefault(); setPage("api-console"); window.scrollTo(0, 0); }} className="text-zinc-400 hover:text-zinc-50 transition-colors text-sm cursor-pointer">API Console</a></li>
                   <li><a href="#features" onClick={(e) => { e.preventDefault(); setPage("features"); window.scrollTo(0, 0); }} className="text-zinc-400 hover:text-zinc-50 transition-colors text-sm cursor-pointer">Features</a></li>
                   <li><a href="#usecases" onClick={(e) => { e.preventDefault(); setPage("use-cases"); window.scrollTo(0, 0); }} className="text-zinc-400 hover:text-zinc-50 transition-colors text-sm cursor-pointer">Use Cases</a></li>
                   <li><a href="#pricing" onClick={(e) => { e.preventDefault(); setPage("pricing"); window.scrollTo(0, 0); }} className="text-zinc-400 hover:text-zinc-50 transition-colors text-sm cursor-pointer">Pricing</a></li>
