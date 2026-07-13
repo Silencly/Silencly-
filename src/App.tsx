@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef, MouseEvent, FormEvent, ChangeEvent, ReactNode } from "react";
 import { motion } from "motion/react";
 import Hls from "hls.js";
-import BudPage from "./components/BudPage";
 import { useAppAuth } from "./lib/supabase-service";
 import { safeStorage } from "./lib/safe-storage";
 import {
@@ -125,10 +124,6 @@ const faqData = {
       a: "Traditional voice-to-text transcribes your words literally, keeping all filler words, grammar mistakes, and disjointed pacing. Silencly acts as an real-time professional editor—listening to your raw thoughts and instantly rewriting them into perfectly organized bullet points, clean paragraphs, or checklists."
     },
     {
-      q: "What is Bud?",
-      a: "Bud is an intelligent AI knowledge companion app under the Silencly brand, integrating seamlessly with Silencly to help you store, categorize, and recall your polished dictations as an interactive personal knowledge base."
-    },
-    {
       q: "Who is this for?",
       a: "For creators, researchers, professionals, and anyone who thinks faster than they type. If you regularly use scratchpads or voice memos to braindump unorganized thoughts, Silencly will save you hours of editing."
     },
@@ -242,7 +237,7 @@ export default function App() {
     updateProfileName,
   } = useAppAuth();
 
-  const [page, setPage] = useState<"home" | "about" | "workspace" | "bud" | "features" | "use-cases" | "pricing" | "careers" | "privacy" | "terms" | "demo">(() => {
+  const [page, setPage] = useState<"home" | "about" | "workspace" | "features" | "use-cases" | "pricing" | "careers" | "privacy" | "terms" | "demo">(() => {
     if (typeof window === "undefined") return "home";
     const params = new URLSearchParams(window.location.search);
     if (params.get("page") === "workspace" || window.location.pathname === "/workspace") {
@@ -252,7 +247,6 @@ export default function App() {
     if (window.location.pathname === "/privacy") return "privacy";
     if (window.location.pathname === "/terms") return "terms";
     if (window.location.pathname === "/demo") return "demo";
-    if (window.location.pathname === "/bud" || window.location.pathname === "/dsbuddy") return "bud";
     return "home";
   });
 
@@ -322,10 +316,6 @@ export default function App() {
       if (window.location.pathname !== "/demo") {
         window.history.pushState({ page: "demo" }, "", "/demo");
       }
-    } else if (page === "bud") {
-      if (window.location.pathname !== "/bud") {
-        window.history.pushState({ page: "bud" }, "", "/bud");
-      }
     } else if (page === "workspace") {
       if (!window.location.search.includes("page=workspace")) {
         window.history.pushState({ page: "workspace" }, "", "/?page=workspace");
@@ -353,8 +343,6 @@ export default function App() {
         setPage("terms");
       } else if (window.location.pathname === "/demo") {
         setPage("demo");
-      } else if (window.location.pathname === "/bud" || window.location.pathname === "/dsbuddy") {
-        setPage("bud");
       } else {
         const params = new URLSearchParams(window.location.search);
         if (params.get("page") === "workspace") {
@@ -403,7 +391,7 @@ export default function App() {
     if (activeUser) {
       setShowAuthModal(false);
       // Only reset page to home if we aren't already on one of the inner routed sections on initial load
-      setPage((prev) => (prev === "bud" || prev === "about" || prev === "workspace" ? prev : "home"));
+      setPage((prev) => (prev === "about" || prev === "workspace" ? prev : "home"));
     }
   }, [activeUser]);
 
@@ -1673,7 +1661,7 @@ export default function App() {
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#1f1f2e05_1px,transparent_1px),linear-gradient(to_bottom,#1f1f2e05_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] pointer-events-none" />
 
         {/* Floating Capsule Navigation Bar */}
-        {page !== "bud" && (
+        {true && (
           <div className="fixed left-0 right-0 z-50 px-4 top-4">
           <nav className="max-w-4xl mx-auto rounded-full border border-white/20 bg-white/10 backdrop-blur-xl shadow-xl shadow-black/50 px-3 py-1.5 sm:px-6 sm:py-2.5 flex items-center justify-between">
             {/* Left Brand */}
@@ -2543,11 +2531,6 @@ export default function App() {
           </section>
         )}
 
-        {/* Bud AI Worker Dashboard */}
-        {(page === "bud" || page === "about") && (
-          <AboutPage onBack={() => setPage("home")} />
-        )}
-        
         {/* Workspace Login Prompt */}
         {page === "workspace" && !activeUser && (
           <div className="flex flex-col items-center justify-center min-h-[60vh] text-center px-4">
@@ -2575,7 +2558,7 @@ export default function App() {
 
 
         {/* Public Footer */}
-        {page !== "bud" && page !== "demo" && (
+        {page !== "demo" && (
           <footer className="bg-[#0a0a0a] border-t border-zinc-900 pt-16 pb-8">
           <div className="max-w-7xl mx-auto px-6">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
@@ -2625,7 +2608,6 @@ export default function App() {
                   <li><a href="#pricing" onClick={(e) => { e.preventDefault(); setPage("pricing"); window.scrollTo(0, 0); }} className="text-zinc-400 hover:text-zinc-50 transition-colors text-sm cursor-pointer">Pricing</a></li>
                   <li><a href="#careers" onClick={(e) => { e.preventDefault(); setPage("careers"); window.scrollTo(0, 0); }} className="text-zinc-400 hover:text-zinc-50 transition-colors text-sm cursor-pointer">Careers</a></li>
                   {/* <li><button onClick={() => setPage("about")} className="text-zinc-400 hover:text-zinc-50 transition-colors text-sm cursor-pointer">About Us</button></li> */}
-                  <li><a href="/bud" onClick={(e) => { e.preventDefault(); setPage("bud"); }} className="text-zinc-400 hover:text-zinc-50 transition-colors text-sm cursor-pointer">Bud</a></li>
                 </ul>
               </div>
 

@@ -4,7 +4,7 @@ import { Search, FileText, ArrowRight, Shield, Info, HelpCircle, Sparkles, Mic, 
 interface SpotlightSearchProps {
   isOpen: boolean;
   onClose: () => void;
-  setPage: (page: "home" | "about" | "workspace" | "bud" | "features" | "use-cases" | "pricing" | "careers" | "privacy" | "terms" | "demo" | "api-console") => void;
+  setPage: (page: "home" | "about" | "workspace" | "features" | "use-cases" | "pricing" | "careers" | "privacy" | "terms" | "demo" | "api-console") => void;
   handleWorkspaceClick: () => void;
 }
 
@@ -119,17 +119,6 @@ export default function SpotlightSearch({ isOpen, onClose, setPage, handleWorksp
       icon: Mic,
       action: () => {
         handleWorkspaceClick();
-      }
-    },
-    {
-      id: "bud",
-      title: "Bud AI Worker",
-      description: "Access the Bud AI voice and workflow agent dashboard.",
-      category: "Pages",
-      icon: Sparkles,
-      action: () => {
-        setPage("bud");
-        window.scrollTo({ top: 0, behavior: "smooth" });
       }
     },
     {
