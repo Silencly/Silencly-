@@ -77,7 +77,7 @@ import { TestimonialsSection } from "./components/blocks/testimonials-with-marqu
 import { UseCasesPage } from "./components/UseCasesPage";
 import { IntegrationsSection } from "./components/IntegrationsSection";
 import DemoPage from "./components/DemoPage";
-import ApiConsolePage from "./components/ApiConsolePage";
+
 import { DictationSession, ToneOption, TONE_OPTIONS } from "./types";
 
 const marqueeLogos = [
@@ -181,7 +181,13 @@ const AboutPage = ({ onBack }: { onBack: () => void }) => (
   <div className="min-h-screen bg-zinc-950 text-zinc-50 p-12 mt-20">
     <button onClick={onBack} className="mb-8 text-blue-600 hover:underline">← Back to home</button>
     <h1 className="text-4xl font-bold mb-4">About Silencly</h1>
-    <p className="max-w-2xl text-lg text-zinc-300">Silencly is building the foundation of the new digital epoch. We empower builders, enterprises, and communities with decentralized tools.</p>
+    <p className="max-w-2xl text-lg text-zinc-300">
+      Silencly is a completely open-source AI dictation tool that instantly converts messy thoughts into clear, perfectly formatted text. 
+      We believe in the power of open source to build the foundation of the new digital epoch, empowering builders, enterprises, and communities with transparent tools.
+    </p>
+    <div className="mt-6">
+      <a href="https://github.com/silencly/silencly-" target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">Check us out on GitHub</a>
+    </div>
   </div>
 );
 
@@ -236,7 +242,7 @@ export default function App() {
     updateProfileName,
   } = useAppAuth();
 
-  const [page, setPage] = useState<"home" | "about" | "workspace" | "bud" | "features" | "use-cases" | "pricing" | "careers" | "privacy" | "terms" | "demo" | "api-console">(() => {
+  const [page, setPage] = useState<"home" | "about" | "workspace" | "bud" | "features" | "use-cases" | "pricing" | "careers" | "privacy" | "terms" | "demo">(() => {
     if (typeof window === "undefined") return "home";
     const params = new URLSearchParams(window.location.search);
     if (params.get("page") === "workspace" || window.location.pathname === "/workspace") {
@@ -246,7 +252,6 @@ export default function App() {
     if (window.location.pathname === "/privacy") return "privacy";
     if (window.location.pathname === "/terms") return "terms";
     if (window.location.pathname === "/demo") return "demo";
-    if (window.location.pathname === "/api-console") return "api-console";
     if (window.location.pathname === "/bud" || window.location.pathname === "/dsbuddy") return "bud";
     return "home";
   });
@@ -317,10 +322,6 @@ export default function App() {
       if (window.location.pathname !== "/demo") {
         window.history.pushState({ page: "demo" }, "", "/demo");
       }
-    } else if (page === "api-console") {
-      if (window.location.pathname !== "/api-console") {
-        window.history.pushState({ page: "api-console" }, "", "/api-console");
-      }
     } else if (page === "bud") {
       if (window.location.pathname !== "/bud") {
         window.history.pushState({ page: "bud" }, "", "/bud");
@@ -352,8 +353,6 @@ export default function App() {
         setPage("terms");
       } else if (window.location.pathname === "/demo") {
         setPage("demo");
-      } else if (window.location.pathname === "/api-console") {
-        setPage("api-console");
       } else if (window.location.pathname === "/bud" || window.location.pathname === "/dsbuddy") {
         setPage("bud");
       } else {
@@ -1787,7 +1786,15 @@ export default function App() {
                 </div>
               ) : (
                 <>
-
+                  <a 
+                    href="https://github.com/silencly/silencly-" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="p-1.5 rounded-full hover:bg-white/10 text-white/80 hover:text-white transition-all cursor-pointer"
+                    title="View on GitHub"
+                  >
+                    <Github className="w-5 h-5" />
+                  </a>
                   <button
                     onClick={() => {
                       setAuthMode("signin");
@@ -2526,8 +2533,8 @@ export default function App() {
         )}
 
         {/* Bud AI Worker Dashboard */}
-        {page === "bud" && (
-          <BudPage onBack={() => setPage("home")} user={user} onAuthClick={() => { setAuthMode("signin"); setShowAuthModal(true); }} />
+        {(page === "bud" || page === "about") && (
+          <AboutPage onBack={() => setPage("home")} />
         )}
         
         {/* Workspace Login Prompt */}
@@ -2553,12 +2560,11 @@ export default function App() {
         )}
         
         {/* API Console Page */}
-        {page === "api-console" && (
-          <ApiConsolePage onBack={() => setPage("home")} user={user} />
-        )}
+        {/* API Console Page removed */}
+
 
         {/* Public Footer */}
-        {page !== "bud" && page !== "api-console" && page !== "demo" && (
+        {page !== "bud" && page !== "demo" && (
           <footer className="bg-[#0a0a0a] border-t border-zinc-900 pt-16 pb-8">
           <div className="max-w-7xl mx-auto px-6">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
