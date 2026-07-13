@@ -1450,7 +1450,7 @@ export default function App() {
                 }}
                 className="flex items-center gap-2"
               >
-                <img src="/silencly-logo-transparent.png" alt="Silencly Logo" className="w-5 h-5 object-contain select-none pointer-events-none" draggable={false} onContextMenu={(e) => e.preventDefault()} />
+                <img src="https://upload.wikimedia.org/wikipedia/commons/e/e5/Silencly-logo-transparent.png?_=20260711084505" alt="Silencly Logo" className="w-5 h-5 object-contain select-none pointer-events-none" draggable={false} onContextMenu={(e) => e.preventDefault()} />
                 <span className="text-xl font-semibold tracking-tight">Silencly</span>
               </motion.div>
 
@@ -1716,8 +1716,18 @@ export default function App() {
                 </kbd>
               </button>
               {activeUser ? (
-                <div className="relative">
-                  {/* User Logo / Avatar */}
+                <div className="flex items-center gap-2">
+                  <a 
+                    href="https://github.com/silencly/silencly-" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="p-1.5 rounded-full hover:bg-white/10 text-white/80 hover:text-white transition-all cursor-pointer"
+                    title="View on GitHub"
+                  >
+                    <Github className="w-5 h-5" />
+                  </a>
+                  <div className="relative">
+                    {/* User Logo / Avatar */}
                   <button
                     onClick={() => setShowProfileDropdown(!showProfileDropdown)}
                     className="flex items-center gap-1.5 sm:gap-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full pl-1.5 pr-2.5 py-1 sm:pl-2 sm:pr-3.5 sm:py-1.5 transition-all cursor-pointer focus:outline-none focus:ring-1 focus:ring-white/20 select-none"
@@ -1783,6 +1793,7 @@ export default function App() {
                       </div>
                     </div>
                   )}
+                </div>
                 </div>
               ) : (
                 <>
@@ -1970,7 +1981,7 @@ export default function App() {
                 >
                   {/* Small circular logo placeholder */}
                   <div className="w-9 h-9 bg-zinc-950 border border-zinc-900 shadow-sm flex items-center justify-center rounded-full text-slate-500 font-semibold select-none mr-2 overflow-hidden p-1.5">
-                    <img src="/silencly-logo-transparent.png" alt="Logo" className="w-full h-full object-contain pointer-events-none select-none" draggable={false} onContextMenu={(e) => e.preventDefault()} />
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/e/e5/Silencly-logo-transparent.png?_=20260711084505" alt="Logo" className="w-full h-full object-contain pointer-events-none select-none" draggable={false} onContextMenu={(e) => e.preventDefault()} />
                   </div>
 
                   {/* Two standard text buttons */}
@@ -2304,10 +2315,10 @@ export default function App() {
                 {/* Logos */}
                 <div className="flex flex-col sm:flex-row items-center justify-center gap-6 py-6">
                   <div className="bg-zinc-900/40 p-4 rounded-3xl border border-zinc-800/50 shadow-xl">
-                    <img src="/silencly-logo-normal.png" alt="Silencly Normal Logo" className="w-32 h-32 sm:w-40 sm:h-40 object-contain rounded-2xl select-none pointer-events-none" draggable={false} onContextMenu={(e) => e.preventDefault()} />
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/e/e5/Silencly-logo-transparent.png?_=20260711084505" alt="Silencly Logo" className="w-32 h-32 sm:w-40 sm:h-40 object-contain rounded-2xl select-none pointer-events-none" draggable={false} onContextMenu={(e) => e.preventDefault()} />
                   </div>
                   <div className="bg-zinc-900/40 p-4 rounded-3xl border border-zinc-800/50 shadow-xl">
-                    <img src="/silencly-logo-transparent.png" alt="Silencly Transparent Logo" className="w-32 h-32 sm:w-40 sm:h-40 object-contain select-none pointer-events-none" draggable={false} onContextMenu={(e) => e.preventDefault()} />
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/e/e5/Silencly-logo-transparent.png?_=20260711084505" alt="Silencly Transparent Logo" className="w-32 h-32 sm:w-40 sm:h-40 object-contain select-none pointer-events-none" draggable={false} onContextMenu={(e) => e.preventDefault()} />
                   </div>
                 </div>
 
@@ -2315,7 +2326,7 @@ export default function App() {
                   About Silencly
                 </h1>
                 <p className="text-base sm:text-lg text-zinc-400 max-w-2xl mx-auto font-sans leading-relaxed">
-                  Silencly is a free AI dictation app designed to help users effortlessly convert speech into text, converting messy thoughts and voice brain dumps into perfectly formatted documents instantly.
+                  Silencly is a completely open-source AI dictation app designed to help users effortlessly convert speech into text, converting messy thoughts and voice brain dumps into perfectly formatted documents instantly.
                 </p>
                 <p className="text-xs text-zinc-500 font-mono">Published by Silencly</p>
               </div>
@@ -2608,12 +2619,12 @@ export default function App() {
                   <li><button onClick={() => { window.scrollTo(0, 0); setPage("home"); }} className="text-zinc-400 hover:text-zinc-50 transition-colors text-sm cursor-pointer">Home</button></li>
                   <li><a href="/demo" onClick={(e) => { e.preventDefault(); setPage("demo"); window.scrollTo(0, 0); }} className="text-zinc-400 hover:text-zinc-50 transition-colors text-sm cursor-pointer">Public Demo</a></li>
                   <li><a href="/workspace" onClick={(e) => { e.preventDefault(); handleWorkspaceClick(); }} className="text-zinc-400 hover:text-zinc-50 transition-colors text-sm cursor-pointer">Workspace</a></li>
-                  <li><a href="/api-console" onClick={(e) => { e.preventDefault(); setPage("api-console"); window.scrollTo(0, 0); }} className="text-zinc-400 hover:text-zinc-50 transition-colors text-sm cursor-pointer">API Console</a></li>
+                  <li><a href="/about" onClick={(e) => { e.preventDefault(); setPage("about"); window.scrollTo(0, 0); }} className="text-zinc-400 hover:text-zinc-50 transition-colors text-sm cursor-pointer">About Us</a></li>
                   <li><a href="#features" onClick={(e) => { e.preventDefault(); setPage("features"); window.scrollTo(0, 0); }} className="text-zinc-400 hover:text-zinc-50 transition-colors text-sm cursor-pointer">Features</a></li>
                   <li><a href="#usecases" onClick={(e) => { e.preventDefault(); setPage("use-cases"); window.scrollTo(0, 0); }} className="text-zinc-400 hover:text-zinc-50 transition-colors text-sm cursor-pointer">Use Cases</a></li>
                   <li><a href="#pricing" onClick={(e) => { e.preventDefault(); setPage("pricing"); window.scrollTo(0, 0); }} className="text-zinc-400 hover:text-zinc-50 transition-colors text-sm cursor-pointer">Pricing</a></li>
                   <li><a href="#careers" onClick={(e) => { e.preventDefault(); setPage("careers"); window.scrollTo(0, 0); }} className="text-zinc-400 hover:text-zinc-50 transition-colors text-sm cursor-pointer">Careers</a></li>
-                  <li><button onClick={() => setPage("about")} className="text-zinc-400 hover:text-zinc-50 transition-colors text-sm cursor-pointer">About Us</button></li>
+                  {/* <li><button onClick={() => setPage("about")} className="text-zinc-400 hover:text-zinc-50 transition-colors text-sm cursor-pointer">About Us</button></li> */}
                   <li><a href="/bud" onClick={(e) => { e.preventDefault(); setPage("bud"); }} className="text-zinc-400 hover:text-zinc-50 transition-colors text-sm cursor-pointer">Bud</a></li>
                 </ul>
               </div>
