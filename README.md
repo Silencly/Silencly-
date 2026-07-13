@@ -15,7 +15,6 @@ Silencly is an intelligent real-time dictation platform that records, transcribe
 - **Real-time Voice Dictation** — High-quality transcription as you speak
 - **Intelligent AI Formatting** — Automatically polishes raw thoughts into structured formats
 - **Workspace Dashboard** — Persistent authenticated workspace with history, sessions, settings, and custom prompts
-- **Interactive API Console** — Generate developer API keys, explore docs, test endpoints, and track usage
 - **Public Demo** — Fully interactive preview where anyone can test dictation and AI polishing before signing up
 - **Custom AI Prompts** — Create and save your own formatting instructions
 - **Modern & Responsive UI** — Built for speed and beautiful user experience
@@ -27,8 +26,17 @@ Silencly is an intelligent real-time dictation platform that records, transcribe
 - **Frontend**: React 18 + Vite + TypeScript
 - **Styling**: Tailwind CSS + shadcn/ui
 - **Icons**: Lucide React
-- **Backend & Auth**: Firebase (Firestore & Authentication)
+- **Backend & Auth**: Firebase (Firestore & Authentication) and supabase . 
 - **AI Engine**: Google GenAI (`@google/genai`) SDK
+
+
+## Social Media 
+- **X.com**: https://x.com/silencly-
+- **facebook.com**: https://www.facebook.com/p/Silencly-Ai-61591670588556/
+- **Instagram**: https://www.instagram.com/impersio_ai
+- **Discord Server**: https://discord.gg/pCqH34N5A
+- **Email**:s.impersio@gmail.com
+-**PortFolio**:
 
 ---
 
@@ -45,9 +53,10 @@ ai dictation speech-to-text voice-ai productivity note-taking react typescript f
 
 Created By
 
-Anubhav Sapkota
+Anubhav Sapkota . Portfolio 
 Daksh Shetty
 Johaan Jovin Cheeran
+
 
 
 Contributing
