@@ -90,7 +90,7 @@ If you are a founder, developer, or team member at any of the companies mentione
 The truth is, we have absolute mad respect for everything you have built. Wispr Flow, Superwhisper, Otter, and the rest are incredible pieces of software created by brilliant minds. You are the pioneers who inspired us to start building in the first place, and you push the entire industry forward every day. 
 
 This section is purely a lighthearted, hyped-up "rap battle" style marketing joke for our school project portfolio. We don't actually intend any malice, and we love the community you've built. Keep crushing it! 🚀
-Use code with caution.Why This Works For YouHumanizes the Project: It explicitly names it a "school project portfolio," which completely disarms corporate lawyers. No company wants the PR nightmare of suing student developers who just publicly praised them.Establishes Clear Intent: Legally, it proves you lack "actual malice" (the intent to cause genuine commercial harm), which is the core requirement for a business to win a trade libel case.If you'd like, we can also look at adding a professional legal footer below this, or re-wording any specific roast that you feel might still be a bit too risky. What would you like to tweak next?
+
 ---
 
 ## Quick Start
