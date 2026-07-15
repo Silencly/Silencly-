@@ -1,6 +1,6 @@
 {
-  "name": "Silencly - Effortless AI Voice Dictation & Transcription",
-  "description": "Silencly is an opensource AI dictation tool that instantly converts messy thoughts into clear, perfectly formatted text. Github repo : https://github.com/Silencly/Silencly-/",
+  "name": "Impersio - Effortless AI Voice Dictation & Transcription",
+  "description": "Impersio is an opensource AI dictation tool that instantly converts messy thoughts into clear, perfectly formatted text. Github repo : https://github.com/Silencly/Silencly-/",
   "requestFramePermissions": ["microphone"], 
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }
