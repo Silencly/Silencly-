@@ -493,7 +493,7 @@ Output:
 
     let polishedText = "";
     console.log("Polishing text using Groq Llama...");
-    const apiKey = process.env.GROQ_API_KEY || "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";
+    const apiKey = process.env.GROQ_API_KEY;
     const model = "llama-3.1-8b-instant";
 
     try {
@@ -558,7 +558,7 @@ app.post("/api/transcribe", async (req, res) => {
     }
 
     console.log("Transcribing audio directly using AssemblyAI Universal 3 Pro...");
-    const apiKey = process.env.ASSEMBLYAI_API_KEY || "8c7d46c2a0ca4c3bacf169ca9d4b0f79";
+    const apiKey = process.env.ASSEMBLYAI_API_KEY;
     if (!apiKey) {
       return res.status(500).json({ error: "ASSEMBLYAI_API_KEY environment variable is missing on the server. Please check your Secrets settings." });
     }

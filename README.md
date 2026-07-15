@@ -15,6 +15,7 @@ Silencly is an intelligent real-time dictation platform that records, transcribe
 - **Real-time Voice Dictation** — High-quality transcription as you speak
 - **Intelligent AI Formatting** — Automatically polishes raw thoughts into structured formats
 - **Workspace Dashboard** — Persistent authenticated workspace with history, sessions, settings, and custom prompts
+- **Interactive API Console** — Generate developer API keys, explore docs, test endpoints, and track usage
 - **Public Demo** — Fully interactive preview where anyone can test dictation and AI polishing before signing up
 - **Custom AI Prompts** — Create and save your own formatting instructions
 - **Modern & Responsive UI** — Built for speed and beautiful user experience
@@ -26,70 +27,8 @@ Silencly is an intelligent real-time dictation platform that records, transcribe
 - **Frontend**: React 18 + Vite + TypeScript
 - **Styling**: Tailwind CSS + shadcn/ui
 - **Icons**: Lucide React
-- **Backend & Auth**: Firebase (Firestore & Authentication) and Supabase . 
+- **Backend & Auth**: Firebase (Firestore & Authentication)
 - **AI Engine**: Google GenAI (`@google/genai`) SDK
-
-## Social Media 
-- **X.com**: https://x.com/silencly-
-- **facebook.com**: https://www.facebook.com/p/Silencly-Ai-61591670588556/
-- **Instagram**: https://www.instagram.com/impersio_ai
-- **Discord Server**: https://discord.gg/pCqH34N5A
-- **Email**:s.impersio@gmail.com
-
-# How We Are Better Than Our Competitors
-
-**They brought vibes. We brought the slaughter.**
-
-### Wispr Flow
-Wispr where is the flow? Remember this: go with the flow only works if you actually have flow.  
-We deliver real seamless cross-platform performance on Mac, Windows, Linux, iOS, and Android with AI that perfectly understands context and tone everywhere.
-
-### Superwhisper
-Super where can I whisper about your privacy? Where is the code on GitHub, adorable little fortress?  
-We offer true on-device privacy that actually works across all platforms — no locked island, just real security without limits.
-
-### Laxis
-Don’t you know that multitasking kills focus, Laxis?  
-We combine the fastest voice keyboard with a sharp, focused AI agent mode that actually delivers instead of splitting attention.
-
-### BossAI
-Who is the boss? Go search Google and come back when you know.  
-We bring real native OS integration, zero copy-paste hassle, superior accuracy, and actual premium performance.
-
-### Willow Voice
-Mac/iOS specialist playing with presets. Cool story.  
-We give better tone control, smarter custom dictionaries, and full power on every platform.
-
-### Voicy
-Chrome warrior who dies the second you leave the browser.  
-Our AI commands and auto-formatting dominate across every app and device, not just one tab.
-
-### Apple Dictation
-Free built-in participation trophy.  
-We crush it with much higher accuracy, real intelligence, and features Apple still hasn’t figured out.
-
-### Dragon Professional
-Old expensive dinosaur still pretending to be king.  
-We deliver better specialized accuracy, modern speed, and an interface that doesn’t belong in a museum.
-
-### Otter.ai
-Meeting hero, daily zero.  
-We own meetings with speaker ID and summaries while destroying everyday voice-to-text use.
-
-### Aiko
-One-trick local Whisper pony.  
-We run better local models for files and give you full real-time dictation with complete privacy.
-
----
-
-**Others are options.**  
-**We are the standard.**
-
-If you are a founder, developer, or team member at any of the companies mentioned above: **we sincerely apologize if our marketing spice stung!** 
-
-The truth is, we have absolute mad respect for everything you have built. Wispr Flow, Superwhisper, Otter, and the rest are incredible pieces of software created by brilliant minds. You are the pioneers who inspired us to start building in the first place, and you push the entire industry forward every day. 
-
-This section is purely a lighthearted, hyped-up "rap battle" style marketing joke for our school project portfolio. We don't actually intend any malice, and we love the community you've built. Keep crushing it! 🚀
 
 ---
 
@@ -106,9 +45,9 @@ ai dictation speech-to-text voice-ai productivity note-taking react typescript f
 
 Created By
 
-Anubhav Sapkota from uae , eminence private school . 
-Daksh Shetty from uae , eminence private school . 
-Johaan Jovin Cheeran from uae , eminence private school . 
+Anubhav Sapkota
+Daksh Shetty
+Johaan Jovin Cheeran
 
 
 Contributing
