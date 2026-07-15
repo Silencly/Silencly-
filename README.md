@@ -1,4 +1,4 @@
-# Silencly
+# Impersio formerly Silencly
 
 <p align="center">
   <img src="https://upload.wikimedia.org/wikipedia/commons/e/e5/Silencly-logo-transparent.png?_=20260711084505" alt="Silencly Logo" width="220" />
@@ -17,10 +17,10 @@
 An open-source AI search engine that delivers generative, cited answers.
 
 
-Silencly
+Impersio
 **AI-powered voice dictation that turns messy speech into clean, structured text.**
 
-Silencly is an intelligent real-time dictation platform that records, transcribes, and refines your spoken thoughts using AI. It acts as a smart intermediate layer between your voice and other tools — transforming raw "messy" speech into beautifully formatted, professional outputs such as emails, meeting notes, code documentation, Jira tickets, and more.
+Impersio is an intelligent real-time dictation platform that records, transcribes, and refines your spoken thoughts using AI. It acts as a smart intermediate layer between your voice and other tools — transforming raw "messy" speech into beautifully formatted, professional outputs such as emails, meeting notes, code documentation, Jira tickets, and more.
 
 ---
 
@@ -112,7 +112,7 @@ The founder of Morphic helped me build and help me understand my project structu
 ## Quick Start
 
 ```bash
-git clone https://github.com/silencly/silencly-.git
+git clone https://github.com/silencly/impersio.git
 cd silencly
 npm install
 npm run dev
