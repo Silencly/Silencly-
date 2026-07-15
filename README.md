@@ -4,6 +4,20 @@
   <img src="https://upload.wikimedia.org/wikipedia/commons/e/e5/Silencly-logo-transparent.png?_=20260711084505" alt="Silencly Logo" width="220" />
 </p>
 
+## ✨ Sponsors
+
+<a href="https://chat.morphic.sh">
+  <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSJGElCyqI1OAhlvQOSfz9-OHsb-hNuPjLUJEfuvaicNQ&s" 
+       alt="Morphic.sh" 
+       width="120" 
+       style="margin: 10px;">
+</a>
+
+**Powered by [Morphic.sh](https://chat.morphic.sh)**  
+An open-source AI search engine that delivers generative, cited answers.
+
+
+Silencly
 **AI-powered voice dictation that turns messy speech into clean, structured text.**
 
 Silencly is an intelligent real-time dictation platform that records, transcribes, and refines your spoken thoughts using AI. It acts as a smart intermediate layer between your voice and other tools — transforming raw "messy" speech into beautifully formatted, professional outputs such as emails, meeting notes, code documentation, Jira tickets, and more.
@@ -29,6 +43,69 @@ Silencly is an intelligent real-time dictation platform that records, transcribe
 - **Icons**: Lucide React
 - **Backend & Auth**: Firebase (Firestore & Authentication)
 - **AI Engine**: Google GenAI (`@google/genai`) SDK
+
+## Social Media 
+- **X.com**: https://x.com/silencly-
+- **facebook.com**: https://www.facebook.com/p/Silencly-Ai-61591670588556/
+- **Instagram**: https://www.instagram.com/impersio_ai
+- **Discord Server**: https://discord.gg/pCqH34N5A
+- **Email**:s.impersio@gmail.com
+
+# How We Are Better Than Our Competitors
+
+**They brought vibes. We brought the slaughter.**
+
+### Wispr Flow
+Wispr where is the flow? Remember this: go with the flow only works if you actually have flow.  
+We deliver real seamless cross-platform performance on Mac, Windows, Linux, iOS, and Android with AI that perfectly understands context and tone everywhere.
+
+### Superwhisper
+Super where can I whisper about your privacy? Where is the code on GitHub, adorable little fortress?  
+We offer true on-device privacy that actually works across all platforms — no locked island, just real security without limits.
+
+### Laxis
+Don’t you know that multitasking kills focus, Laxis?  
+We combine the fastest voice keyboard with a sharp, focused AI agent mode that actually delivers instead of splitting attention.
+
+### BossAI
+Who is the boss? Go search Google and come back when you know.  
+We bring real native OS integration, zero copy-paste hassle, superior accuracy, and actual premium performance.
+
+### Willow Voice
+Mac/iOS specialist playing with presets. Cool story.  
+We give better tone control, smarter custom dictionaries, and full power on every platform.
+
+### Voicy
+Chrome warrior who dies the second you leave the browser.  
+Our AI commands and auto-formatting dominate across every app and device, not just one tab.
+
+### Apple Dictation
+Free built-in participation trophy.  
+We crush it with much higher accuracy, real intelligence, and features Apple still hasn’t figured out.
+
+### Dragon Professional
+Old expensive dinosaur still pretending to be king.  
+We deliver better specialized accuracy, modern speed, and an interface that doesn’t belong in a museum.
+
+### Otter.ai
+Meeting hero, daily zero.  
+We own meetings with speaker ID and summaries while destroying everyday voice-to-text use.
+
+### Aiko
+One-trick local Whisper pony.  
+We run better local models for files and give you full real-time dictation with complete privacy.
+
+---
+
+**Others are options.**  
+**We are the standard.**
+
+This is not serious, just for fun and marketing spice 🔥
+
+This section is purely a lighthearted, hyped-up "rap battle" style marketing joke for our school project portfolio. We don't actually intend any malice, and we love the community you've built. Keep crushing it! 
+
+## Respect for Miiura ##
+The founder of Morphic helped me build and help me understand my project structure . Thanks for helping . 
 
 ---
 
